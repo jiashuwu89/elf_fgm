@@ -1,0 +1,60 @@
+# For reference: https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  VM_WORKING_DIR: "/home/gitlab-runner/sp-server"
+
+image: git.elfin.ucla:5050/science-processing/sp-server/gitlab-image:latest
+
+cache:
+  paths:
+    - .venv
+    - .cache/pip
+
+stages:
+  - Static Analysis and Testing
+  - Deploy
+
+before_script:
+  - python -V  # Print out python version for debugging
+  - poetry install
+
+check-format:
+  stage: Static Analysis and Testing
+  script:
+  - make check-format
+
+check-style:
+  stage: Static Analysis and Testing
+  script:
+  - make check-style
+
+check-types:
+  stage: Static Analysis and Testing
+  script:
+  - make check-types
+
+test:
+  stage: Static Analysis and Testing
+  script:
+  - make test
+
+deploy-vm:
+  stage: Deploy
+  environment:
+    name: Production
+    url: sciproc.elfin.ucla
+  tags:
+    - shell
+    - sciproc
+  before_script:
+    - echo "Deploying!"
+  script:
+    - cd "$VM_WORKING_DIR"
+    - git checkout "$CI_DEFAULT_BRANCH"
+    - git pull
+    - poetry install
+    - sudo systemctl restart sp-server.service
+  only:
+    variables:
+      - $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
