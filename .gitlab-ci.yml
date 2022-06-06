@@ -54,7 +54,7 @@ deploy-vm:
     - git checkout "$CI_DEFAULT_BRANCH"
     - git pull
     - poetry install
-    - sudo systemctl restart sp-server.service
+    - sudo systemctl restart sp-server
   only:
     variables:
       - $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
