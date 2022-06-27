@@ -1,12 +1,13 @@
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .endpoints import base, general, science_downlink
+from .endpoints import base, general, science_downlink, jwu_test
 
 router = APIRouter()
 router.include_router(base.router)
 router.include_router(general.router)
 router.include_router(science_downlink.router)
+router.include_router(jwu_test.router)
 
 app = FastAPI()
 app.add_middleware(
