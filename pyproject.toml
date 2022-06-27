@@ -9,13 +9,17 @@ name = "elfin"  # This name will be used in the configuration to retreive the pr
 url = "http://git.elfin.ucla/api/v4/projects/5/packages/pypi/simple"  # URL used to download your packages from
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.10"
 fastapi = "^0.78.0"
 uvicorn = "^0.17.6"
 requests = "^2.27.1"
 gunicorn = "^20.1.0"
 SQLAlchemy = "^1.4.36"
 elfin-ops-libs = "^3.1.16"
+geopack = "^1.0.9"
+scipy = "^1.8.1"
+numpy = "^1.23.0"
+datetime = "^4.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
