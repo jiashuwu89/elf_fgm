@@ -13,11 +13,7 @@ from cdflib import CDF, cdfepoch
 from fastapi import APIRouter, Query
 from geopack import geopack
 from pyspedas.cotrans import cotrans_lib
-from scipy import signal
-from scipy.integrate import simpson, trapezoid
 from scipy.interpolate import interp1d
-from scipy.optimize import curve_fit
-import function.Bplot as Bplot
 import function.calibration as calibration
 import function.coordinate as coordinate
 import function.cross_time as cross_time
@@ -219,7 +215,6 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
     ############################################
     df["ctime"] = df["timestamp"] - df["timestamp"][0]
     ctime = np.array(df["ctime"])
-    delta_t = np.median(ctime[1:] - ctime[:-1])
     # get fgm data in fgm coordinate
     B_S1_corr, B_S2_corr, B_S3_corr = list(zip(*df["fgm_fgm"]))
 
@@ -395,7 +390,7 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
         fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
         fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
-        
+
         #Bplot.B_ctime_plot(
         #cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, "X1 = fsp_res_detrend")     
 
@@ -459,8 +454,18 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
 
 
     #Bplot.B_ctime_plot(cross_times_calib,fgs_fsp_res_dmxl_x,fgs_fsp_res_dmxl_y,fgs_fsp_res_dmxl_z,"fsp_res_dmxl")
+    """
+            fgs ful field data dmxl to gei
+    """
+
+    FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
+                                    datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), 
+                        cross_times_calib))
+
+    FGM_timestamp = df["timestamp"][0] + cross_times_calib     
 
     return [
+        FGM_timestamp,
         fgs_fsp_res_dmxl_x,
         fgs_fsp_res_dmxl_y,
         fgs_fsp_res_dmxl_z,
@@ -511,7 +516,8 @@ if __name__ == "__main__":
     #sta_cdfpath = "test/ela_l1_state_defn_20220706_v01.cdf"
     #fgm_cdfpath = "test/ela_l1_fgs_20220706_v01.cdf"
 
-    [
+    [   
+        FGM_timestamp,
         fgs_fsp_res_dmxl_x,
         fgs_fsp_res_dmxl_y,
         fgs_fsp_res_dmxl_z,
