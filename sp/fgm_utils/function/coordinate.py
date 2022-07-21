@@ -1,5 +1,6 @@
 import numpy as np
-import parameter as parameter
+from .. import parameter
+
 
 def dmxl_gei_matrix(
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z

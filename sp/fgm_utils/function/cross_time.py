@@ -1,9 +1,9 @@
 from typing import List
 import numpy as np
 from scipy.optimize import curve_fit
-import parameter
+from .. import parameter
 from scipy.integrate import simpson
-import function.calibration as calibration
+from . import calibration
 
 func = calibration.cube_fit
 
