@@ -15,6 +15,7 @@ from scipy.interpolate import interp1d
 from .function import calibration
 from .function import coordinate
 from .function import cross_time
+from .function import Bplot
 from . import parameter
 
 
@@ -200,6 +201,16 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
     B_S1_corr, B_S2_corr, B_S3_corr = list(zip(*df["fgm_fgm"]))
 
     """
+        timestamp correction; TODO: automatic detection
+    """
+    if parameter.time_correct == True:
+        mid_idx = [i for i in range(parameter.err_idx[0]+1, parameter.err_idx[1])]
+        shift_idx = [i for i in range(parameter.err_idx[0], parameter.err_idx[1]+1)]
+        shift = np.median(np.abs((ctime[1:]-ctime[:-1])[parameter.err_idx] - np.median(ctime[mid_idx][1:]-ctime[mid_idx][:-1])))
+        shift_idx_act = [i for i in range(parameter.err_idx[0]+1, parameter.err_idx[1]+1)]
+        ctime[shift_idx_act] -= shift
+
+    """
         corr - cross time determination
     """
     [
@@ -346,6 +357,9 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         #cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, 
         #fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z, "X1 = fsp_res    X2 = fsp_res_trend")
         # 
+
+        Bplot.B_ctime_plot1(
+        cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, "fsp before detrend")   
 
         fgs_fsp_res_dmxl_x = fgs_fsp_res0_dmxl_x - fgs_fsp_res_dmxl_trend_x
         fgs_fsp_res_dmxl_y = fgs_fsp_res0_dmxl_y - fgs_fsp_res_dmxl_trend_y

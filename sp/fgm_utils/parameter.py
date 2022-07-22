@@ -13,3 +13,5 @@ peak_detect = False # For detecting peaks by fitting B_S3 itself instead of
 zero_crossing_method = 3   
 f = 44 * np.pi / 180
 detrend_fsp = True
+time_correct = True
+err_idx = [1020, 1045]
