@@ -1,5 +1,6 @@
 import datetime
 import traceback
+from typing import List, Literal, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -38,9 +39,8 @@ def get_igrf(time: datetime.datetime, xgsm: float, ygsm: float, zgsm: float):
     return (bxgsm, bygsm, bzgsm)
 
 
-# def get_cdf(cdfpath: str, vars: Union[list[str], None]):
-def get_cdf(cdfpath, vars):
-    
+def get_cdf(cdfpath: str, vars: Union[List[str], None]):
+
     try:
         cdf = CDF(cdfpath)
         cdfinfo = cdf.cdf_info()
@@ -96,25 +96,12 @@ def resample_data(
     return pd.Series(interp_data.tolist())
 
 
-def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cdfpath: str):
-
-    df = pd.DataFrame()
-
-    # time range for sci zone
-    starttime = pd.to_datetime(starttime_str)
-    endtime = pd.to_datetime(endtime_str)
-
-    """
-        initial points exclude
-    """
-    if parameter.init_secs != 0:
-        starttime = starttime + datetime.timedelta(seconds = parameter.init_secs)
-
+def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"], starttime: datetime.datetime, endtime: datetime.datetime) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # read state cdf for att
     att_cdfdata = pd.DataFrame(
-        get_cdf(sta_cdfpath, vars=["ela_att_time", "ela_att_gei"])
+        get_cdf(sta_cdfpath, vars=[f"{mission}_att_time", f"{mission}_att_gei"])
     )
-    att_cdfdata.set_index("ela_att_time", inplace=True)
+    att_cdfdata.set_index(f"{mission}_att_time", inplace=True)
     att_cdfdata = clip_cdfdata(
         att_cdfdata,
         starttime - datetime.timedelta(minutes=2),
@@ -123,31 +110,49 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
 
     # read state cdf for pos; not read together with att b/c different length
     pos_cdfdata = pd.DataFrame(
-        get_cdf(sta_cdfpath, vars=["ela_pos_gei"])
+        get_cdf(sta_cdfpath, vars=[f"{mission}_pos_gei"])
     )  # not read state time b/c too slow
-    pos_cdfdata["ela_pos_time"] = pd.date_range(
-        start=starttime_str[0:10], periods=len(pos_cdfdata["ela_pos_gei"]), freq="S"
+    pos_cdfdata[f"{mission}_pos_time"] = pd.date_range(
+        start=starttime.date(), periods=len(pos_cdfdata[f"{mission}_pos_gei"]), freq="S"
     )
-    pos_cdfdata.set_index("ela_pos_time", inplace=True)
+    pos_cdfdata.set_index(f"{mission}_pos_time", inplace=True)
     pos_cdfdata = clip_cdfdata(
         pos_cdfdata,
         starttime - datetime.timedelta(minutes=2),
         endtime + datetime.timedelta(minutes=2),
     )
+    return att_cdfdata, pos_cdfdata
+
+
+def fgm_fsp_calib(
+    mission: Literal["ela", "elb"],
+    starttime: datetime.datetime,
+    endtime: datetime.datetime,
+    fgm_cdfdata: pd.DataFrame,
+    att_cdfdata: pd.DataFrame,
+    pos_cdfdata: pd.DataFrame,
+):
+    """
+    Note that starttime, endtime refer to the start and end of the science zone collection
+    """
+    # initial points exclude
+    if parameter.init_secs != 0:
+        starttime = starttime + datetime.timedelta(seconds = parameter.init_secs)
+
+    df = pd.DataFrame()
 
     # read fgm cdf and clip
-    fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=["ela_fgs_time", "ela_fgs"]))
-    fgm_cdfdata.set_index("ela_fgs_time", inplace=True)
+    fgm_cdfdata.set_index(f"{mission}_fgs_time", inplace=True)
     fgm_cdfdata = clip_cdfdata(fgm_cdfdata, starttime, endtime)
 
     # resample att and pos to fgm time resolution
     df["att_gei"] = resample_data(
-        att_cdfdata.index, att_cdfdata["ela_att_gei"], fgm_cdfdata.index
+        att_cdfdata.index, att_cdfdata[f"{mission}_att_gei"], fgm_cdfdata.index
     )
     df["pos_gei"] = resample_data(
-        pos_cdfdata.index, pos_cdfdata["ela_pos_gei"], fgm_cdfdata.index
+        pos_cdfdata.index, pos_cdfdata[f"{mission}_pos_gei"], fgm_cdfdata.index
     )
-    df["fgm_fgm"] = pd.Series(fgm_cdfdata["ela_fgs"].tolist())
+    df["fgm_fgm"] = pd.Series(fgm_cdfdata[f"{mission}_fgs"].tolist())
     df["time"] = fgm_cdfdata.index
     df["timestamp"] = df["time"].apply(lambda ts: pd.Timestamp(ts).timestamp())
 

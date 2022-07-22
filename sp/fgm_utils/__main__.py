@@ -1,12 +1,25 @@
-from . import fgm_fsp_calib
+import datetime as dt
+import pandas as pd
+
+from . import fgm_fsp_calib, get_cdf, get_relevant_state_data
 
 
 if __name__ == "__main__":
 
+    mission = "ela"
+
     starttime_str = "2022-01-12 04:54:09"
     endtime_str = "2022-01-12 05:00:21"
+
+    starttime = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
+    endtime = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")
+
     sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
+
     fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
+    fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=["ela_fgs_time", "ela_fgs"]))
+
+    att_cdfdata, pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, starttime, endtime)
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"
@@ -127,4 +140,4 @@ if __name__ == "__main__":
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_cdfpath)
+    ] = fgm_fsp_calib(mission, starttime, endtime, fgm_cdfdata, att_cdfdata, pos_cdfdata)

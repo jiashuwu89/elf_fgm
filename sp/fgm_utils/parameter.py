@@ -1,4 +1,27 @@
+import datetime as dt
 import numpy as np
+import os
+from typing import Literal
+
+
+STATE_DATA_DIR = "/nfs/elfin-mirror/elfin/ela/l1/state/defn/2022/"
+
+
+def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
+    """Get the path to the CDF corresponding to the given mission and date.
+
+    NOTE: This function relies on the fact that `sp-server` will run on the
+    sciproc-vm, which has an up-to-date copy of all elfin data.
+
+    Parameters
+    ----------
+    mission : Literal["ela", "elb"]
+    date: dt.date
+    """
+    year_str = str(date.year)
+    sta_datestr = date.strftime("%Y%m%d")
+    return os.path.join("/nfs/elfin-mirror/elfin", mission, "l1/state/defn", year_str, f"{mission}_l1_state_defn_{sta_datestr}_v01.cdf")
+
 
 proper_pad = True  # fails when data have gaps
 fit_running_spline = True
