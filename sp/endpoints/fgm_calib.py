@@ -26,12 +26,12 @@ class FgmCalibRequest(BaseModel):
 
 # TODO: Confirm all are floats?
 class FgmCalibResponse(BaseModel):
-    ela_fgs_fsp_time: List[dt.datetime]
-    ela_fgs_fsp_res_dmxl: List[List[float]]
-    ela_fgs_fsp_res_dmxl_trend: List[List[float]]
-    ela_fgs_fsp_res_gei: List[List[float]]
-    ela_fgs_fsp_igrf_dmxl: List[List[float]]
-    ela_fgs_fsp_igrf_gei: List[List[float]]
+    fgs_fsp_time: List[dt.datetime]
+    fgs_fsp_res_dmxl: List[List[float]]
+    fgs_fsp_res_dmxl_trend: List[List[float]]
+    fgs_fsp_res_gei: List[List[float]]
+    fgs_fsp_igrf_dmxl: List[List[float]]
+    fgs_fsp_igrf_gei: List[List[float]]
 
 
 @router.get("/get_numbers")
@@ -93,10 +93,10 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
 
     # Note: Transposing
     return FgmCalibResponse(
-        ela_fgs_fsp_time=FGM_timestamp,
-        ela_fgs_fsp_res_dmxl=list(map(list, zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z))),
-        ela_fgs_fsp_res_dmxl_trend=list(map(list, zip(fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z))),
-        ela_fgs_fsp_res_gei=list(map(list, zip(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z))),
-        ela_fgs_fsp_igrf_dmxl=list(map(list, zip(fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z))),
-        ela_fgs_fsp_igrf_gei=list(map(list, zip(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z))),
+        fgs_fsp_time=FGM_timestamp,
+        fgs_fsp_res_dmxl=list(map(list, zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z))),
+        fgs_fsp_res_dmxl_trend=list(map(list, zip(fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z))),
+        fgs_fsp_res_gei=list(map(list, zip(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z))),
+        fgs_fsp_igrf_dmxl=list(map(list, zip(fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z))),
+        fgs_fsp_igrf_gei=list(map(list, zip(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z))),
     )
