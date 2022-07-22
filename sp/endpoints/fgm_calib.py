@@ -67,10 +67,10 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         "ela_fgs": fgm_calib_request.fgs,
     })
 
-    logger.info(starttime_str, endtime_str, sta_cdfpath, fgm_data)
+    logger.info(f"Generated parameters {starttime_str}, {endtime_str}, {sta_cdfpath}")
 
-    try:
-        [
+#    try:
+    [
             FGM_timestamp,
             fgs_fsp_res_dmxl_x,
             fgs_fsp_res_dmxl_y,
@@ -87,13 +87,14 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
             fgs_fsp_igrf_gei_x,
             fgs_fsp_igrf_gei_y,
             fgs_fsp_igrf_gei_z,
-        ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_data)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_data)
+#    except Exception as e:
+#        raise e
+#        raise HTTPException(status_code=500, detail=str(e))
 
     # Note: Transposing
     return FgmCalibResponse(
-        fgs_fsp_time=FGM_timestamp,
+        fgs_fsp_time=list(FGM_timestamp),
         fgs_fsp_res_dmxl=list(map(list, zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z))),
         fgs_fsp_res_dmxl_trend=list(map(list, zip(fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z))),
         fgs_fsp_res_gei=list(map(list, zip(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z))),

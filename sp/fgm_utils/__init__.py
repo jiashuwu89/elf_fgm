@@ -42,7 +42,7 @@ def get_igrf(time: datetime.datetime, xgsm: float, ygsm: float, zgsm: float):
     return (bxgsm, bygsm, bzgsm)
 
 
-def get_cdf(cdfpath: str, vars: Union[list[str], None]):
+def get_cdf(cdfpath: str, vars: Union[List[str], None]):
 
     try:
         cdf = CDF(cdfpath)
