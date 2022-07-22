@@ -99,7 +99,7 @@ def resample_data(
     return pd.Series(interp_data.tolist())
 
 
-def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cdfpath: str):
+def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cdfdata: pd.DataFrame):
 
     df = pd.DataFrame()
 
@@ -133,7 +133,6 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
     )
 
     # read fgm cdf and clip
-    fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=["ela_fgs_time", "ela_fgs"]))
     fgm_cdfdata.set_index("ela_fgs_time", inplace=True)
     fgm_cdfdata = clip_cdfdata(fgm_cdfdata, starttime, endtime)
 
@@ -358,8 +357,8 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         #fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z, "X1 = fsp_res    X2 = fsp_res_trend")
         # 
 
-        Bplot.B_ctime_plot1(
-        cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, "fsp before detrend")   
+        # Bplot.B_ctime_plot1(
+        # cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, "fsp before detrend")   
 
         fgs_fsp_res_dmxl_x = fgs_fsp_res0_dmxl_x - fgs_fsp_res_dmxl_trend_x
         fgs_fsp_res_dmxl_y = fgs_fsp_res0_dmxl_y - fgs_fsp_res_dmxl_trend_y

@@ -1,5 +1,7 @@
 import numpy as np
 
+STATE_DATA_DIR = "/Users/jamesking/Desktop/elfin/OPS/science/gitlab/sp-server/sp/fgm_utils/test"
+
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
 relative_integrate = True

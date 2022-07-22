@@ -1,4 +1,6 @@
-from . import fgm_fsp_calib
+import pandas as pd
+
+from . import fgm_fsp_calib, get_cdf
 
 
 if __name__ == "__main__":
@@ -7,7 +9,9 @@ if __name__ == "__main__":
     endtime_str = "2022-01-12 15:52:04"
 
     sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
+
     fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
+    fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=["ela_fgs_time", "ela_fgs"]))
 
     #starttime_str = "2022-01-14 15:45:50"
     #endtime_str = "2022-01-14 15:52:04"
@@ -50,4 +54,4 @@ if __name__ == "__main__":
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_cdfpath)
+    ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_cdfdata)
