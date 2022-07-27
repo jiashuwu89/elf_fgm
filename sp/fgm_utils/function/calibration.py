@@ -3,6 +3,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
+from .. import parameter 
+from . import Bplot
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -59,7 +61,7 @@ def running_spline(time, sample_time, sample_signal, T=10, func=cube_fit):
         else:
             low_lim = time[i] - T / 2
             high_lim = time[i] + T / 2
-        idx = (time >= low_lim) & (time <= high_lim)
+
         idx_sample = (sample_time >= low_lim) & (sample_time <= high_lim)
         fit_opt, fit_covar = curve_fit(
             func, sample_time[idx_sample], sample_signal[idx_sample]
@@ -88,124 +90,12 @@ def running_filter(time, signal, eps=1, T=20):
     return np.array(filter_idx)
 
 
-def detrend_linear(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
-    ):
-    """detrend with quadratic fit 
-
-    """
-    B_x_trend = linear_fit(
-                ctime,
-                *curve_fit(linear_fit, ctime, B_x)[0],
-    )
-
-    B_y_trend = linear_fit(
-                ctime,
-                *curve_fit(linear_fit, ctime, B_y)[0],
-    )
-    
-    B_z_trend = linear_fit(
-                ctime,
-                *curve_fit(linear_fit, ctime, B_z)[0],
-    )
-
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
-    return [B_x_trend, B_y_trend, B_z_trend]
-
-
-def detrend_quad_log(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
-    ):
-    """detrend with quadratic fit 
-
-    #TODO: verify fit on log scale
-
-    """
-    x_min = np.abs(np.min(B_x))+1
-    y_min = np.abs(np.min(B_y))+1
-    z_min = np.abs(np.min(B_z))+1
-    B_x = B_x + x_min
-    B_y = B_y + y_min
-    B_z = B_z + z_min
-
-    B_x_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, np.log10(B_x))[0],
-    )
-    B_x_trend = 10**B_x_trend - x_min
-
-    B_y_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, np.log10(B_y))[0],
-    )
-    B_y_trend = 10**B_y_trend - y_min
-    
-    B_z_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, np.log10(B_z))[0],
-    )
-    B_z_trend = 10**B_z_trend - z_min
-
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")
-    return [B_x_trend, B_y_trend, B_z_trend]
-
-
-def detrend_quad(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
-    ):
-    """detrend with quadratic fit 
-
-    """
-    B_x_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, B_x)[0],
-    )
-
-    B_y_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, B_y)[0],
-    )
-    
-    B_z_trend = quad_fit(
-                ctime,
-                *curve_fit(quad_fit, ctime, B_z)[0],
-    )
-
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
-    return [B_x_trend, B_y_trend, B_z_trend]
-
-
-def detrend_cube(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
-    ):
-    """detrend with cubic fit 
-
-    """
-
-    B_x_trend = cube_fit(
-                ctime,
-                *curve_fit(cube_fit, ctime, B_x)[0],
-    )
-
-    B_y_trend = cube_fit(
-                ctime,
-                *curve_fit(cube_fit, ctime, B_y)[0],
-    )
-    
-    B_z_trend = cube_fit(
-                ctime,
-                *curve_fit(cube_fit, ctime, B_z)[0],
-    )
-    return [B_x_trend, B_y_trend, B_z_trend]
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
-
-
 def calib_leastsquare(
     B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z
 ):
 
     """use B igrf to calibrate fgs data in fgm coordinate 
-        
+       least sqaure fitting 
     """
     n = len(B_S1_corr)
     b = np.concatenate((B_S1_corr, B_S2_corr, B_S3_corr))
@@ -246,3 +136,73 @@ def calib_leastsquare(
     ) 
 
     return [B_S1_calib, B_S2_calib, B_S3_calib]   
+
+def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
+    """degap when ctime has large jumps
+       multipolar jumps: 
+       unipolar jumps:  
+    """
+    delta_t = np.median(ctime[1:]-ctime[:-1])
+    ctime_adj = ctime[1:]-ctime[:-1] - delta_t
+    ctime_idx = np.where(np.abs(ctime_adj) > parameter.ctime_thrhld)[0]
+    Bplot.ctimediff_plot(ctime, ctime_idx)
+
+    err_idx_1 = []
+    err_idx_2 = []
+    err_num = 0
+
+    i = 0
+    while i < len(ctime_idx):
+        if i == len(ctime_idx)-1:
+            err_idx_1.append(ctime_idx[i])
+            err_idx_2.append(0)
+            err_num += 1
+
+            i += 1
+        else:         
+            if (ctime_adj[ctime_idx[i]]*ctime_adj[ctime_idx[i+1]] < 0 # multipolar jumps
+                and np.abs(np.abs(ctime_adj[ctime_idx[i]]) - np.abs(ctime_adj[ctime_idx[i+1]])) < 1e-3): # pos and neg jumps similar magnitude
+                err_idx_1.append(ctime_idx[i])
+                err_idx_2.append(ctime_idx[i+1])
+                err_num += 1
+                
+                mid_idx = [i for i in range(ctime_idx[i]+1, ctime_idx[i+1])]
+                ctimediff_mid = np.median(ctime[mid_idx][1:]-ctime[mid_idx][:-1])
+                shift_1 = np.abs((ctime[1:]-ctime[:-1])[ctime_idx[i]] - ctimediff_mid)
+                shift_2 = np.abs((ctime[1:]-ctime[:-1])[ctime_idx[i+1]] - ctimediff_mid)
+                shift_idx_act = [i for i in range(ctime_idx[i]+1, ctime_idx[i+1]+1)]
+                shift = np.mean([shift_1, shift_2])
+                ctime[shift_idx_act] -= shift
+
+                i += 2
+            else: # unipolar jumps
+                err_idx_1.append(ctime_idx[i])
+                err_idx_2.append(0)
+                err_num += 1
+
+                if parameter.ctime_correct == True:
+                    # TODO: not correct for unipolar spike
+                    """shift all the way to the end
+                    if np.abs(ctime_adj[ctime_idx[i]]) < 0.1:   # small jumps not gaps
+                        mid_idx = [i for i in range(ctime_idx[i]+1, len(ctime))]
+                        shift = np.median(np.abs((ctime[1:]-ctime[:-1])[ctime_idx[i]] - (ctime[1:]-ctime[:-1])[ctime_idx[i]-1]))
+                        shift_idx_act = [i for i in range(ctime_idx[i]+1, len(ctime))]
+                        ctime[shift_idx_act] -= shift
+                    """
+                    """
+                    if np.abs(ctime_adj[ctime_idx[i]]) < 0.1:   # small jumps not gaps
+                        fit_range = range(ctime_idx[i]-20, ctime_idx[i]+20)
+                        B_x_fit = sine_fit(
+                            fit_range, *curve_fit(
+                            sine_fit, fit_range, B_x[fit_range])[0])
+                        B_y_fit = sine_fit(
+                            fit_range, *curve_fit(
+                            sine_fit, fit_range, B_y[fit_range])[0])
+                        B_z_fit = sine_fit(
+                            fit_range, *curve_fit(
+                            sine_fit, fit_range, B_z[fit_range])[0])  
+                    """
+                i += 1
+
+    # Bplot.ctimediff_plot(ctime, ctime_idx)
+    return ctime, ctime_idx
