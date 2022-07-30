@@ -4,7 +4,7 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   VM_WORKING_DIR: "/home/gitlab-runner/sp-server"
 
-image: git.elfin.ucla:5050/science-processing/sp-server/gitlab-image:latest
+image: jcking1034/sp-server-cicd:v1
 
 cache:
   paths:
