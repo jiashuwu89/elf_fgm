@@ -208,7 +208,7 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
     B_S1_corr, B_S2_corr, B_S3_corr = np.array(list(zip(*df["fgm_fgm"])))
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
-    #breakpoint()
+    
     """
         exclude bad data; TODO: automatic detection
     """
