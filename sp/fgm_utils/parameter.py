@@ -1,6 +1,18 @@
+import datetime as dt
 import numpy as np
+import os
+from typing import Literal
+
 
 STATE_DATA_DIR = "/nfs/elfin-mirror/elfin/ela/l1/state/defn/2022/"
+
+
+def get_state_data_dir(mission_id: Literal[1, 2], data_datetime: dt.datetime) -> str:
+    mission_str = "ela" if mission_id == 1 else "elb"
+    year_str = str(data_datetime.year)
+    sta_datestr = data_datetime.strftime("%Y%m%d")
+    return os.path.join("/nfs/elfin-mirror/elfin", mission_str, "l1/state/defn", year_str, f"ela_l1_state_defn_{sta_datestr}_v01.cdf")
+
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False

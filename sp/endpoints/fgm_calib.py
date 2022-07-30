@@ -1,10 +1,9 @@
 import logging
-import os
 import random
 
 import pandas as pd
 import datetime as dt
-from typing import List
+from typing import List, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -20,6 +19,7 @@ router = APIRouter(
 
 
 class FgmCalibRequest(BaseModel):
+    mission_id: Literal[1, 2]
     fgs_time: List[dt.datetime]
     fgs: List[List[float]]
 
@@ -56,20 +56,17 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
 
     starttime_str = fgm_calib_request.fgs_time[0].strftime("%Y-%m-%d %H:%M:%S")
     endtime_str = fgm_calib_request.fgs_time[-1].strftime("%Y-%m-%d %H:%M:%S")
+    sta_cdfpath = parameter.get_state_data_dir(fgm_calib_request.mission_id, fgm_calib_request.fgs_time[0])
+    logger.info(f"Generated parameters {starttime_str}, {endtime_str}, {sta_cdfpath}")
 
-    # TODO: Avoid hardcoding ELA
-    sta_datestr = fgm_calib_request.fgs_time[0].strftime("%Y%m%d")
-    sta_cdfpath = os.path.join(parameter.STATE_DATA_DIR, f"ela_l1_state_defn_{sta_datestr}_v01.cdf")
-
-    # TODO: Avoid hardcoding ELA
+    # TODO: The endpoint should now technically work for both ELA and ELB, so
+    # the use of the `ela_` is misleading but kept for compatibility with old
+    # code until we update this
     fgm_data = pd.DataFrame({
         "ela_fgs_time": fgm_calib_request.fgs_time,
         "ela_fgs": fgm_calib_request.fgs,
     })
 
-    logger.info(f"Generated parameters {starttime_str}, {endtime_str}, {sta_cdfpath}")
-
-#    try:
     [
             FGM_timestamp,
             fgs_fsp_res_dmxl_x,
@@ -88,9 +85,6 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
             fgs_fsp_igrf_gei_y,
             fgs_fsp_igrf_gei_z,
     ] = fgm_fsp_calib(starttime_str, endtime_str, sta_cdfpath, fgm_data)
-#    except Exception as e:
-#        raise e
-#        raise HTTPException(status_code=500, detail=str(e))
 
     # Note: Transposing
     return FgmCalibResponse(
