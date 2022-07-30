@@ -7,11 +7,20 @@ from typing import Literal
 STATE_DATA_DIR = "/nfs/elfin-mirror/elfin/ela/l1/state/defn/2022/"
 
 
-def get_state_data_dir(mission_id: Literal[1, 2], data_datetime: dt.datetime) -> str:
-    mission_str = "ela" if mission_id == 1 else "elb"
-    year_str = str(data_datetime.year)
-    sta_datestr = data_datetime.strftime("%Y%m%d")
-    return os.path.join("/nfs/elfin-mirror/elfin", mission_str, "l1/state/defn", year_str, f"ela_l1_state_defn_{sta_datestr}_v01.cdf")
+def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
+    """Get the path to the CDF corresponding to the given mission and date.
+
+    NOTE: This function relies on the fact that `sp-server` will run on the
+    sciproc-vm, which has an up-to-date copy of all elfin data.
+
+    Parameters
+    ----------
+    mission : Literal["ela", "elb"]
+    date: dt.date
+    """
+    year_str = str(date.year)
+    sta_datestr = date.strftime("%Y%m%d")
+    return os.path.join("/nfs/elfin-mirror/elfin", mission, "l1/state/defn", year_str, f"{mission}_l1_state_defn_{sta_datestr}_v01.cdf")
 
 
 proper_pad = False  # fails when data have gaps
