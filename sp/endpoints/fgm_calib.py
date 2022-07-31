@@ -69,13 +69,13 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     while cur_date <= end_time.date():
         sta_cdfpath = parameter.get_state_cdf_path(mission, cur_date)
 
-        cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, start_time, end_time)
+        cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
         all_att_cdfdata.append(cur_att_cdfdata)
         all_pos_cdfdata.append(cur_pos_cdfdata)
 
         cur_date += dt.timedelta(days=1)
-    att_cdfdata = pd.concat(all_att_cdfdata, axis=0, ignore_index=True, sort=True)
-    pos_cdfdata = pd.concat(all_pos_cdfdata, axis=0, ignore_index=True, sort=True)
+    att_cdfdata = pd.concat(all_att_cdfdata).sort_index()
+    pos_cdfdata = pd.concat(all_pos_cdfdata).sort_index()
 
     [
         FGM_timestamp,
@@ -94,7 +94,7 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata)
+    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata)
 
     # Note: Transposing
     return FgmCalibResponse(
