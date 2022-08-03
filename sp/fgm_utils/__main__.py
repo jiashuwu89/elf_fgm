@@ -3,10 +3,10 @@ from . import fgm_fsp_calib
 
 if __name__ == "__main__":
 
-    starttime_str = "2022-01-12 04:54:09"
-    endtime_str = "2022-01-12 05:00:21"
-    sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
-    fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
+    #starttime_str = "2022-01-12 04:54:09"
+    #endtime_str = "2022-01-12 05:00:21"
+    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
+    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"
@@ -62,10 +62,10 @@ if __name__ == "__main__":
     #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
 
     # TODO: two unipolar spikes, example asked by V
-    #starttime_str = "2022-06-23 04:00:07"
-    #endtime_str = "2022-06-23 04:06:19"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
+    starttime_str = "2022-06-23 04:00:07"
+    endtime_str = "2022-06-23 04:06:19"
+    sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
+    fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
 
     # TODO: one spikes
     #starttime_str = "2022-06-23 08:34:48"
