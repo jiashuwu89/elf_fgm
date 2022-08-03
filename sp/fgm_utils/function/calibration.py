@@ -204,5 +204,5 @@ def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
                     """
                 i += 1
 
-    # Bplot.ctimediff_plot(ctime, ctime_idx)
-    return ctime, ctime_idx
+    #Bplot.ctimediff_plot(ctime, ctime_idx)
+    return ctime, ctime_idx    

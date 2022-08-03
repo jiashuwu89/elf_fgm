@@ -208,7 +208,7 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
     B_S1_corr, B_S2_corr, B_S3_corr = np.array(list(zip(*df["fgm_fgm"])))
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
-    
+    breakpoint()
     """
         exclude bad data; TODO: automatic detection
     """
@@ -304,13 +304,12 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z
     )
 
-    if parameter.makeplot == True: 
-        #Bplot.phase_plot(ctime, phi_corr, cross_times_corr, ctime[ctime_idx], xlimt=[70,85])
-        #breakpoint()
-        #Bplot.B2_ctime1_plot3(ctime, B_S1_calib, B_S2_calib, B_S3_calib, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z, ctime[ctime_idx], xlimt=[70,85])
-        Bplot.B1_ctime1_plot3(ctime, B_S1_calib-fgs_igrf_fgm_x, B_S2_calib-fgs_igrf_fgm_y, 
-            B_S3_calib-fgs_igrf_fgm_z, err = ctime[ctime_idx], cross_times = cross_times_corr)
-        #breakpoint()
+    #Bplot.phase_plot(ctime, phi_corr, cross_times_corr, ctime[ctime_idx], xlimt=[70,85])
+    #breakpoint()
+    #Bplot.B2_ctime1_plot3(ctime, B_S1_calib, B_S2_calib, B_S3_calib, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z, ctime[ctime_idx], xlimt=[70,85])
+    Bplot.B1_ctime1_plot3(ctime, B_S1_calib-fgs_igrf_fgm_x, B_S2_calib-fgs_igrf_fgm_y, 
+        B_S3_calib-fgs_igrf_fgm_z, err = ctime[ctime_idx], cross_times = cross_times_corr)
+    #breakpoint()
     """
         calib - data cross time determination
     """
@@ -342,6 +341,8 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         cross_times_calib_3_select, w_syn_d_calib_3_select, T_spins_d_calib_3_select,
     )
  
+    #Bplot.phase_plot(ctime, phi_calib, cross_times_calib)
+    #breakpoint()
 
     """
         fgs data coordinate transform
@@ -358,12 +359,12 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
             fgs_ful_smxl_x, fgs_ful_smxl_y, fgs_ful_smxl_z, phi_calib
     )
 
-    if parameter.makeplot == True: 
-        Bplot.B2_ctime1_plot3(ctime, fgs_ful_dmxl_x, fgs_ful_dmxl_y, 
-            fgs_ful_dmxl_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, title="dmxl")
 
-        #Bplot.B2_ctime1_plot3(ctime, fgs_ful_smxl_x, fgs_ful_smxl_y, 
-        #    fgs_ful_smxl_z, fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z, title="smxl")    
+    #Bplot.B2_ctime1_plot3(ctime, fgs_ful_dmxl_x, fgs_ful_dmxl_y, 
+    #    fgs_ful_dmxl_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, title="dmxl")
+
+    #Bplot.B2_ctime1_plot3(ctime, fgs_ful_smxl_x, fgs_ful_smxl_y, 
+    #    fgs_ful_smxl_z, fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z, title="smxl")    
 
     if parameter.detrend_fsp == True:
         """
@@ -391,6 +392,13 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
                 cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z
         )
 
+        #Bplot.B2_ctime_plot3(
+        #cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, 
+        #fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z, "X1 = fsp_res    X2 = fsp_res_trend") 
+
+        #Bplot.B1_ctime1_plot1(
+        #    cross_times_calib, fgs_fsp_res0_dmxl_x, fgs_fsp_res0_dmxl_y, fgs_fsp_res0_dmxl_z, "fsp before detrend in dmxl")   
+
         fgs_fsp_res_dmxl_x = fgs_fsp_res0_dmxl_x - fgs_fsp_res_dmxl_trend_x
         fgs_fsp_res_dmxl_y = fgs_fsp_res0_dmxl_y - fgs_fsp_res_dmxl_trend_y
         fgs_fsp_res_dmxl_z = fgs_fsp_res0_dmxl_z - fgs_fsp_res_dmxl_trend_z
@@ -415,7 +423,12 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
         fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
         fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
- 
+
+        #breakpoint()
+
+        #Bplot.B1_ctime1_plot1(
+        #cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, "fsp_detrend in dmxl")     
+
     else:
         """
             fgs res data full resolution
@@ -423,6 +436,10 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x
         fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
         fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z    
+
+        #Bplot.B1_ctime1_plot3(ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, 
+        #    fgs_res_dmxl_z, ctime[ctime_idx], cross_times_corr = cross_times_calib)
+        #breakpoint()
 
         """
             fgs ful field data dmxl to gei
@@ -451,6 +468,9 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         fgs_fsp_res_dmxl_y = fgs_fsp_ful_dmxl_y - fgs_fsp_igrf_dmxl_y
         fgs_fsp_res_dmxl_z = fgs_fsp_ful_dmxl_z - fgs_fsp_igrf_dmxl_z
 
+        #Bplot.B_ctime_plot(
+        #cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, "X1 = fsp_res_detrend")  
+
         fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
         fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
         fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
@@ -459,10 +479,10 @@ def fgm_fsp_calib(starttime_str: str, endtime_str: str, sta_cdfpath: str, fgm_cd
         fgs_fsp_res_dmxl_trend_y = 0
         fgs_fsp_res_dmxl_trend_z = 0
 
-    if parameter.makeplot == True:
-        Bplot.B1_ctime1_plot3(cross_times_calib, fgs_fsp_res_dmxl_x, 
-            fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, ctime[ctime_idx], xlimt = [10, 355],
-            title="res in dmxl with detrend")
+    breakpoint()
+    Bplot.B1_ctime1_plot3(cross_times_calib, fgs_fsp_res_dmxl_x, 
+        fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, ctime[ctime_idx], xlimt = [10, 355],
+        title="res in dmxl with detrend")
     """
             fgs ful field data dmxl to gei
     """
