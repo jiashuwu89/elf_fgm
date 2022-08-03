@@ -478,7 +478,7 @@ def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         fgs_z_slice = fgs_z[idx]
 
         FAC_func = lambda x, A, k: calibration.sine_fit(x, 1, A, w_syn, -w_syn * t0, k)
-
+        
         fgs_fsp_x[i] = curve_fit(FAC_func, ctime_slice, fgs_x_slice)[0][1]
         fgs_fsp_y[i] = curve_fit(FAC_func, ctime_slice, fgs_y_slice)[0][1]
         fgs_fsp_z[i] = curve_fit(FAC_func, ctime_slice, fgs_z_slice)[0][1]
