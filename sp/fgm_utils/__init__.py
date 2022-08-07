@@ -238,11 +238,14 @@ def fgm_fsp_calib(
         T_spins_d_pad_corr_2_select, w_syn_d_corr_2_select] = cross_time.cross_time_stage_2(
         ctime, B_S3_corr, cross_times_corr_1_select, T_spins_d_pad_corr_1_select,
     )
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times = cross_times_corr_2_select, xlimt =[-1,50])
 
     [
         cross_times_corr_3_select, T_spins_d_corr_3_select, w_syn_d_corr_3_select] = cross_time.cross_time_stage_3(
             ctime, B_S3_corr, cross_times_corr_2_select, T_spins_d_pad_corr_2_select
     )
+
 
     """
         corr - phase angle integration
@@ -474,9 +477,9 @@ def fgm_fsp_calib(
         fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
         fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
 
-        fgs_fsp_res_dmxl_trend_x = 0
-        fgs_fsp_res_dmxl_trend_y = 0
-        fgs_fsp_res_dmxl_trend_z = 0
+        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
     if parameter.makeplot == True:
         Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_x, 

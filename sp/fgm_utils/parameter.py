@@ -41,8 +41,12 @@ detrend_cutoff = 6 # criterion of linear detrend with first and second points
 ctime_correct = False # degap unipolar gap if true
 ctime_thrhld = 5e-5 # criterion for finding ctime gaps difference between jumps and ctime median in seconds
 
-makeplot = False
+makeplot = True
 savepng = True
 
-cali_2nd = True
+cali_2nd = True # add a second calibration in dmxl coordinate to solve the trend
+
+R2_filter = True # in cross time determination stage 3, use R2_thrhld to exclude bad fit
+R2_thrhld = 0.8
+
 

@@ -8,8 +8,8 @@ if __name__ == "__main__":
 
     mission = "ela"
 
-    starttime_str = "2022-01-12 04:54:09"
-    endtime_str = "2022-01-12 05:00:21"
+    starttime_str = "2022-01-12 06:28:06"
+    endtime_str = "2022-01-12 06:34:18"
 
     starttime = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
     endtime = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")

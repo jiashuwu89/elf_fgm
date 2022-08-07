@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
-
+from .Bplot import B_ctime_plot_single
 func = calibration.cube_fit
 
 def cross_time_stage_1(
@@ -221,6 +221,7 @@ def cross_time_stage_3(
     d_B_S3 = np.gradient(B_S3) / np.gradient(ctime)
     cross_times_3 = []
     w_syn_d_3 = []
+    R2score = []
 
     for i in range(len(cross_times_2_select)):
         # Get the crossing time, synodic period, and angular velocity from stage 2
@@ -263,20 +264,38 @@ def cross_time_stage_3(
 
         # Fit the curve you want to work with!
         # Good initial guesses p0 really help
+        # JWu:we need B_max of dB = 0 with negative slope, this find -sin(phi) where phi = 0
         spin_opt, spin_covar = curve_fit(
             spin_func,
             ctime_slice,
             signal_slice,
-            p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_syn, 0],
+            p0=[-np.max(np.abs(signal_slice - np.mean(signal_slice))), w_syn, 0],
+            bounds=((-np.inf, -np.inf, -np.inf), (0, np.inf, np.inf)),
         )
+
+        signal_slice_fit = spin_func(ctime_slice, *spin_opt)
+        R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
+
+        #if parameter.makeplot == True:
+        #    B_ctime_plot_single(ctime_slice, [signal_slice, B_S3[idx], signal_slice_fit])
+        #    breakpoint()   
 
         # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
         delta_t0 = -spin_opt[2] / spin_opt[1]
 
         # Contextualize the computing perturbation in terms of the relative time for the science zone
+        if t0 + delta_t0 < 0:
+            delta_t0 = -(spin_opt[2] - 2*np.pi) / spin_opt[1]
         cross_times_3.append(t0 + delta_t0)
         # Also save the fitted value for the angular velocity
         w_syn_d_3.append(spin_opt[1])
+
+    if parameter.R2_filter == True:
+        # if R2 too low, replace with the results from stage two 
+        for i in range(len(cross_times_2_select)):
+            if (R2score[i] < parameter.R2_thrhld):
+                cross_times_3[i] = cross_times_2_select[i]
+                w_syn_d_3[i] = 2 * np.pi / T_spins_d_pad_2_select[i]
 
     cross_times_3 = np.array(cross_times_3)
     w_syn_d_3 = np.array(w_syn_d_3)
@@ -346,7 +365,7 @@ def phase_integration(
     if parameter.relative_integrate == True:
         # Use multiple reference points for integration
         idx0s = np.array(
-            [np.where(ctime <= t0)[0][-1] for t0 in cross_times]
+                [np.where(ctime <= t0)[0][-1] for t0 in cross_times]
         )
         if parameter.fit_running_spline == True:
             if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:

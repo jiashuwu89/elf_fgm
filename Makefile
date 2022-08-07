@@ -33,7 +33,7 @@ test:
 
 .PHONY: dev-server
 dev-server:
-	$(PR) uvicorn sp:app --reload
+	$(PR) uvicorn sp:app --reload --port=8080
 
 .PHONY: prod-server
 prod-server:
