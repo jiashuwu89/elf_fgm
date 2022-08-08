@@ -96,7 +96,6 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         fgs_fsp_igrf_gei_z,
     ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata)
     
-    breakpoint()
     # Note: Transposing
     return FgmCalibResponse(
         fgs_fsp_time=list(FGM_timestamp),

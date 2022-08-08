@@ -1,13 +1,14 @@
 import datetime
 import traceback
 from typing import List, Literal, Tuple, Union
-
+import logging
 import numpy as np
 import pandas as pd
-from cdflib import CDF, cdfepoch
+from cdflib import CDF, cdfepoch, cdfread
 from geopack import geopack
 from pyspedas.cotrans import cotrans_lib
 from scipy.interpolate import interp1d
+import os.path
 from .function import calibration
 from .function import coordinate
 from .function import cross_time
@@ -40,33 +41,33 @@ def get_igrf(time: datetime.datetime, xgsm: float, ygsm: float, zgsm: float):
 
 
 def get_cdf(cdfpath: str, vars: Union[List[str], None]):
+    if os.path.exists(cdfpath) == True:
+        try:
+            cdf = CDF(cdfpath)
+            cdfinfo = cdf.cdf_info()
+            data = {}
+            if vars is None:
+                vars = cdfinfo["zVariables"]
+                print(f"{cdfpath} variables: {vars}")
+            for var in vars:
+                val = cdf.varget(var)
+                if var.endswith("_time"):
+                    data[var] = list(
+                        map(lambda t: cdfepoch.to_datetime(t)[0], val.tolist())
+                    )
+                elif isinstance(val, np.ndarray):
+                    data[var] = val.tolist()
+                else:
+                    data[var] = val
 
-    try:
-        cdf = CDF(cdfpath)
-        cdfinfo = cdf.cdf_info()
-        data = {}
-        if vars is None:
-            vars = cdfinfo["zVariables"]
-            print(f"{cdfpath} variables: {vars}")
-        for var in vars:
-            val = cdf.varget(var)
-            if var.endswith("_time"):
-                data[var] = list(
-                    map(lambda t: cdfepoch.to_datetime(t)[0], val.tolist())
-                )
-            elif isinstance(val, np.ndarray):
-                data[var] = val.tolist()
-            else:
-                data[var] = val
+            return data
 
-        return data
-
-    except Exception as e:
-        return {
-            "message": "Failed to open state CDF",
-            "error": str(e),
-            "traceback": "".join(traceback.format_exception(None, e, e.__traceback__)),
-        }
+        except Exception as e:
+            logging.error(f"get_cdf: {e}")
+            return
+    else:
+        logging.error(f"cdf not found: {cdfpath}")
+        return
 
 
 def clip_cdfdata(
@@ -232,15 +233,15 @@ def fgm_fsp_calib(
         T_spins_d_pad_corr_1_select, w_syn_d_corr_1_select] = cross_time.cross_time_stage_1(
         ctime, B_S3_corr,
     )
-
+   
+    #if parameter.makeplot == True: 
+    #    Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times = cross_times_corr_1_select)
     [
         cross_times_corr_2_select, cross_times_corr_2_mids_select, 
         T_spins_d_pad_corr_2_select, w_syn_d_corr_2_select] = cross_time.cross_time_stage_2(
         ctime, B_S3_corr, cross_times_corr_1_select, T_spins_d_pad_corr_1_select,
     )
-    if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times = cross_times_corr_2_select, xlimt =[-1,50])
-
+ 
     [
         cross_times_corr_3_select, T_spins_d_corr_3_select, w_syn_d_corr_3_select] = cross_time.cross_time_stage_3(
             ctime, B_S3_corr, cross_times_corr_2_select, T_spins_d_pad_corr_2_select

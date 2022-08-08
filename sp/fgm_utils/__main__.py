@@ -1,6 +1,6 @@
 import datetime as dt
 import pandas as pd
-
+import logging
 from . import fgm_fsp_calib, get_cdf, get_relevant_state_data
 
 
@@ -8,18 +8,28 @@ if __name__ == "__main__":
 
     mission = "ela"
 
-    starttime_str = "2022-01-12 06:28:06"
-    endtime_str = "2022-01-12 06:34:18"
+    starttime_str = "2022-01-01 16:29:54"
+    endtime_str = "2022-01-01 16:36:04"
+    start_time = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
+    end_time = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")
 
-    starttime = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
-    endtime = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")
+    sta_datestr = start_time.strftime("%Y%m%d")
 
-    sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
+    sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+    fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
+    
+    logger = logging.getLogger("fgm_calib.fgm_calib")
+    logger.info(f"Received {mission} collection from {start_time} to {end_time}")
 
-    fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
-    fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=["ela_fgs_time", "ela_fgs"]))
+    try: 
+        fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+    except ValueError:
+        logger.error(f"fgm cdf {fgm_cdfpath} not load!")
 
-    att_cdfdata, pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, starttime, endtime)
+    try :
+        att_cdfdata, pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
+    except ValueError:
+        logger.error(f"state cdf {fgm_cdfpath} not load!")
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"
@@ -75,10 +85,10 @@ if __name__ == "__main__":
     #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
 
     # TODO: two unipolar spikes, example asked by V
-    starttime_str = "2022-06-23 04:00:07"
-    endtime_str = "2022-06-23 04:06:19"
-    sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
+    #starttime_str = "2022-06-23 04:00:07"
+    #endtime_str = "2022-06-23 04:06:19"
+    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
+    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
 
     # TODO: one spikes
     #starttime_str = "2022-06-23 08:34:48"
@@ -140,4 +150,4 @@ if __name__ == "__main__":
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(mission, starttime, endtime, fgm_cdfdata, att_cdfdata, pos_cdfdata)
+    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata)

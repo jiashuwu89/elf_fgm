@@ -126,7 +126,7 @@ def cross_time_stage_2(
             (ctime - t0) <= T_spins_d_pad_1_select[i] / 2
         )
         # Use the arcsine function to get phase angle around the zero-crossing
-        phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))
+        phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))    
     # Record zero crossings as locations of the phase passing over from positive to negative
     cross_times_2 = []
 
