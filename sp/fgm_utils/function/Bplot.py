@@ -108,6 +108,6 @@ def B_ctime_plot_single(
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')
     ax.set_ylabel('B (nT)')
-    ax.legend()
+    #ax.legend()
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{title}") 
 

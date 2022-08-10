@@ -5,6 +5,8 @@ from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
 from .Bplot import B_ctime_plot_single
+import logging
+from .error import CrossTime1Error
 func = calibration.cube_fit
 
 def cross_time_stage_1(
@@ -32,11 +34,13 @@ def cross_time_stage_1(
             and B_S3[i + 2] > 0
         ):
             # jwu: when gap exits, dB can jump from positive to negative
+            
             y1 = d_B_S3[i]
             y2 = d_B_S3[i + 1]
             x1 = ctime[i]
             x2 = ctime[i + 1]
-            cross_times_1.append((y2 * x1 - y1 * x2) / (y2 - y1))
+            if x2 - x1 < 5:  # if x1 and x2 seperate more than 1 spin period. there is a gap in data. this cross time should be disgard
+                cross_times_1.append((y2 * x1 - y1 * x2) / (y2 - y1))
     # List of crossing times
     cross_times_1 = np.array(cross_times_1)
     # List of middle points of crossing times, helpful for interpolation purposes earlier
@@ -51,6 +55,9 @@ def cross_time_stage_1(
     #--------------------------------------------
     #   2 - select
     #--------------------------------------------
+    if len(cross_times_1) < 5:
+        raise CrossTime1Error(1)
+
     # Get indices of valid spin-periods
     valid_idx_1 = calibration.running_filter(
         cross_times_1_mids, w_syn_d_1, parameter.eps_1
@@ -102,6 +109,7 @@ def cross_time_stage_1(
 
     return [cross_times_1_select, cross_times_1_mids_select, T_spins_d_pad_1_select, w_syn_d_1_select]
 
+
 def cross_time_stage_2(
     ctime: List[float], B_S3: List[float],
     cross_times_1_select: List[float], T_spins_d_pad_1_select: List[float],
@@ -126,7 +134,12 @@ def cross_time_stage_2(
             (ctime - t0) <= T_spins_d_pad_1_select[i] / 2
         )
         # Use the arcsine function to get phase angle around the zero-crossing
-        phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))    
+        try:
+            phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))  
+        except ValueError:
+            # if gap exists, idx could be []; example starttime_str = "2022-01-01 14:57:42"
+            breakpoint()
+             
     # Record zero crossings as locations of the phase passing over from positive to negative
     cross_times_2 = []
 
@@ -159,6 +172,9 @@ def cross_time_stage_2(
     #--------------------------------------------
     #   2 - select
     #--------------------------------------------
+    if len(cross_times_2) < 3 :
+        raise CrossTime1Error(2)
+
     valid_idx_2 = calibration.running_filter(
         cross_times_2_mids, w_syn_d_2, parameter.eps_2
     )
@@ -230,19 +246,20 @@ def cross_time_stage_3(
         w_syn = 2 * np.pi / T_syn
 
         # The total time over which the fit will be computed
-        T_avg = parameter.N_spins_fit * T_syn
+        T_tot = parameter.N_spins_fit * T_syn
+        w_avg = 2 * np.pi / np.median(T_spins_d_pad_2_select)
 
         # Dealing with edge cases around the beginning and the end of time
         # Similar idea to moving_average, running_spline, and running-filter
-        if t0 - ctime[0] < T_avg / 2:
+        if t0 - ctime[0] < T_tot / 2:
             low_lim = ctime[0]
-            high_lim = ctime[0] + T_avg
-        elif ctime[-1] - t0 < T_avg / 2:
-            low_lim = t0 - T_avg
+            high_lim = ctime[0] + T_tot
+        elif ctime[-1] - t0 < T_tot / 2:
+            low_lim = t0 - T_tot
             high_lim = t0
         else:
-            low_lim = t0 - T_avg / 2
-            high_lim = t0 + T_avg / 2
+            low_lim = t0 - T_tot / 2
+            high_lim = t0 + T_tot / 2
 
         # Get time instances within N_spins_fit
         idx = (ctime >= low_lim) & (ctime <= high_lim)
@@ -265,13 +282,27 @@ def cross_time_stage_3(
         # Fit the curve you want to work with!
         # Good initial guesses p0 really help
         # JWu:we need B_max of dB = 0 with negative slope, this find -sin(phi) where phi = 0
-        spin_opt, spin_covar = curve_fit(
-            spin_func,
-            ctime_slice,
-            signal_slice,
-            p0=[-np.max(np.abs(signal_slice - np.mean(signal_slice))), w_syn, 0],
-            bounds=((-np.inf, -np.inf, -np.inf), (0, np.inf, np.inf)),
-        )
+        try:
+            spin_opt, spin_covar = curve_fit(
+                spin_func,
+                ctime_slice,
+                signal_slice,
+                p0=[-np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0],
+                bounds=((-np.inf, -np.inf, -np.inf), (0, np.inf, np.inf)),
+            )
+            # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
+            delta_t0 = -spin_opt[2] / spin_opt[1]
+        except:
+            print(f"{i}\n")
+            spin_opt, spin_covar = curve_fit(
+                spin_func,
+                ctime_slice,
+                signal_slice,
+                p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0]
+            )
+            # Using the phase == pi , computing the deviation to the crossing time
+            delta_t0 = (np.pi - spin_opt[2]) / spin_opt[1]
+            breakpoint()
 
         signal_slice_fit = spin_func(ctime_slice, *spin_opt)
         R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
@@ -279,9 +310,6 @@ def cross_time_stage_3(
         #if parameter.makeplot == True:
         #    B_ctime_plot_single(ctime_slice, [signal_slice, B_S3[idx], signal_slice_fit])
         #    breakpoint()   
-
-        # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
-        delta_t0 = -spin_opt[2] / spin_opt[1]
 
         # Contextualize the computing perturbation in terms of the relative time for the science zone
         if t0 + delta_t0 < 0:
@@ -303,6 +331,9 @@ def cross_time_stage_3(
     #--------------------------------------------
     #   2 select
     #--------------------------------------------
+    if len(cross_times_3) < 3:
+        raise CrossTime1Error(3)
+
     valid_idx_3 = calibration.running_filter(
         cross_times_3, w_syn_d_3, parameter.eps_3, T=50
     )
@@ -358,6 +389,7 @@ def phase_integration(
                 ctime, *curve_fit(func, cross_times_mids, w_syn_d)[0]
             )
         else:
+            #breakpoint()
             w_syn = func(
                 ctime, *curve_fit(func, cross_times, w_syn_d)[0]
             )

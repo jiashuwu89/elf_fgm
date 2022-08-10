@@ -1,128 +1,11 @@
 import datetime
-import traceback
-from typing import List, Literal, Tuple, Union
+from typing import Literal
 import logging
 import numpy as np
 import pandas as pd
-from cdflib import CDF, cdfepoch, cdfread
-from geopack import geopack
 from pyspedas.cotrans import cotrans_lib
-from scipy.interpolate import interp1d
-import os.path
-from .function import calibration
-from .function import coordinate
-from .function import cross_time
-from .function import Bplot
-from .function import detrend
 from . import parameter
-
-
-def get_igrf(time: datetime.datetime, xgsm: float, ygsm: float, zgsm: float):
-
-    """
-    Input
-        xgsm,ygsm,zgsm: The given position in cartesian GSM coordinate in
-        Re (earth radii, 1 Re = 6371.2 km).
-    Return
-        bxgsm,bygsm,bzgsm: Cartesian GSM components of the internal magnetic
-        field in nT.
-    """
-
-    t1 = time
-    t0 = datetime.datetime(1970, 1, 1)
-    ut = (t1 - t0).total_seconds()
-    tilt = geopack.recalc(ut)
-    Re = 6371.2  # in km
-    xgsm = xgsm / Re
-    ygsm = ygsm / Re
-    zgsm = zgsm / Re
-    bxgsm, bygsm, bzgsm = geopack.igrf_gsm(xgsm, ygsm, zgsm)
-    return (bxgsm, bygsm, bzgsm)
-
-
-def get_cdf(cdfpath: str, vars: Union[List[str], None]):
-    if os.path.exists(cdfpath) == True:
-        try:
-            cdf = CDF(cdfpath)
-            cdfinfo = cdf.cdf_info()
-            data = {}
-            if vars is None:
-                vars = cdfinfo["zVariables"]
-                print(f"{cdfpath} variables: {vars}")
-            for var in vars:
-                val = cdf.varget(var)
-                if var.endswith("_time"):
-                    data[var] = list(
-                        map(lambda t: cdfepoch.to_datetime(t)[0], val.tolist())
-                    )
-                elif isinstance(val, np.ndarray):
-                    data[var] = val.tolist()
-                else:
-                    data[var] = val
-
-            return data
-
-        except Exception as e:
-            logging.error(f"get_cdf: {e}")
-            return
-    else:
-        logging.error(f"cdf not found: {cdfpath}")
-        return
-
-
-def clip_cdfdata(
-    df: pd.Series, starttime: pd.Timestamp, endtime: pd.Timestamp
-) -> pd.Series:
-
-    startindex = df.index.get_indexer([starttime], method="nearest")[0]
-    endindex = df.index.get_indexer([endtime], method="nearest")[0]
-
-    return df[startindex:endindex]
-
-
-def resample_data(
-    cur_time: pd.Timestamp, cur_data: pd.Series, target_time: pd.Timestamp
-) -> pd.Series:
-
-    cur_data_np = np.array(cur_data.to_list())
-    dimens = cur_data_np.shape[1]  # x, y, z
-    interp_data = np.zeros((len(target_time), dimens))
-
-    x = (cur_time - target_time[0]).total_seconds()
-    x_interp = (target_time - target_time[0]).total_seconds()
-    for dimen in range(dimens):
-        f = interp1d(x, cur_data_np[:, dimen])
-        interp_data[:, dimen] = f(x_interp)
-
-    return pd.Series(interp_data.tolist())
-
-
-def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"], starttime: datetime.datetime, endtime: datetime.datetime) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    # read state cdf for att
-    att_cdfdata = pd.DataFrame(
-        get_cdf(sta_cdfpath, vars=[f"{mission}_att_time", f"{mission}_att_gei"])
-    )
-    att_cdfdata.set_index(f"{mission}_att_time", inplace=True)
-    att_cdfdata = clip_cdfdata(
-        att_cdfdata,
-        starttime - datetime.timedelta(minutes=2),
-        endtime + datetime.timedelta(minutes=2),
-    )
-
-    # read state cdf for pos; not read together with att b/c different length
-    pos_cdfdata = pd.DataFrame(
-        get_cdf(sta_cdfpath, vars=[f"{mission}_pos_gei"])
-    )  # not read state time b/c too slow
-    pos_cdfdata[f"{mission}_pos_time"] = pd.date_range(
-        start=starttime.date(), periods=len(pos_cdfdata[f"{mission}_pos_gei"]), freq="S"
-    )
-    pos_cdfdata.set_index(f"{mission}_pos_time", inplace=True)
-    pos_cdfdata = clip_cdfdata(
-        pos_cdfdata,
-        starttime - datetime.timedelta(minutes=2),
-        endtime + datetime.timedelta(minutes=2),
-    )
-    return att_cdfdata, pos_cdfdata
+from .function import calibration, coordinate, cross_time, Bplot, detrend, igrf, preprocess, error
 
 
 def fgm_fsp_calib(
@@ -144,13 +27,13 @@ def fgm_fsp_calib(
 
     # read fgm cdf and clip
     fgm_cdfdata.set_index(f"{mission}_fgs_time", inplace=True)
-    fgm_cdfdata = clip_cdfdata(fgm_cdfdata, starttime, endtime)
+    fgm_cdfdata = preprocess.clip_cdfdata(fgm_cdfdata, starttime, endtime)
 
     # resample att and pos to fgm time resolution
-    df["att_gei"] = resample_data(
+    df["att_gei"] = preprocess.resample_data(
         att_cdfdata.index, att_cdfdata[f"{mission}_att_gei"], fgm_cdfdata.index
     )
-    df["pos_gei"] = resample_data(
+    df["pos_gei"] = preprocess.resample_data(
         pos_cdfdata.index, pos_cdfdata[f"{mission}_pos_gei"], fgm_cdfdata.index
     )
     df["fgm_fgm"] = pd.Series(fgm_cdfdata[f"{mission}_fgs"].tolist())
@@ -181,7 +64,7 @@ def fgm_fsp_calib(
 
     # call igrf b in gsm
     df["igrf_gsm"] = [
-        get_igrf(
+        igrf.get_igrf(
             df["time"][i], df["pos_gsm"][i][0], df["pos_gsm"][i][1], df["pos_gsm"][i][2]
         )
         for i in range(len(df["timestamp"]))
@@ -215,7 +98,12 @@ def fgm_fsp_calib(
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
     
-
+    # check data sanity
+    try:
+        preprocess.funkyfgm_check(B_S1_corr, ctime)
+    except (error.funkyFGMError, error.CrossTime1Error) as e:
+        logging.error(e.__str__())
+        return [ [] for _ in range(16) ]
     """
         timestamp correction; TODO: automatic detection
     """
@@ -225,23 +113,31 @@ def fgm_fsp_calib(
     #d_B_S2 = np.gradient(B_S2_corr) / np.gradient(ctime)
     #d_B_S3 = np.gradient(B_S3_corr) / np.gradient(ctime)   
 
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr)
     """
         corr - cross time determination
     """
-    [
-        cross_times_corr_1_select, cross_times_corr_1_mids_select, 
-        T_spins_d_pad_corr_1_select, w_syn_d_corr_1_select] = cross_time.cross_time_stage_1(
-        ctime, B_S3_corr,
-    )
-   
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times = cross_times_corr_1_select)
+    try:
+        [
+            cross_times_corr_1_select, cross_times_corr_1_mids_select, 
+            T_spins_d_pad_corr_1_select, w_syn_d_corr_1_select] = cross_time.cross_time_stage_1(
+            ctime, B_S3_corr,
+        )
+    except error.CrossTime1Error as e:
+        logging.error(e.__str__())
+        logging.error("cross time error return empty!")
+        return [ [] for _ in range(16) ]
+
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times=cross_times_corr_1_select)
+        
     [
         cross_times_corr_2_select, cross_times_corr_2_mids_select, 
         T_spins_d_pad_corr_2_select, w_syn_d_corr_2_select] = cross_time.cross_time_stage_2(
         ctime, B_S3_corr, cross_times_corr_1_select, T_spins_d_pad_corr_1_select,
     )
- 
+    
     [
         cross_times_corr_3_select, T_spins_d_corr_3_select, w_syn_d_corr_3_select] = cross_time.cross_time_stage_3(
             ctime, B_S3_corr, cross_times_corr_2_select, T_spins_d_pad_corr_2_select

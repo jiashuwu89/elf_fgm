@@ -7,9 +7,10 @@ from typing import List, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..fgm_utils import fgm_fsp_calib, get_relevant_state_data
+from ..fgm_utils.function.preprocess import get_relevant_state_data
+from ..fgm_utils import fgm_fsp_calib
 from ..fgm_utils import parameter
-
+from ..fgm_utils.function import error
 
 router = APIRouter(
     prefix="/fgm_calib",
@@ -67,7 +68,11 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     all_pos_cdfdata = []
     cur_date = start_time.date()
     while cur_date <= end_time.date():
-        sta_cdfpath = parameter.get_state_cdf_path(mission, cur_date)
+        try:
+            sta_cdfpath = parameter.get_state_cdf_path(mission, cur_date)
+        except error.cdfError as e:
+            logger.error(e.__str__())
+            return
 
         cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
         all_att_cdfdata.append(cur_att_cdfdata)

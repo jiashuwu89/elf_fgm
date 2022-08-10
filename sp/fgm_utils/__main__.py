@@ -1,15 +1,15 @@
 import datetime as dt
 import pandas as pd
 import logging
-from . import fgm_fsp_calib, get_cdf, get_relevant_state_data
-
+from . import fgm_fsp_calib
+from .function import error, preprocess
 
 if __name__ == "__main__":
 
     mission = "ela"
 
-    starttime_str = "2022-01-01 16:29:54"
-    endtime_str = "2022-01-01 16:36:04"
+    starttime_str = "2022-01-01 14:57:42"
+    endtime_str = "2022-01-01 15:03:55"
     start_time = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
     end_time = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")
 
@@ -22,14 +22,30 @@ if __name__ == "__main__":
     logger.info(f"Received {mission} collection from {start_time} to {end_time}")
 
     try: 
-        fgm_cdfdata = pd.DataFrame(get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
-    except ValueError:
-        logger.error(f"fgm cdf {fgm_cdfpath} not load!")
+        fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+        att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
+    except error.cdfError as e:
+        logger.error(e.__str__())
+    else:
+        [
+            FGM_timestamp,
+            fgs_fsp_res_dmxl_x,
+            fgs_fsp_res_dmxl_y,
+            fgs_fsp_res_dmxl_z,
+            fgs_fsp_igrf_dmxl_x,
+            fgs_fsp_igrf_dmxl_y,
+            fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_dmxl_trend_x,
+            fgs_fsp_res_dmxl_trend_y,
+            fgs_fsp_res_dmxl_trend_z,
+            fgs_fsp_res_gei_x,
+            fgs_fsp_res_gei_y,
+            fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x,
+            fgs_fsp_igrf_gei_y,
+            fgs_fsp_igrf_gei_z,
+        ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata)
 
-    try :
-        att_cdfdata, pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
-    except ValueError:
-        logger.error(f"state cdf {fgm_cdfpath} not load!")
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"
@@ -133,21 +149,3 @@ if __name__ == "__main__":
     #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
     #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
 
-    [
-        FGM_timestamp,
-        fgs_fsp_res_dmxl_x,
-        fgs_fsp_res_dmxl_y,
-        fgs_fsp_res_dmxl_z,
-        fgs_fsp_igrf_dmxl_x,
-        fgs_fsp_igrf_dmxl_y,
-        fgs_fsp_igrf_dmxl_z,
-        fgs_fsp_res_dmxl_trend_x,
-        fgs_fsp_res_dmxl_trend_y,
-        fgs_fsp_res_dmxl_trend_z,
-        fgs_fsp_res_gei_x,
-        fgs_fsp_res_gei_y,
-        fgs_fsp_res_gei_z,
-        fgs_fsp_igrf_gei_x,
-        fgs_fsp_igrf_gei_y,
-        fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata)
