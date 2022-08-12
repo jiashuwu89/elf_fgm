@@ -1,6 +1,6 @@
 import datetime as dt
 import pandas as pd
-import logging
+import logging.config
 from . import fgm_fsp_calib
 from .function import error, preprocess
 
@@ -18,12 +18,16 @@ if __name__ == "__main__":
     sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
     fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
     
-    logger = logging.getLogger("fgm_calib.fgm_calib")
+    config_file = ('../logging.conf')
+    logging.config.fileConfig(config_file)
+    logger = logging.getLogger("sp")
     logger.info(f"Received {mission} collection from {start_time} to {end_time}")
 
     try: 
         fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+        logger.info(f"Sucessfully read cdf for {mission} from {start_time} to {end_time}")
         att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
+        logger.info(f"Sucessfully read state cdf for {mission} from {start_time} to {end_time}")
     except error.cdfError as e:
         logger.error(e.__str__())
     else:
@@ -44,8 +48,8 @@ if __name__ == "__main__":
             fgs_fsp_igrf_gei_x,
             fgs_fsp_igrf_gei_y,
             fgs_fsp_igrf_gei_z,
-        ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata)
-
+        ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+        logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}")
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"

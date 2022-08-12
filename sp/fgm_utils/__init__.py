@@ -1,4 +1,5 @@
 import datetime
+from distutils.log import Log
 from typing import Literal
 import logging
 import numpy as np
@@ -15,6 +16,7 @@ def fgm_fsp_calib(
     fgm_cdfdata: pd.DataFrame,
     att_cdfdata: pd.DataFrame,
     pos_cdfdata: pd.DataFrame,
+    logger: Log,
 ):
     """
     Note that starttime, endtime refer to the start and end of the science zone collection
@@ -102,7 +104,7 @@ def fgm_fsp_calib(
     try:
         preprocess.funkyfgm_check(B_S1_corr, ctime)
     except (error.funkyFGMError, error.CrossTime1Error) as e:
-        logging.error(e.__str__())
+        logger.error(e.__str__())
         return [ [] for _ in range(16) ]
     """
         timestamp correction; TODO: automatic detection
@@ -125,13 +127,13 @@ def fgm_fsp_calib(
             ctime, B_S3_corr,
         )
     except error.CrossTime1Error as e:
-        logging.error(e.__str__())
-        logging.error("cross time error return empty!")
+        logger.error(e.__str__())
+        logger.error("cross time error return empty!")
         return [ [] for _ in range(16) ]
 
     if parameter.makeplot == True:
         Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, cross_times=cross_times_corr_1_select)
-        
+
     [
         cross_times_corr_2_select, cross_times_corr_2_mids_select, 
         T_spins_d_pad_corr_2_select, w_syn_d_corr_2_select] = cross_time.cross_time_stage_2(

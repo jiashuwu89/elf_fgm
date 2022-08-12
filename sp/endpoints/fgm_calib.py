@@ -49,7 +49,7 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
 
     TODO: Rename to something clearer - maybe just calculate_fsp_data and GET /fsp?
     """
-    logger = logging.getLogger("fgm_calib.fgm_calib")
+    logger = logging.getLogger("sp")
     if not fgm_calib_request.fgs_time or not fgm_calib_request.fgs:
         raise HTTPException(status_code=404, detail="empty science zone")
 
@@ -70,6 +70,7 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     while cur_date <= end_time.date():
         try:
             sta_cdfpath = parameter.get_state_cdf_path(mission, cur_date)
+            logger.info(f"Sucessfully read state cdf")
         except error.cdfError as e:
             logger.error(e.__str__())
             return
@@ -99,8 +100,9 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata)
-    
+    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata, logger)
+    logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}")
+
     # Note: Transposing
     return FgmCalibResponse(
         fgs_fsp_time=list(FGM_timestamp),

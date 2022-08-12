@@ -5,7 +5,6 @@ from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
 from .Bplot import B_ctime_plot_single
-import logging
 from .error import CrossTime1Error
 func = calibration.cube_fit
 
