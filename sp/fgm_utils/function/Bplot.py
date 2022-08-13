@@ -95,7 +95,7 @@ def B_ctime_plot(
 
 def B_ctime_plot_single(
     ctime: List[float], B: List[float], scatter = False,
-    title = "B_ctime_plot_single", xlimt = None
+    title = "B_ctime_plot_single", xlimt = None, cross_times = None
 ):
     dim = np.array(B).ndim
     fig, ax = plt.subplots(1, figsize=(12,7))
@@ -104,7 +104,8 @@ def B_ctime_plot_single(
         ax.scatter(ctime, B, alpha=.5) if scatter == True else None
     else:
         [ax.plot(ctime, B[i], alpha=.5, label = f"X_{i}") for i in range(len(B))]
-
+    if cross_times is not None:
+        [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')
     ax.set_ylabel('B (nT)')

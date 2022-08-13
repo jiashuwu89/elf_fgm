@@ -7,7 +7,7 @@ import datetime
 import os.path
 from . import error 
 from .. import parameter
-
+from . import Bplot
 
 def get_cdf(cdfpath: str, vars: Union[List[str], None]):
     """Read CDF
@@ -101,25 +101,25 @@ def funkyfgm_check(B_x, ctime):
     for i in range(1, len(ctime) - 2):
         if (
             dB_x[i] < 0
-            and dB_x[i+1] < 0
-            and B_x[i] > 0
-            and B_x[i + 1] < 0
+            and dB_x[i+1] > 0
         ):
             # jwu: when gap exits, dB can jump from positive to negative
-            y1 = B_x[i]
-            y2 = B_x[i + 1]
+            y1 = dB_x[i]
+            y2 = dB_x[i + 1]
             x1 = ctime[i]
             x2 = ctime[i + 1]
             cross_times.append((y2 * x1 - y1 * x2) / (y2 - y1))
+            
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot_single(ctime, dB_x, cross_times=cross_times, title = "funckyfgm_check")
 
     if len(cross_times) < 3 :
         raise error.CrossTime1Error(0)
-
     cross_times = np.array(cross_times)
     cross_times_diff = cross_times[1:-1] - cross_times[0:-2]
     idx = cross_times_diff < 4
     med = np.median(cross_times_diff[idx])
     std = np.std(cross_times_diff[idx])
-    if std > parameter.Spinrate_thrhld * med:
-        raise error.funkyFGMError(std)
+    if med < 2.5 or med > 3.2 or std > parameter.Spinrate_thrhld * med:
+        raise error.funkyFGMError(med, std)
     return

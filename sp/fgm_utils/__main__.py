@@ -8,8 +8,8 @@ if __name__ == "__main__":
 
     mission = "ela"
 
-    starttime_str = "2022-01-01 14:57:42"
-    endtime_str = "2022-01-01 15:03:55"
+    starttime_str = "2022-01-15 00:26:04"
+    endtime_str = "2022-01-15 00:32:12"
     start_time = dt.datetime.strptime(starttime_str, "%Y-%m-%d %H:%M:%S")
     end_time = dt.datetime.strptime(endtime_str, "%Y-%m-%d %H:%M:%S")
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             fgs_fsp_igrf_gei_y,
             fgs_fsp_igrf_gei_z,
         ] = fgm_fsp_calib(mission, start_time, end_time, fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
-        logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}")
+        logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}\n")
 
     #starttime_str = "2022-01-12 15:45:51"
     #endtime_str = "2022-01-12 15:52:04"

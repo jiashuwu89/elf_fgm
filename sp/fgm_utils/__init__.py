@@ -114,7 +114,7 @@ def fgm_fsp_calib(
     #d_B_S1 = np.gradient(B_S1_corr) / np.gradient(ctime)
     #d_B_S2 = np.gradient(B_S2_corr) / np.gradient(ctime)
     #d_B_S3 = np.gradient(B_S3_corr) / np.gradient(ctime)   
-
+    
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr)
     """
@@ -376,6 +376,27 @@ def fgm_fsp_calib(
         fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
         fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
 
+        """
+            check first and last three points and detele rogue ones 
+        """
+        if parameter.del_rogue == True:
+            del_index = detrend.del_rogue(
+                cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z
+            )
+            cross_times_calib = np.delete(cross_times_calib, del_index)
+            fgs_fsp_res_dmxl_x = np.delete(fgs_fsp_res_dmxl_x, del_index)
+            fgs_fsp_res_dmxl_y = np.delete(fgs_fsp_res_dmxl_y, del_index)
+            fgs_fsp_res_dmxl_z = np.delete(fgs_fsp_res_dmxl_z, del_index)
+            fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_index)
+            fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_index)
+            fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_index)
+            fgs_fsp_res_gei_x = np.delete(fgs_fsp_res_gei_x, del_index)
+            fgs_fsp_res_gei_y = np.delete(fgs_fsp_res_gei_y, del_index)
+            fgs_fsp_res_gei_z = np.delete(fgs_fsp_res_gei_z, del_index)
+            fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_index)
+            fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
+            fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
+
         fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
         fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
         fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
@@ -383,9 +404,7 @@ def fgm_fsp_calib(
     if parameter.makeplot == True:
         Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_x, 
             fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, plot3 = True, title="res_dmxl_fsp", scatter = True, gap_time = ctime[ctime_idx])
-    """
-            fgs ful field data dmxl to gei
-    """
+
     #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
     #                                datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), 
     #                    cross_times_calib))

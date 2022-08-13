@@ -35,10 +35,11 @@ class funkyFGMError(Exception):
      Attributes:
         std -- std of spin rate 
     """
-    def __init__(self, std, message = "Funky FGM, skip collection!"):
+    def __init__(self, err,std, message = "Funky FGM, skip collection!"):
         self.std = std
+        self.err = err
         self.message = message
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message} - std:{self.std}"        
+        return f"{self.message} - err:{self.err} std:{self.std}"        

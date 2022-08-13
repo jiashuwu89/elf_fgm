@@ -3,6 +3,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from .. import parameter 
 from . import calibration
+from . import Bplot
 
 def detrend_linear(
     ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
@@ -142,3 +143,21 @@ def detrend_cube(
     return [B_x_trend, B_y_trend, B_z_trend]
     #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
 
+def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]):
+
+    dB_x = np.gradient(B_x) / np.gradient(ctime)
+    dB_y = np.gradient(B_y) / np.gradient(ctime)
+    dB_z = np.gradient(B_z) / np.gradient(ctime)
+    dB_x_ave = np.average(np.abs(dB_x))
+    dB_y_ave = np.average(np.abs(dB_y))
+    dB_z_ave = np.average(np.abs(dB_z))
+
+    index = [0, 1, 2] + [len(dB_x)-3, len(dB_x)-2, len(dB_x)-1]
+    del_index = [
+        i for i in index 
+        if (np.abs(dB_x[i]) > parameter.detrend_cutoff * dB_x_ave or 
+            np.abs(dB_y[i]) > parameter.detrend_cutoff * dB_y_ave or 
+            np.abs(dB_z[i]) > parameter.detrend_cutoff * dB_z_ave)
+        ] 
+
+    return del_index
