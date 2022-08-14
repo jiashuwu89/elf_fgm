@@ -38,13 +38,13 @@ init_secs = 0 # seconds
 detrend_fsp = False
 detrend_cutoff = 6  # criterion of linear detrend with first and second points, 
                     # if points > detrend_cutoff*average, neglect       
-del_rogue = True   # criterion is detrend_cutoff          
+del_rogue = True   # del rogue points in the first and last three points, criterion is detrend_cutoff          
 
-ctime_correct = False  # degap unipolar gap if true
+ctime_correct = True  # degap unipolar gap if true
 ctime_thrhld = 5e-5  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
 
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
 
