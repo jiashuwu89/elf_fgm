@@ -1,5 +1,6 @@
 import logging
 import random
+import traceback
 
 import pandas as pd
 import datetime as dt
@@ -83,24 +84,29 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     att_cdfdata = pd.concat(all_att_cdfdata).sort_index()
     pos_cdfdata = pd.concat(all_pos_cdfdata).sort_index()
 
-    [
-        FGM_timestamp,
-        fgs_fsp_res_dmxl_x,
-        fgs_fsp_res_dmxl_y,
-        fgs_fsp_res_dmxl_z,
-        fgs_fsp_igrf_dmxl_x,
-        fgs_fsp_igrf_dmxl_y,
-        fgs_fsp_igrf_dmxl_z,
-        fgs_fsp_res_dmxl_trend_x,
-        fgs_fsp_res_dmxl_trend_y,
-        fgs_fsp_res_dmxl_trend_z,
-        fgs_fsp_res_gei_x,
-        fgs_fsp_res_gei_y,
-        fgs_fsp_res_gei_z,
-        fgs_fsp_igrf_gei_x,
-        fgs_fsp_igrf_gei_y,
-        fgs_fsp_igrf_gei_z,
-    ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata, logger)
+    try:
+        [
+            FGM_timestamp,
+            fgs_fsp_res_dmxl_x,
+            fgs_fsp_res_dmxl_y,
+            fgs_fsp_res_dmxl_z,
+            fgs_fsp_igrf_dmxl_x,
+            fgs_fsp_igrf_dmxl_y,
+            fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_dmxl_trend_x,
+            fgs_fsp_res_dmxl_trend_y,
+            fgs_fsp_res_dmxl_trend_z,
+            fgs_fsp_res_gei_x,
+            fgs_fsp_res_gei_y,
+            fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x,
+            fgs_fsp_igrf_gei_y,
+            fgs_fsp_igrf_gei_z,
+        ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata, logger)
+    except Exception as e:
+        traceback_msg = traceback.format_exc()
+        logger.error(f"fsp calibration failed ({e}): {traceback_msg}")
+        raise
     logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}")
 
     # Note: Transposing
