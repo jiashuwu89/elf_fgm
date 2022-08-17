@@ -188,9 +188,4 @@ def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
                 
         i += 1
 
-    if parameter.makeplot == True:
-        Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_zoom=ctime_idx[0])
-        #breakpoint()
-
-    #Bplot.ctimediff_plot(ctime, ctime_idx)
     return ctime, ctime_idx    

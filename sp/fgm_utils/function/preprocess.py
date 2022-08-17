@@ -95,7 +95,8 @@ def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"],
     )
     return att_cdfdata, pos_cdfdata
 
-def funkyfgm_check(B_x, ctime):
+def funkyfgm_check(B_x, ctime, datestr):
+
     cross_times = []
     dB_x = np.gradient(B_x) / np.gradient(ctime)
     for i in range(1, len(ctime) - 2):
@@ -111,7 +112,7 @@ def funkyfgm_check(B_x, ctime):
             cross_times.append((y2 * x1 - y1 * x2) / (y2 - y1))
             
     if parameter.makeplot == True:
-        Bplot.B_ctime_plot_single(ctime, dB_x, cross_times=cross_times, title = "funckyfgm_check")
+        Bplot.B_ctime_plot_single(ctime, dB_x, cross_times=cross_times, title = "funckyfgm", datestr = datestr)
 
     if len(cross_times) < 3 :
         raise error.CrossTime1Error(0)

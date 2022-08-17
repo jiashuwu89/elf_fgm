@@ -148,16 +148,22 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
     dB_x = np.gradient(B_x) / np.gradient(ctime)
     dB_y = np.gradient(B_y) / np.gradient(ctime)
     dB_z = np.gradient(B_z) / np.gradient(ctime)
-    dB_x_ave = np.average(np.abs(dB_x))
-    dB_y_ave = np.average(np.abs(dB_y))
-    dB_z_ave = np.average(np.abs(dB_z))
+    dB_x_ave = np.average(dB_x)
+    dB_y_ave = np.average(dB_y)
+    dB_z_ave = np.average(dB_z)
+    dB_x_std = np.std(dB_x)
+    dB_y_std = np.std(dB_y)
+    dB_z_std = np.std(dB_z)
 
-    index = [0, 1, 2] + [len(dB_x)-3, len(dB_x)-2, len(dB_x)-1]
+    index = [*range(10)] + [*range(len(dB_x)-10, len(dB_x))]
     del_index = [
         i for i in index 
-        if (np.abs(dB_x[i]) > parameter.detrend_cutoff * dB_x_ave or 
-            np.abs(dB_y[i]) > parameter.detrend_cutoff * dB_y_ave or 
-            np.abs(dB_z[i]) > parameter.detrend_cutoff * dB_z_ave)
-        ] 
-
+        if (
+            dB_x[i] > dB_x_ave + parameter.eps_rogue * dB_x_std or 
+            dB_x[i] < dB_x_ave - parameter.eps_rogue * dB_x_std or 
+            dB_y[i] > dB_y_ave + parameter.eps_rogue * dB_y_std or
+            dB_y[i] < dB_y_ave - parameter.eps_rogue * dB_y_std or 
+            dB_z[i] > dB_z_ave + parameter.eps_rogue * dB_z_std or 
+            dB_z[i] < dB_z_ave - parameter.eps_rogue * dB_z_std)
+        ]
     return del_index

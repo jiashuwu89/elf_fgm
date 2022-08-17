@@ -35,10 +35,11 @@ zero_crossing_method = 3
 f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
-detrend_fsp = False
+detrend_fsp = True
 detrend_cutoff = 6  # criterion of linear detrend with first and second points, 
                     # if points > detrend_cutoff*average, neglect       
-del_rogue = True   # del rogue points in the first and last three points, criterion is detrend_cutoff          
+del_rogue = True   # del rogue points in the first and last three points         
+eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 
 ctime_correct = True  # degap unipolar gap if true
 ctime_thrhld = 5e-5  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
@@ -46,9 +47,11 @@ ctime_thrhld = 5e-5  # criterion for finding ctime gaps difference between jumps
 makeplot = True
 savepng = True
 
-cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
+cali_2nd = False  # add a second calibration in dmxl coordinate to solve the trend
 
 R2_filter = True  # in cross time determination stage 3, use R2_thrhld to exclude bad fit
 R2_thrhld = 0.8
 
 Spinrate_thrhld = 0.2  # if std of spin rate > median of spin rate * Spinrate_thrhld, funky fgm skip collection
+
+output = True

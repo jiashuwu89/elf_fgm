@@ -1,3 +1,4 @@
+from socketserver import DatagramRequestHandler
 import matplotlib.pyplot as plt
 from typing import List
 import numpy as np
@@ -14,10 +15,13 @@ def phase_plot(ctime, phi, cross_time = None, gap_time = None, xlimt = None):
     if xlimt is not None: ax.set_xlim(xlimt)
 
     plt.show() if parameter.savepng is False else plt.savefig("fgm_utils/temp/phase_plot.png") 
+    plt.close()
 
+def ctimediff_plot(
+    ctime, ctime_idx, ctime_idx_zoom = None, title = "ctimediff", datestr = None,
+):
 
-def ctimediff_plot(ctime, ctime_idx, ctime_idx_zoom = None):
-
+    filename = datestr + "_" + title if datestr is not None else title
     fig, ax = plt.subplots(1, figsize = (12, 7))
     ctime_adj = ctime[1:]-ctime[:-1]
     #ax.plot(ctime_adj, color='blue')
@@ -29,16 +33,18 @@ def ctimediff_plot(ctime, ctime_idx, ctime_idx_zoom = None):
     if ctime_idx_zoom is not None:
         ax.set_xlim([ctime[ctime_idx_zoom]-5*2.8, ctime[ctime_idx_zoom]+5*2.8])
 
-    plt.show() if parameter.savepng is False else plt.savefig("fgm_utils/temp/ctimediff_plot.png")  
-
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}.png")  
+    plt.close()
 
 def B_ctime_plot(
     ctime: List[float], B_x: List[float],
     B_y: List[float], B_z: List[float],
     gap_time = None, plot3 = True, scatter = False,
-    title = "B_ctime_plot", xlimt = None, cross_times = None
+    title = "B_ctime_plot", xlimt = None, cross_times = None, 
+    datestr = None, ylimt = None,
 ):
 
+    filename = datestr + "_" + title if datestr is not None else title
     if np.array(B_x).shape == np.array(B_y).shape == np.array(B_z).shape:
         if np.array(B_x).ndim == np.array(ctime).ndim == 1:
             # one set of data and time
@@ -72,8 +78,9 @@ def B_ctime_plot(
                 ax[j].scatter(ctime[i], B[j][i], label=[], alpha=.5) if scatter == True else None
                 if gap_time is not None:
                     [ax[j].axvline(k, color='r') for k in gap_time]
-                ax[j].set_title(title) if j == 0 else None
+                ax[j].set_title(filename) if j == 0 else None
                 ax[j].set_xlim(xlimt) if xlimt is not None else None
+                ax[j].set_ylim(ylimt[j]) if ylimt is not None else None
                 if cross_times is not None:
                     [ax[j].axvline(k, linestyle='--') for k in cross_times]
                 ax[j].set_xlabel('Relative Time (seconds)')
@@ -84,19 +91,23 @@ def B_ctime_plot(
         for i in range(dim):
             for j in range(3):
                 ax.plot(ctime[i], B[j][i], label=labels[j][i], alpha=.5)
-        ax.set_title(title)
+        ax.set_title(filename)
+        ax.set_xlim(xlimt) if xlimt is not None else None
+        ax.set_ylim(ylimt) if ylimt is not None else None
         ax.set_xlabel('Relative Time (seconds)')
         ax.set_ylabel('Field (nT)')
         ax.legend()
 
-
-    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{title}") 
-
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
+    plt.close()
 
 def B_ctime_plot_single(
     ctime: List[float], B: List[float], scatter = False,
-    title = "B_ctime_plot_single", xlimt = None, cross_times = None
+    title = "B_ctime_plot_single", xlimt = None, ylimt = None, 
+    cross_times = None, datestr = None
 ):
+
+    filename = datestr + "_" + title if datestr is not None else title
     dim = np.array(B).ndim
     fig, ax = plt.subplots(1, figsize=(12,7))
     if dim == 1:
@@ -107,8 +118,9 @@ def B_ctime_plot_single(
     if cross_times is not None:
         [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
+    ax.set_ylim(ylimt) if ylimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')
     ax.set_ylabel('B (nT)')
     #ax.legend()
-    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{title}") 
-
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
+    plt.close()

@@ -43,3 +43,17 @@ class funkyFGMError(Exception):
 
     def __str__(self):
         return f"{self.message} - err:{self.err} std:{self.std}"        
+
+class SCreadError(Exception):
+    """Exception raised when not sci zone found
+
+     Attributes:
+        std -- std of spin rate 
+    """
+    def __init__(self, message = "No sci zone found!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}" 
+
