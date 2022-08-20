@@ -4,17 +4,19 @@ from typing import List
 import numpy as np
 from .. import parameter
 
-def phase_plot(ctime, phi, cross_time = None, gap_time = None, xlimt = None):
+def phase_plot(ctime, phi, cross_time = None, gap_time = None, xlimt = None, title = "phase", datestr = None):
 
+    filename = datestr + "_" + title if datestr is not None else title
     fig, ax = plt.subplots(1, figsize=(12,7))
 
     ax.plot(ctime, phi)
     ax.scatter(ctime, phi)
     if cross_time is not None: ax.scatter(cross_time, np.zeros(len(cross_time)), color='r')
-    if gap_time is not None: ax.axvline(gap_time.all())
+    if gap_time is not None: 
+        [ax.axvline(ts, color='r') for ts in gap_time]
     if xlimt is not None: ax.set_xlim(xlimt)
 
-    plt.show() if parameter.savepng is False else plt.savefig("fgm_utils/temp/phase_plot.png") 
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}.png") 
     plt.close()
 
 def ctimediff_plot(
@@ -32,7 +34,8 @@ def ctimediff_plot(
     ax.set_ylabel('$t_{i+1} - t_i$')  
     if ctime_idx_zoom is not None:
         ax.set_xlim([ctime[ctime_idx_zoom]-5*2.8, ctime[ctime_idx_zoom]+5*2.8])
-
+    ax.ticklabel_format(useOffset=False)
+    
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}.png")  
     plt.close()
 

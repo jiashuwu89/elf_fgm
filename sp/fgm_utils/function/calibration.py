@@ -178,13 +178,22 @@ def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
             err_num += 1
 
             if parameter.ctime_correct == True:
+                """
+                # spread over two 2 spins
                 delta_t = ctime_adj[ctime_idx[i]]                
                 if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
                     ctime[ctime_idx[i]+1:ctime_idx[i]+56] = ctime[ctime_idx[i]+1:ctime_idx[i]+56] - delta_t # only works for pos jump
                     ctime[ctime_idx[i]+1: ctime_idx[i]+56] = list(map(
                         lambda n, time: time + n*delta_t/56, 
                         range(56), ctime[ctime_idx[i]+1:ctime_idx[i]+56]))
-                    
+                
+                # shift
+
+                """
+                delta_t = ctime_adj[ctime_idx[i]]                
+                if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                    ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_t # only works for pos jump
+                
                 
         i += 1
 
