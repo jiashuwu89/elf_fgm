@@ -39,12 +39,12 @@ if __name__ == "__main__":
 
     #starttime_str = ["2022-01-14/15:45:50"]
     #endtime_str = ["2022-01-14/15:52:04"]
-    #starttime_str = ["2022-06-23/04:00:07"]
-    #endtime_str = ["2022-06-23/04:06:19"]
+    starttime_str = ["2022-06-23/04:00:07"]
+    endtime_str = ["2022-06-23/04:06:19"]
     #starttime_str = ["2022-01-14/17:17:52"]
     #endtime_str = ["2022-01-14/17:24:03"]
-    starttime_str = ["2022-01-04/04:52:28"]
-    endtime_str = ["2022-01-04/04:58:36"]
+    #starttime_str = ["2022-01-04/04:52:28"]
+    #endtime_str = ["2022-01-04/04:58:36"]
     #starttime_str = ["2022-06-23/04:00:07"]
     #endtime_str = ["2022-06-23/04:06:19"]
     #starttime_str = ["2022-01-14/23:26:43"]
@@ -68,8 +68,6 @@ if __name__ == "__main__":
         sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
         fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf"  
         logger.info(f"Received {mission} collection from {start_time[i]} to {end_time[i]}")
-
-        
 
         try: 
             fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))

@@ -189,13 +189,61 @@ def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
                         range(56), ctime[ctime_idx[i]+1:ctime_idx[i]+56]))
                 
                 # shift
+                """
 
                 """
+                # shift entire to the left
                 delta_t = ctime_adj[ctime_idx[i]]                
                 if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
                     ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_t # only works for pos jump
+                """
+
+                """
+                # large correction interval [t1, t2] + dt/2
+                delta_t = ctime_adj[ctime_idx[i]]
+                if i == 0:
+                    t1 = 1362
+                    t2 = 1374
+                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
+                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t/2 # only works for pos jump
+                else:
+                    t1 = 3238
+                    t2 = 3249
+                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
+                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t/2 # only works for pos jump
+                """
+
                 
+                # large correction interval [t1, t2] + dt
+                delta_t = ctime_adj[ctime_idx[i]]
+                if i == 0:
+                    t1 = 1363
+                    t2 = 1374
+                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
+                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t # only works for pos jump
+                else:
+                    t1 = 3238
+                    t2 = 3249
+                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
+                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t # only works for pos jump
                 
+
+                """
+                # large correction interval [t1, t2] + dt/2
+                delta_t = ctime_adj[ctime_idx[i]]
+                if i == 0:
+                    t1 = 1363
+                    t2 = 1374
+                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
+                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
+                        ctime[t1: t2+1] = list(map(
+                        lambda n, time: time + n*delta_t/(t2+1-t1), 
+                        range(t2+1-t1), ctime[t1:t2+1]))
+                """
         i += 1
 
     return ctime, ctime_idx    

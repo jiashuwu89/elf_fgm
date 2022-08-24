@@ -45,8 +45,8 @@ eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 ctime_correct = False  # degap unipolar gap if true
 ctime_thrhld = 5e-5  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
 
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
 
@@ -57,4 +57,5 @@ Spinrate_thrhld = 0.2  # if std of spin rate > median of spin rate * Spinrate_th
 
 output = False
 
-del_spike_fsp = True
+del_spike_fsp = False
+del_spike_10hz = False
