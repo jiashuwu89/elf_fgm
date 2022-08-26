@@ -421,13 +421,50 @@ def fgm_fsp_calib(
         fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
         fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
+    if parameter.del_spike_fsp == True:
+        """
+        [
+            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z] = calibration.del_spike_fsp(
+            cross_times_calib, ctime[ctime_idx], 
+            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z
+        )
+        """
+        for ispike in ctime[ctime_idx]:
+            index = min(range(len(cross_times_calib)), key=lambda i: abs(cross_times_calib[i] - ispike))
+            if index - 1 < 0 :
+                del_index =  [index, index+1]
+            elif index + 1 == len(cross_times_calib) :
+                del_index =  [index-1, index]
+            else:
+                del_index =  [index-1, index, index+1]
+
+            cross_times_calib = np.delete(cross_times_calib, del_index)
+            fgs_fsp_res_dmxl_x = np.delete(fgs_fsp_res_dmxl_x, del_index)
+            fgs_fsp_res_dmxl_y = np.delete(fgs_fsp_res_dmxl_y, del_index)
+            fgs_fsp_res_dmxl_z = np.delete(fgs_fsp_res_dmxl_z, del_index)
+            fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_index)
+            fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_index)
+            fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_index)
+            fgs_fsp_res_dmxl_trend_x = np.delete(fgs_fsp_res_dmxl_trend_x, del_index)
+            fgs_fsp_res_dmxl_trend_y = np.delete(fgs_fsp_res_dmxl_trend_y, del_index)
+            fgs_fsp_res_dmxl_trend_z = np.delete(fgs_fsp_res_dmxl_trend_z, del_index)
+            fgs_fsp_res_gei_x = np.delete(fgs_fsp_res_gei_x, del_index)
+            fgs_fsp_res_gei_y = np.delete(fgs_fsp_res_gei_y, del_index)
+            fgs_fsp_res_gei_z = np.delete(fgs_fsp_res_gei_z, del_index)
+            fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_index)
+            fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
+            fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
+
     if parameter.makeplot == True:
         Bplot.B_ctime_plot(
             cross_times_calib, fgs_fsp_res_dmxl_x, 
             fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title="res_dmxl_fsp", scatter = True, 
-            gap_time = ctime[ctime_idx], datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10]
+            gap_time = ctime[ctime_idx], datestr = datestr,
         )
 
+    
     #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
     #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
     #breakpoint()

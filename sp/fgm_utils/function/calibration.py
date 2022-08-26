@@ -3,6 +3,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
+from scipy.interpolate import interp1d
 from .. import parameter 
 from . import Bplot
 
@@ -198,3 +199,46 @@ def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
         i += 1
 
     return ctime, ctime_idx    
+
+"""delete spikes and interp, not finished, cannot run 
+def del_spike_fsp(
+    ctime, spike_ctime, 
+    fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
+    fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z
+    ):
+
+    for ispike in spike_ctime:
+        index = min(range(len(ctime)), key=lambda i: abs(ctime[i] - ispike))
+   
+        ctime_interp = np.delete(ctime, [index-1, index, index+1])
+        fgs_fsp_res_dmxl_x_interp = np.delete(fgs_fsp_res_dmxl_x, [index-1, index, index+1])
+        f1 = interp1d(ctime_interp, fgs_fsp_res_dmxl_x_interp, kind='linear')
+        fgs_fsp_res_dmxl_x = f1(ctime)
+
+        fgs_fsp_res_dmxl_y_interp = np.delete(fgs_fsp_res_dmxl_y, [index-1, index, index+1])
+        f2 = interp1d(ctime_interp, fgs_fsp_res_dmxl_y_interp, kind='linear')
+        fgs_fsp_res_dmxl_y = f2(ctime)
+
+        fgs_fsp_res_dmxl_z_interp = np.delete(fgs_fsp_res_dmxl_z, [index-1, index, index+1])
+        f3 = interp1d(ctime_interp, fgs_fsp_res_dmxl_z_interp, kind='linear')
+        fgs_fsp_res_dmxl_z = f3(ctime)
+
+        fgs_fsp_res_gei_x_interp = np.delete(fgs_fsp_res_gei_x, [index-1, index, index+1])
+        f4 = interp1d(ctime_interp, fgs_fsp_res_gei_x_interp, kind='linear')
+        fgs_fsp_res_gei_x = f4(ctime)
+
+        fgs_fsp_res_gei_y_interp = np.delete(fgs_fsp_res_gei_y, [index-1, index, index+1])
+        f5 = interp1d(ctime_interp, fgs_fsp_res_gei_y_interp, kind='linear')
+        fgs_fsp_res_gei_y = f5(ctime)
+
+        fgs_fsp_res_gei_z_interp = np.delete(fgs_fsp_res_gei_z, [index-1, index, index+1])
+        f5 = interp1d(ctime_interp, fgs_fsp_res_gei_z_interp, kind='linear')
+        fgs_fsp_res_gei_z = f5(ctime)
+
+    return [fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
+    fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z]
+"""
+
+
+
+
