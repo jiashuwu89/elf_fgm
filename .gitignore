@@ -8,3 +8,4 @@ __pycache__
 *.cdf
 sp/fgm_utils/temp/
 \**/*.gitignore
+log/

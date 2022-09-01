@@ -36,7 +36,7 @@ dev-server:
 	$(PR) uvicorn sp:app \
 		--reload \
 		--port=8080 \
-		--log-config debug_logging.conf
+		--log-config logging.conf
 
 .PHONY: prod-server
 prod-server:
