@@ -3,9 +3,6 @@ import numpy as np
 from scipy.optimize import curve_fit
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
-from scipy.interpolate import interp1d
-from .. import parameter 
-from . import Bplot
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -18,6 +15,9 @@ def cube_fit(x, a, b, c, d):
 
 def sine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.sin(w * x + p) + k
+
+def sine_fit2(x, A, w, p, k):
+    return A * np.sin(w * x + p) + k
 
 def cosine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.cos(w * x + p) + k
@@ -140,153 +140,3 @@ def calib_leastsquare(
     ) 
 
     return [B_S1_calib, B_S2_calib, B_S3_calib, x]   
-
-def ctime_calib(ctime, B_x = None, B_y = None, B_z = None):
-    """degap when ctime has large jumps
-       multipolar jumps: 
-       unipolar jumps:  
-    """
-    delta_t = np.median(ctime[1:]-ctime[:-1])
-    ctime_adj = ctime[1:]-ctime[:-1] - delta_t
-    ctime_idx = np.where(np.abs(ctime_adj) > parameter.ctime_thrhld)[0]
-    #if parameter.makeplot == True:
-    #    Bplot.ctimediff_plot(ctime, ctime_idx)
-
-    err_idx_1 = []
-    err_idx_2 = []
-    err_num = 0
-
-    i = 0
-    while i < len(ctime_idx):
-        if i < len(ctime_idx)-1 and (ctime_adj[ctime_idx[i]]*ctime_adj[ctime_idx[i+1]] < 0 # multipolar jumps
-            and np.abs(np.abs(ctime_adj[ctime_idx[i]]) - np.abs(ctime_adj[ctime_idx[i+1]])) < 1e-3): # pos and neg jumps similar magnitude
-            err_idx_1.append(ctime_idx[i])
-            err_idx_2.append(ctime_idx[i+1])
-            err_num += 1
-            
-            mid_idx = [i for i in range(ctime_idx[i]+1, ctime_idx[i+1])]
-            ctimediff_mid = np.median(ctime[mid_idx][1:]-ctime[mid_idx][:-1])
-            shift_1 = np.abs((ctime[1:]-ctime[:-1])[ctime_idx[i]] - ctimediff_mid)
-            shift_2 = np.abs((ctime[1:]-ctime[:-1])[ctime_idx[i+1]] - ctimediff_mid)
-            shift_idx_act = [i for i in range(ctime_idx[i]+1, ctime_idx[i+1]+1)]
-            shift = np.mean([shift_1, shift_2])
-            ctime[shift_idx_act] -= shift
-
-            i += 2
-        else: # unipolar jumps
-            err_idx_1.append(ctime_idx[i])
-            err_idx_2.append(0)
-            err_num += 1
-
-            if parameter.ctime_correct == True:
-                """
-                # spread over two 2 spins
-                delta_t = ctime_adj[ctime_idx[i]]                
-                if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                    ctime[ctime_idx[i]+1:ctime_idx[i]+56] = ctime[ctime_idx[i]+1:ctime_idx[i]+56] - delta_t # only works for pos jump
-                    ctime[ctime_idx[i]+1: ctime_idx[i]+56] = list(map(
-                        lambda n, time: time + n*delta_t/56, 
-                        range(56), ctime[ctime_idx[i]+1:ctime_idx[i]+56]))
-                
-                # shift
-                """
-
-                """
-                # shift entire to the left
-                delta_t = ctime_adj[ctime_idx[i]]                
-                if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                    ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_t # only works for pos jump
-                """
-
-                """
-                # large correction interval [t1, t2] + dt/2
-                delta_t = ctime_adj[ctime_idx[i]]
-                if i == 0:
-                    t1 = 1362
-                    t2 = 1374
-                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
-                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t/2 # only works for pos jump
-                else:
-                    t1 = 3238
-                    t2 = 3249
-                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
-                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t/2 # only works for pos jump
-                """
-
-                
-                # large correction interval [t1, t2] + dt
-                delta_t = ctime_adj[ctime_idx[i]]
-                if i == 0:
-                    t1 = 1363
-                    t2 = 1374
-                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
-                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t # only works for pos jump
-                else:
-                    t1 = 3238
-                    t2 = 3249
-                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
-                        ctime[t1:t2+1] = ctime[t1:t2+1] + delta_t # only works for pos jump
-                
-
-                """
-                # large correction interval [t1, t2] + dt/2
-                delta_t = ctime_adj[ctime_idx[i]]
-                if i == 0:
-                    t1 = 1363
-                    t2 = 1374
-                    if np.abs(delta_t) < 0.1:   # small jumps not gaps, spread gaps over 2 spins
-                        ctime[ctime_idx[i]+1:t2+1] = ctime[ctime_idx[i]+1:t2+1] - delta_t # only works for pos jump
-                        ctime[t1: t2+1] = list(map(
-                        lambda n, time: time + n*delta_t/(t2+1-t1), 
-                        range(t2+1-t1), ctime[t1:t2+1]))
-                """
-        i += 1
-
-    return ctime, ctime_idx    
-
-"""delete spikes and interp, not finished, cannot run 
-def del_spike_fsp(
-    ctime, spike_ctime, 
-    fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-    fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z
-    ):
-
-    for ispike in spike_ctime:
-        index = min(range(len(ctime)), key=lambda i: abs(ctime[i] - ispike))
-   
-        ctime_interp = np.delete(ctime, [index-1, index, index+1])
-        fgs_fsp_res_dmxl_x_interp = np.delete(fgs_fsp_res_dmxl_x, [index-1, index, index+1])
-        f1 = interp1d(ctime_interp, fgs_fsp_res_dmxl_x_interp, kind='linear')
-        fgs_fsp_res_dmxl_x = f1(ctime)
-
-        fgs_fsp_res_dmxl_y_interp = np.delete(fgs_fsp_res_dmxl_y, [index-1, index, index+1])
-        f2 = interp1d(ctime_interp, fgs_fsp_res_dmxl_y_interp, kind='linear')
-        fgs_fsp_res_dmxl_y = f2(ctime)
-
-        fgs_fsp_res_dmxl_z_interp = np.delete(fgs_fsp_res_dmxl_z, [index-1, index, index+1])
-        f3 = interp1d(ctime_interp, fgs_fsp_res_dmxl_z_interp, kind='linear')
-        fgs_fsp_res_dmxl_z = f3(ctime)
-
-        fgs_fsp_res_gei_x_interp = np.delete(fgs_fsp_res_gei_x, [index-1, index, index+1])
-        f4 = interp1d(ctime_interp, fgs_fsp_res_gei_x_interp, kind='linear')
-        fgs_fsp_res_gei_x = f4(ctime)
-
-        fgs_fsp_res_gei_y_interp = np.delete(fgs_fsp_res_gei_y, [index-1, index, index+1])
-        f5 = interp1d(ctime_interp, fgs_fsp_res_gei_y_interp, kind='linear')
-        fgs_fsp_res_gei_y = f5(ctime)
-
-        fgs_fsp_res_gei_z_interp = np.delete(fgs_fsp_res_gei_z, [index-1, index, index+1])
-        f5 = interp1d(ctime_interp, fgs_fsp_res_gei_z_interp, kind='linear')
-        fgs_fsp_res_gei_z = f5(ctime)
-
-    return [fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-    fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z]
-"""
-
-
-
-

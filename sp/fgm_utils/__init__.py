@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
-from .function import calibration, coordinate, cross_time, Bplot, detrend, igrf, preprocess, error
+from .function import calibration, coordinate, cross_time, Bplot, detrend, igrf, preprocess, error, ctime_spike
 from .function import output
-from scipy.optimize import curve_fit
 
 datestr = ""
 
@@ -105,105 +104,15 @@ def fgm_fsp_calib(
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
 
-
     # check data sanity
     try:
         preprocess.funkyfgm_check(B_S1_corr, ctime, datestr)
     except (error.funkyFGMError, error.CrossTime1Error) as e:
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-    """
-        timestamp correction; TODO: automatic detection
-    """
-    ctime, ctime_idx = calibration.ctime_calib(ctime, B_x = B_S1_corr, B_y = B_S2_corr, B_z = B_S3_corr)
-    
-    if len(ctime_idx) > 0  and parameter.makeplot == True:
-        #Bplot.ctimediff_plot(ctime, ctime_idx, datestr = datestr)
-        Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_zoom=ctime_idx[1])
-    breakpoint()
 
-    if parameter.del_spike_10hz == True:
-        """
-        # TEST: delete rogue point and interpolate 
-        ctime = np.delete(ctime, [1363, 1364])
-        B_S1_corr = np.delete(B_S1_corr, [1363, 1364])
-        B_S2_corr = np.delete(B_S2_corr, [1363, 1364])
-        B_S3_corr = np.delete(B_S3_corr, [1363, 1364])
-        fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, [1363, 1364])
-        fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, [1363, 1364])
-        fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, [1363, 1364])
-        att_gei_x = np.delete(att_gei_x, [1363, 1364])
-        att_gei_y = np.delete(att_gei_y, [1363, 1364])
-        att_gei_z = np.delete(att_gei_z, [1363, 1364])  
-        """
-
-        """
-        # TEST: linear fit 
-        fit_opt, fit_covar = curve_fit(
-            calibration.linear_fit, ctime[1362:1366], B_S1_corr[1362:1366]
-        )
-        B_S1_corr_del = calibration.linear_fit(ctime[1362:1366], *fit_opt)
-        B_S1_corr[1363:1365] = B_S1_corr_del[1:3]
-
-        fit_opt, fit_covar = curve_fit(
-            calibration.linear_fit, ctime[1362:1366], B_S2_corr[1362:1366]
-        )
-        B_S2_corr_del = calibration.linear_fit(ctime[1362:1366], *fit_opt)
-        B_S2_corr[1363:1365] = B_S2_corr_del[1:3]
-
-        fit_opt, fit_covar = curve_fit(
-            calibration.linear_fit, ctime[1362:1366], B_S3_corr[1362:1366]
-        )
-        B_S3_corr_del = calibration.linear_fit(ctime[1362:1366], *fit_opt)
-        B_S3_corr[1363:1365] = B_S3_corr_del[1:3]
-        """
-
-        spike_idx1s = [1363, 3238]
-        spike_idx2s = [1365, 3240]
-        for idx in range(len(ctime_idx)): 
-            # TEST: sine fit 
-            spike_idx1 = spike_idx1s[idx]
-            spike_idx2 = spike_idx2s[idx]
-            fit_len = 50
-            fit_opt, fit_covar = curve_fit(
-                calibration.sine_fit, ctime[spike_idx1-fit_len:spike_idx2+fit_len], B_S1_corr[spike_idx1-fit_len:spike_idx2+fit_len],
-                p0=[1, np.max(np.abs(B_S1_corr - np.mean(B_S1_corr))), 2.2, 0, 0]
-            )
-            #B_S1_corr_del = calibration.sine_fit(ctime[spike_idx1-fit_len:spike_idx2+fit_len], *fit_opt)
-            B_S1_corr_del = calibration.sine_fit(ctime[spike_idx1:spike_idx2], *fit_opt)
-            B_S1_corr[spike_idx1:spike_idx2] = B_S1_corr_del
-
-            fit_opt, fit_covar = curve_fit(
-                calibration.sine_fit, ctime[spike_idx1-fit_len:spike_idx2+fit_len], B_S2_corr[spike_idx1-fit_len:spike_idx2+fit_len],
-                p0=[1, np.max(np.abs(B_S2_corr - np.mean(B_S2_corr))), 2.2, 0, 0]
-            )
-            #B_S2_corr_del = calibration.sine_fit(ctime[spike_idx1-fit_len:spike_idx2+fit_len], *fit_opt)
-            B_S2_corr_del = calibration.sine_fit(ctime[spike_idx1:spike_idx2], *fit_opt)
-            B_S2_corr[spike_idx1:spike_idx2] = B_S2_corr_del
-        
-            fit_opt, fit_covar = curve_fit(
-                calibration.sine_fit, ctime[spike_idx1-fit_len:spike_idx2+fit_len], B_S3_corr[spike_idx1-fit_len:spike_idx2+fit_len],
-                p0=[1, np.max(np.abs(B_S3_corr - np.mean(B_S3_corr))), 2.2, 0, 0]
-            )
-            #B_S3_corr_del = calibration.sine_fit(ctime[spike_idx1-fit_len:spike_idx2+fit_len], *fit_opt)
-            B_S3_corr_del = calibration.sine_fit(ctime[spike_idx1:spike_idx2], *fit_opt)
-            B_S3_corr[spike_idx1:spike_idx2] = B_S3_corr_del
-            #Bplot.B_ctime_plot(
-            #    ctime[spike_idx1-fit_len:spike_idx2+fit_len], [B_S1_corr_del, B_S1_corr[spike_idx1-fit_len:spike_idx2+fit_len]], 
-            #    [B_S2_corr_del, B_S2_corr[spike_idx1-fit_len:spike_idx2+fit_len]], [B_S3_corr_del, B_S3_corr[spike_idx1-fit_len:spike_idx2+fit_len]], scatter=True, title="del_rogue_10hz")
-
-            if parameter.makeplot == True: 
-                Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, xlimt = [(spike_idx1-28)/10, (spike_idx2+28)/10], scatter=True, title=f"del_rogue_10hz_{idx}")
-        
-
-
-
-    #d_B_S1 = np.gradient(B_S1_corr) / np.gradient(ctime)
-    #d_B_S2 = np.gradient(B_S2_corr) / np.gradient(ctime)
-    #d_B_S3 = np.gradient(B_S3_corr) / np.gradient(ctime)   
-    
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr)
     """
         corr - cross time determination
     """
@@ -228,12 +137,6 @@ def fgm_fsp_calib(
         cross_times_corr_3_select, T_spins_d_corr_3_select, w_syn_d_corr_3_select] = cross_time.cross_time_stage_3(
             ctime, B_S3_corr, cross_times_corr_2_select, T_spins_d_pad_corr_2_select
     )
-
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(
-            ctime, B_S1_corr, B_S2_corr, B_S3_corr, 
-            cross_times=cross_times_corr_3_select, title = "crosstime", datestr = datestr, xlimt = [ctime[ctime_idx[1]]-10, ctime[ctime_idx[1]]+10]
-        )
   
     """
         corr - phase angle integration
@@ -279,13 +182,98 @@ def fgm_fsp_calib(
     """
         use igrf to calibrate fgs data
     """
-    [fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
+    [
+        fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
         B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z
     )  
 
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_x, fgs_igrf_fgm_x], [fgs_ful_fgm_y, fgs_igrf_fgm_y], 
-    #        [fgs_ful_fgm_z, fgs_igrf_fgm_z], plot3 = True, title="ful_igrf_fgm_after1stcali") 
+           
+    """
+        timestamp correction; 
+    """
+    fgs_res_fgm_x = fgs_ful_fgm_x - fgs_igrf_fgm_x
+    fgs_res_fgm_y = fgs_ful_fgm_y - fgs_igrf_fgm_y
+    fgs_res_fgm_z = fgs_ful_fgm_z - fgs_igrf_fgm_z
+
+    ctime, ctime_idx, ctime_idx_flag, spike_ctime_idxs = ctime_spike.ctime_calib(
+            ctime, fgs_res_fgm_x, fgs_res_fgm_y, fgs_res_fgm_z, cross_times_corr, logger = logger
+    )
+    
+    if parameter.ctime_correct == True and parameter.del_spike_10hz == True:
+        B_S1_corr, B_S2_corr, B_S3_corr = ctime_spike.spike_sinefit(
+            ctime, B_S1_corr, B_S2_corr, B_S3_corr, spike_ctime_idxs
+    )
+
+    if parameter.makeplot == True:
+        Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_flag, datestr = datestr)
+    
+    """
+        #start of second run
+    """
+    [
+        cross_times_corr_1_select, cross_times_corr_1_mids_select, 
+        T_spins_d_pad_corr_1_select, w_syn_d_corr_1_select] = cross_time.cross_time_stage_1(
+        ctime, B_S3_corr,
+    )
+    [
+        cross_times_corr_2_select, cross_times_corr_2_mids_select, 
+        T_spins_d_pad_corr_2_select, w_syn_d_corr_2_select] = cross_time.cross_time_stage_2(
+        ctime, B_S3_corr, cross_times_corr_1_select, T_spins_d_pad_corr_1_select,
+    )
+    
+    [
+        cross_times_corr_3_select, T_spins_d_corr_3_select, w_syn_d_corr_3_select] = cross_time.cross_time_stage_3(
+            ctime, B_S3_corr, cross_times_corr_2_select, T_spins_d_pad_corr_2_select
+    )
+    """
+        #corr - phase angle integration
+    """
+    [
+        phi_corr, cross_times_corr, w_syn_d_corr, T_spins_d_corr] = cross_time.phase_integration(
+        ctime, cross_times_corr_1_select, cross_times_corr_1_mids_select, w_syn_d_corr_1_select, T_spins_d_pad_corr_1_select,
+        cross_times_corr_2_select, cross_times_corr_2_mids_select, w_syn_d_corr_2_select, T_spins_d_pad_corr_2_select,
+        cross_times_corr_3_select, w_syn_d_corr_3_select, T_spins_d_corr_3_select,
+    )    
+
+    """
+        #IGRF coorindate transformation: gei -> dmxl -> smxl -> fgm
+    """
+    [
+        DMXL_2_GEI, GEI_2_DMXL] = coordinate.dmxl_gei_matrix(
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z
+    )
+
+    # B igrf rotate from gei to dmxl
+    [
+        fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z] = coordinate.gei2dmxl(
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, GEI_2_DMXL
+    )
+
+    # B igrf rotate from dmxl to smxl
+    [
+        fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z] = coordinate.dmxl2smxl(
+            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_corr
+    )
+
+    # B igrf rotate from smxl to fgm
+    [
+        fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z] = coordinate.smxl2fgm(
+            fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z
+    )
+    """
+        #use igrf to calibrate fgs data
+    """
+    [fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
+        B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z
+    )  
+    
+    #if parameter.makeplot == True and len(spike_ctime_idxs) !=  0 :
+    #    Bplot.B_ctime_plot(
+    #        ctime, fgs_ful_fgm_x - fgs_igrf_fgm_x, fgs_ful_fgm_y - fgs_igrf_fgm_y, 
+    #        fgs_ful_fgm_z - fgs_igrf_fgm_z, ctime_idx = ctime_idx, xlimt = [ctime[spike_ctime_idxs[0]]-10, ctime[spike_ctime_idxs[0]]+10],
+    #        title="fgs_res_fgm after second run")
+    # end of second run
+
     """
         calib - data cross time determination
     """
@@ -298,8 +286,9 @@ def fgm_fsp_calib(
     #    Bplot.B_ctime_plot(
     #    ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
     #    fgs_ful_fgm_z, title="1cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
-    #    gap_time = [ctime[ctime_idx[0]]], cross_times = cross_times_calib_1_select,
+    #    ctime_idx_time = ctime[ctime_idx[0]], cross_times = cross_times_calib_1_select,
     #    )
+
     [
         cross_times_calib_2_select, cross_times_calib_2_mids_select, 
         T_spins_d_pad_calib_2_select, w_syn_d_calib_2_select] = cross_time.cross_time_stage_2(
@@ -309,7 +298,7 @@ def fgm_fsp_calib(
     #    Bplot.B_ctime_plot(
     #    ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
     #    fgs_ful_fgm_z, title="2cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
-    #    gap_time = [ctime[ctime_idx[0]]], cross_times = cross_times_calib_2_select,
+    #    ctime_idx_time = ctime[ctime_idx[0]], cross_times = cross_times_calib_2_select,
     #    )
     [
         cross_times_calib_3_select, T_spins_d_calib_3_select, w_syn_d_calib_3_select] = cross_time.cross_time_stage_3(
@@ -319,7 +308,7 @@ def fgm_fsp_calib(
     #    Bplot.B_ctime_plot(
     #    ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
     #    fgs_ful_fgm_z, title="3cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
-    #    gap_time = [ctime[ctime_idx[0]]], cross_times = cross_times_calib_3_select,
+    #    ctime_idx_time = ctime[ctime_idx[0]], cross_times = cross_times_calib_3_select,
     #    )
   
     """
@@ -333,11 +322,10 @@ def fgm_fsp_calib(
         cross_times_calib_3_select, w_syn_d_calib_3_select, T_spins_d_calib_3_select,
     )
     
-    if parameter.makeplot == True:
-        Bplot.phase_plot(ctime, phi_calib, cross_times_calib, datestr = datestr, 
-            xlimt = [ctime[ctime_idx[1]]-10, ctime[ctime_idx[1]]+10], gap_time = [ctime[ctime_idx[1]]])
+    #if parameter.makeplot == True and len(ctime_idx) != 0:
+    #    Bplot.phase_plot(ctime, phi_calib, cross_times_calib, datestr = datestr, 
+    #        xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10], ctime_idx = ctime_idx[0]
 
-    #Bplot.phase_plot(ctime, phi_calib, cross_times_calib)
     #breakpoint()
 
     """
@@ -354,12 +342,6 @@ def fgm_fsp_calib(
         fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z] = coordinate.smxl2dmxl(
             fgs_ful_smxl_x, fgs_ful_smxl_y, fgs_ful_smxl_z, phi_calib
     )
- 
-    # B full rotate from dmxl to gei
-    [
-        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
-            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
-    )
 
     # 2nd calibration
     if parameter.cali_2nd == True:
@@ -373,16 +355,24 @@ def fgm_fsp_calib(
         [fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, B_parameter] = calibration.calib_leastsquare(
             fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
         )
-
-
         #if parameter.makeplot == True: 
         #    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_y, fgs_igrf_dmxl_y], 
         #        [fgs_ful_dmxl_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
+
+
+    # B full rotate from dmxl to gei
+    [
+        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
+    )
 
     # full res
     fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x
     fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
     fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z
+
+    #if parameter.makeplot == True: 
+    #    Bplot.B_ctime_plot(ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, scatter = True) 
 
     # delete rogue points
     if parameter.del_rogue == True:
@@ -407,24 +397,12 @@ def fgm_fsp_calib(
         fgs_ful_gei_z = np.delete(fgs_ful_gei_z, del_index)
         DMXL_2_GEI = np.delete(DMXL_2_GEI, del_index, axis = 0)  
 
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(
-        ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, 
-        fgs_res_dmxl_z, title="res_dmxl", datestr = datestr, xlimt = [ctime[ctime_idx[1]]-10, ctime[ctime_idx[1]]+10],
-        gap_time = [ctime[ctime_idx[1]]], cross_times = cross_times_calib, scatter = True
-        )
-    breakpoint()
-    # output txt
-    if parameter.detrend_fsp == True:
-        [
-            fgs_res_dmxl_trend_x, fgs_res_dmxl_trend_y, fgs_res_dmxl_trend_z] = detrend.detrend_linear(
-                    ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z
-        )
-        if parameter.makeplot == True:
-            Bplot.B_ctime_plot(
-            ctime, fgs_res_dmxl_x - fgs_res_dmxl_trend_x, fgs_res_dmxl_y - fgs_res_dmxl_trend_y, 
-            fgs_res_dmxl_z - fgs_res_dmxl_trend_z, title="res_dmxl", datestr = datestr
-            )
+    #if parameter.makeplot == True and len(ctime_idx) != 0 :
+    #    Bplot.B_ctime_plot(
+    #    ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, 
+    #    fgs_res_dmxl_z, title="res_dmxl", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
+    #    ctime_idx_time = ctime[ctime_idx[0]], cross_times = cross_times_calib, scatter = True
+    #    )
 
     if parameter.output == True:
         FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
@@ -463,43 +441,28 @@ def fgm_fsp_calib(
     fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
     fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
 
-    # detrend
-    if parameter.detrend_fsp == True:
-        [
-            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z]= detrend.detrend_linear_2point(
-                cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z
+    # delete rogue points again in fsp data
+    if parameter.del_rogue_fsp == True:
+        del_index = detrend.del_rogue(
+            cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z
         )
-
-        
-        fgs_fsp_res_dmxl_x = fgs_fsp_res_dmxl_x - fgs_fsp_res_dmxl_trend_x
-        fgs_fsp_res_dmxl_y = fgs_fsp_res_dmxl_y - fgs_fsp_res_dmxl_trend_y
-        fgs_fsp_res_dmxl_z = fgs_fsp_res_dmxl_z - fgs_fsp_res_dmxl_trend_z
-
-        fgs_fsp_ful_dmxl_x = fgs_fsp_res_dmxl_x + fgs_fsp_igrf_dmxl_x
-        fgs_fsp_ful_dmxl_y = fgs_fsp_res_dmxl_y + fgs_fsp_igrf_dmxl_y
-        fgs_fsp_ful_dmxl_z = fgs_fsp_res_dmxl_z + fgs_fsp_igrf_dmxl_z
-
-        """
-            coordinate transform
-        """
-        DMXL_2_GEI_fsp = cross_time.fsp_matrix(ctime, cross_times_calib, T_spins_d_calib, DMXL_2_GEI)
-        [
-            fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = coordinate.dmxl2gei(
-                fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z, DMXL_2_GEI_fsp
-        )
-        [
-            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z] = coordinate.dmxl2gei(
-                fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, DMXL_2_GEI_fsp
-        )
-
-        fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
-        fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
-        fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
-
-    else:    
-        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
+        cross_times_calib = np.delete(cross_times_calib, del_index)
+        fgs_fsp_res_dmxl_x = np.delete(fgs_fsp_res_dmxl_x, del_index)
+        fgs_fsp_res_dmxl_y = np.delete(fgs_fsp_res_dmxl_y, del_index)
+        fgs_fsp_res_dmxl_z = np.delete(fgs_fsp_res_dmxl_z, del_index)
+        fgs_fsp_res_gei_x = np.delete(fgs_fsp_res_gei_x, del_index)
+        fgs_fsp_res_gei_y = np.delete(fgs_fsp_res_gei_y, del_index)
+        fgs_fsp_res_gei_z = np.delete(fgs_fsp_res_gei_z, del_index)
+        fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_index)
+        fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_index)
+        fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_index)
+        fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_index)
+        fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
+        fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
+       
+    fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
+    fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
+    fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
     if parameter.del_spike_fsp == True:
         """
@@ -541,12 +504,17 @@ def fgm_fsp_calib(
         #Bplot.B_ctime_plot(
         #    cross_times_calib, fgs_fsp_res_dmxl_x, 
         #    fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title="res_dmxl_fsp", scatter = True, 
-        #    gap_time = ctime[ctime_idx], datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10]
+        #    ctime_idx_time = ctime[ctime_idx[0]], datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10]
         #)
         Bplot.B_ctime_plot(
             cross_times_calib, fgs_fsp_res_dmxl_x, 
             fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title="res_dmxl_fsp", scatter = True, 
-            gap_time = ctime[ctime_idx], datestr = datestr,
+            ctime_idx_time = ctime[ctime_idx], datestr = datestr, ctime_idx_flag = ctime_idx_flag
+        )
+        Bplot.B_ctime_plot(
+            cross_times_calib, fgs_fsp_res_gei_x, 
+            fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title="res_gei_fsp", scatter = True, 
+            ctime_idx_time = ctime[ctime_idx], datestr = datestr, ctime_idx_flag = ctime_idx_flag
         )
 
     

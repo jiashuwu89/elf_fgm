@@ -110,9 +110,9 @@ def funkyfgm_check(B_x, ctime, datestr):
             x1 = ctime[i]
             x2 = ctime[i + 1]
             cross_times.append((y2 * x1 - y1 * x2) / (y2 - y1))
-            
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot_single(ctime, dB_x, cross_times=cross_times, title = "funckyfgm", datestr = datestr)
+              
+    #if parameter.makeplot == True:
+    #    Bplot.B_ctime_plot_single(ctime, dB_x, cross_times=cross_times, title = "funckyfgm", datestr = datestr)
 
     if len(cross_times) < 3 :
         raise error.CrossTime1Error(0)

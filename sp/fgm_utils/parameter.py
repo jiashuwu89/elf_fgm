@@ -36,17 +36,16 @@ zero_crossing_method = 3
 f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
-detrend_fsp = False
-detrend_cutoff = 6  # criterion of linear detrend with first and second points, 
-                    # if points > detrend_cutoff*average, neglect       
 del_rogue = True   # del rogue points in the first and last three points         
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
+del_rogue_fsp = True # del rogue points in fsp resolution
 
-ctime_correct = False  # degap unipolar gap if true
-ctime_thrhld = 5e-5  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
 
-makeplot = True
-savepng = True
+ctime_correct = True  # degap unipolar gap if true
+ctime_thrhld = 0.005  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
+
+makeplot = False
+savepng = False
 
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
 
@@ -57,5 +56,8 @@ Spinrate_thrhld = 0.2  # if std of spin rate > median of spin rate * Spinrate_th
 
 output = False
 
-del_spike_fsp = False
-del_spike_10hz = False
+del_spike_fsp = False  # outdated, no godd performance
+del_spike_10hz = True
+
+spike_find_spin_num = 3 # num of spins in which to find [t1, t2] 
+spike_10hz_fit = 28 # number of points to fit around spike

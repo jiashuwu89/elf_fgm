@@ -133,11 +133,8 @@ def cross_time_stage_2(
             (ctime - t0) <= T_spins_d_pad_1_select[i] / 2
         )
         # Use the arcsine function to get phase angle around the zero-crossing
-        try:
-            phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))  
-        except ValueError:
-            # if gap exists, idx could be []; example starttime_str = "2022-01-01 14:57:42"
-            breakpoint()
+        phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))  
+        # if gap exists, idx could be []; example starttime_str = "2022-01-01 14:57:42"
              
     # Record zero crossings as locations of the phase passing over from positive to negative
     cross_times_2 = []
@@ -301,7 +298,6 @@ def cross_time_stage_3(
             )
             # Using the phase == pi , computing the deviation to the crossing time
             delta_t0 = (np.pi - spin_opt[2]) / spin_opt[1]
-            breakpoint()
 
         signal_slice_fit = spin_func(ctime_slice, *spin_opt)
         R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
