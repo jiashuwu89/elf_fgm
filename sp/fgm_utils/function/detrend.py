@@ -145,25 +145,16 @@ def detrend_cube(
 
 def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]):
 
-    dB_x = np.gradient(B_x) / np.gradient(ctime)
-    dB_y = np.gradient(B_y) / np.gradient(ctime)
-    dB_z = np.gradient(B_z) / np.gradient(ctime)
-    dB_x_ave = np.average(dB_x)
-    dB_y_ave = np.average(dB_y)
-    dB_z_ave = np.average(dB_z)
-    dB_x_std = np.std(dB_x)
-    dB_y_std = np.std(dB_y)
-    dB_z_std = np.std(dB_z)
+    B = np.sqrt(B_x**2 + B_y**2 + B_z**2)
+    dB = np.gradient(B) / np.gradient(ctime)
+    dB_ave = np.average(dB)
+    dB_std = np.std(dB)
 
-    index = [*range(10)] + [*range(len(dB_x)-10, len(dB_x))]
+    index = [*range(10)] + [*range(len(dB)-10, len(dB))]
     del_index = [
         i for i in index 
         if (
-            dB_x[i] > dB_x_ave + parameter.eps_rogue * dB_x_std or 
-            dB_x[i] < dB_x_ave - parameter.eps_rogue * dB_x_std or 
-            dB_y[i] > dB_y_ave + parameter.eps_rogue * dB_y_std or
-            dB_y[i] < dB_y_ave - parameter.eps_rogue * dB_y_std or 
-            dB_z[i] > dB_z_ave + parameter.eps_rogue * dB_z_std or 
-            dB_z[i] < dB_z_ave - parameter.eps_rogue * dB_z_std)
+            dB[i] > dB_ave + parameter.eps_rogue * dB_std or 
+            dB[i] < dB_ave - parameter.eps_rogue * dB_std)
         ]
     return del_index

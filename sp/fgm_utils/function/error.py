@@ -47,8 +47,6 @@ class funkyFGMError(Exception):
 class SCreadError(Exception):
     """Exception raised when not sci zone found
 
-     Attributes:
-        std -- std of spin rate 
     """
     def __init__(self, message = "No sci zone found!"):
         self.message = message
@@ -56,4 +54,42 @@ class SCreadError(Exception):
 
     def __str__(self):
         return f"{self.message}" 
+
+class spikeError_spikcrosstime(Exception):
+    """Exception raised when the cloest cross zero time after spike is not found
+
+    """
+    def __init__(self, ctime_idx_time, message = "No cross zero time found with this spike for"):
+        self.ctime_idx_time = ctime_idx_time
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: {self.ctime_idx_time}!" 
+
+class spikeError_spikespin(Exception):
+    """Exception raised when spike t1 t2 is not found
+    """
+    def __init__(self, ctime_idx_time, message = "spike spins determine error(spike_ctime_idx1/2) for"):
+        self.ctime_idx_time = ctime_idx_time
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: {self.ctime_idx_time}!" 
+
+
+class spikeError_t1t2(Exception):
+    """Exception raised when spike t1 t2 is not found after spike - avg
+
+    """
+    def __init__(self, ctime_idx_time, message = "No spike t1/t2 found in avg - spike for"):
+        self.ctime_idx_time = ctime_idx_time
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: {self.ctime_idx_time}!" 
+
+
 
