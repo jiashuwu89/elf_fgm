@@ -342,12 +342,6 @@ def fgm_fsp_calib(
         fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z] = coordinate.smxl2dmxl(
             fgs_ful_smxl_x, fgs_ful_smxl_y, fgs_ful_smxl_z, phi_calib
     )
- 
-    # B full rotate from dmxl to gei
-    [
-        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
-            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
-    )
 
     # 2nd calibration
     if parameter.cali_2nd == True:
@@ -361,11 +355,16 @@ def fgm_fsp_calib(
         [fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, B_parameter] = calibration.calib_leastsquare(
             fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
         )
-
-
         #if parameter.makeplot == True: 
         #    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_y, fgs_igrf_dmxl_y], 
         #        [fgs_ful_dmxl_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
+
+
+    # B full rotate from dmxl to gei
+    [
+        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
+    )
 
     # full res
     fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x
@@ -510,6 +509,11 @@ def fgm_fsp_calib(
         Bplot.B_ctime_plot(
             cross_times_calib, fgs_fsp_res_dmxl_x, 
             fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title="res_dmxl_fsp", scatter = True, 
+            ctime_idx_time = ctime[ctime_idx], datestr = datestr, ctime_idx_flag = ctime_idx_flag
+        )
+        Bplot.B_ctime_plot(
+            cross_times_calib, fgs_fsp_res_gei_x, 
+            fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title="res_gei_fsp", scatter = True, 
             ctime_idx_time = ctime[ctime_idx], datestr = datestr, ctime_idx_flag = ctime_idx_flag
         )
 

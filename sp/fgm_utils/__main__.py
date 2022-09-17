@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     #starttime_str = ["2022-01-14/15:45:50"]
     #endtime_str = ["2022-01-14/15:52:04"]
-    #starttime_str = ["2022-06-23/04:00:07"]
-    #endtime_str = ["2022-06-23/04:06:19"]
+    starttime_str = ["2022-06-23/04:00:07"]
+    endtime_str = ["2022-06-23/04:06:19"]
     #starttime_str = ["2022-01-14/23:26:43"] # no unipolar spike
     #endtime_str = ["2022-01-14/23:32:54"]
     #starttime_str = ["2022-01-14/17:17:52"]
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-12/19:08:31"]
     #starttime_str = ["2022-01-12/20:21:48"]
     #endtime_str = ["2022-01-12/20:27:57"]
-    starttime_str = ["2022-08-17/23:41:54"]
-    endtime_str = ["2022-08-17/23:48:06"]
+    #starttime_str = ["2022-01-14/18:49:45"]
+    #endtime_str = ["2022-01-14/18:55:58"]
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
