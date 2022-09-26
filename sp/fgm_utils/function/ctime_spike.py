@@ -1,4 +1,5 @@
 from audioop import maxpp
+from calendar import c
 import numpy as np
 from scipy.interpolate import interp1d
 from .. import parameter 
@@ -24,11 +25,12 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
     """
     flag = 1 multiploar spike, corrected
     flag = 2 unipolar spike 1/80 s
-    flag = 3 unipolar gap
+    flag = 3 unipolar gap 2.5 s
     flag = 4 other spike
     ['red','orange','magenta','darkviolet']
     """
     ctime_idx_flag = np.zeros(len(ctime_idx), dtype = int)
+    ctime_idx_timediff = np.zeros(len(ctime_idx))
     spike_ctime_idxs = []  # save 1/80 spike
     i = 0
     while i < len(ctime_idx):
@@ -63,7 +65,7 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                     ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_dt
                     try:
                         # get the index for 3 spins with spike, and idx for other spins without spike
-                        avg_ctime_idx, spike_ctime_idx = sepoch_getspin(ctime_idx[i], ctime, cross_times, ctime_idx) # index for three spins
+                        avg_ctime_idx, spike_ctime_idx = sepoch_getspin_80(ctime_idx[i], ctime, cross_times, ctime_idx) # index for three spins
                     
                         #if parameter.makeplot == True:
                         #    Bplot.B_ctime_plot(ctime, B_x, B_y, B_z, 
@@ -71,17 +73,17 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                         #    scatter = True, title = "before_spike_correction")
 
                         # get average Bx, By, Bz
-                        avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz = sepoch_avg(spike_ctime_idx, avg_ctime_idx, B_x, B_y, B_z, ctime)
+                        avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz = sepoch_avg_80(spike_ctime_idx, avg_ctime_idx, B_x, B_y, B_z, ctime)
                         #Bplot.B_3d(spike_Bx, spike_By, spike_Bz)
                         #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], spike_Bx**2+spike_By**2+spike_Bz**2, scatter = True)
                         
                         # subtract Bx, By, Bz, get spike index
-                        spike_idx1, spike_idx2 = sepoch_sub(ctime, ctime_idx[i], spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz)
+                        spike_idx1, spike_idx2 = sepoch_sub_80(ctime, ctime_idx[i], spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz)
                         
                         spike_ctime_idx1 = spike_ctime_idx[spike_idx1]
                         spike_ctime_idx2 = spike_ctime_idx[spike_idx2]
                         
-                    except (error.spikeError_t1t2, error.spikeError_spikespin, error.spikeError_spikcrosstime) as e:
+                    except (error.spikeError80_t1t2, error.spikeError80_spikespin, error.spikeError80_spikcrosstime) as e:
                         
                         logger.error(e.__str__())
                         spike_ctime_idx1 = ctime_idx[i]
@@ -91,18 +93,22 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                     spike_ctime_idxs.append(spike_ctime_idx1)
                     ctime_idx_flag[i] = 2 
 
-            elif np.abs(delta_dt) - 2 > 0 : # gaps
+            elif np.abs(delta_dt) > 2.4 and  np.abs(delta_dt) < 2.7 : # gaps
+            #elif np.abs(delta_dt) > 1.4 and  np.abs(delta_dt) < 1.6 : # gaps
                 ctime_idx_flag[i] = 3
+                ctime_idx_timediff[i] = np.abs(delta_dt)
             else:
                 ctime_idx_flag[i] = 4
+                ctime_idx_timediff[i] = np.abs(delta_dt)
             i += 1
 
 
-    return ctime, ctime_idx, ctime_idx_flag, spike_ctime_idxs    
+    return ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, spike_ctime_idxs    
 
 
-def sepoch_getspin(idx, ctime, cross_times, ctime_idx):
+def sepoch_getspin_80(idx, ctime, cross_times, ctime_idx):
     """
+    calibration step 1 for 1/80 s 
     get ctime index for spins with spike
     TODO: end index is the one spin after spike
     """
@@ -126,7 +132,7 @@ def sepoch_getspin(idx, ctime, cross_times, ctime_idx):
         if np.abs(spike_ctime_time1 - cross_times[spike_spin_idx1]) < 0.5 and np.abs(spike_ctime_time2 - cross_times[spike_spin_idx2]) < 0.5:
             spike_ctime_idx = [*range(spike_ctime_idx1, spike_ctime_idx2)]
         else:
-            raise error.spikeError_spikespin(ctime[idx])
+            raise error.spikeError80_spikespin(ctime[idx])
         
         if round((spike_ctime_time2 - spike_ctime_time1)/2.8) != parameter.spike_find_spin_num:
             spike_find_spin_num = round((spike_ctime_time2 - spike_ctime_time1)/2.8)
@@ -152,11 +158,12 @@ def sepoch_getspin(idx, ctime, cross_times, ctime_idx):
         
         return avg_ctime_idx, spike_ctime_idx
     else:
-        raise error.spikeError_spikcrosstime(ctime[idx])
+        raise error.spikeError80_spikcrosstime(ctime[idx])
 
 
-def sepoch_avg(spike_ctime_idx, avg_ctime_idxs, B_x, B_y, B_z, ctime):
+def sepoch_avg_80(spike_ctime_idx, avg_ctime_idxs, B_x, B_y, B_z, ctime):
     """
+    calibration step 2 for 1/80 s 
     get Bx, By, Bz average from avg_spin
     """
     spike_ctime_diff = ctime[spike_ctime_idx] - ctime[spike_ctime_idx[0]]
@@ -190,8 +197,9 @@ def sepoch_avg(spike_ctime_idx, avg_ctime_idxs, B_x, B_y, B_z, ctime):
     return avg_Bx, avg_By, avg_Bz, B_x[spike_ctime_idx], B_y[spike_ctime_idx], B_z[spike_ctime_idx]
 
 
-def sepoch_sub(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz):
+def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz):
     """
+    calibration step 3 for 1/80 s 
     subtract avg and spike Bx, By, Bz and find t1, t2
     """
     diff_Bx = avg_Bx - spike_Bx
@@ -205,7 +213,7 @@ def sepoch_sub(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_
     if len(B_spike_idx) == 0:
         Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
             title="x1 = B_avg, x2 = B_spike", scatter = True)
-        raise error.spikeError_t1t2(ctime[ctime_idx])
+        raise error.spikeError80_t1t2(ctime[ctime_idx])
 
     B_spike_idx_chunk = np.where(np.diff(B_spike_idx) != 1)[0] + 1
     B_spike_idx_chunk = np.insert(B_spike_idx_chunk, 0, 0)
@@ -224,9 +232,11 @@ def sepoch_sub(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_
                 )
       
     if spike_idx1 == []:
-        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-            title="x1 = B_avg, x2 = B_spike", scatter = True)
-        raise error.spikeError_t1t2(ctime[ctime_idx])
+
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
+        raise error.spikeError80_t1t2(ctime[ctime_idx])
         
     return spike_idx1, spike_idx2
 
@@ -253,7 +263,10 @@ def find_closest(myList, myNumber):
 
 
 def spike_sinefit(ctime, Bx, By, Bz, spike_ctime_idxs):
-
+    """
+    calibration step 4 for 1/80 s 
+    """
+    sine_fit2 = lambda x, A, w, p, k: calibration.sine_fit(x, 1, A, w, p, k)
     spike_idx1s = [spike_ctime_idx - 0 for spike_ctime_idx in spike_ctime_idxs] 
     spike_idx2s = [spike_ctime_idx + 2 for spike_ctime_idx in spike_ctime_idxs]
     for idx in range(len(spike_ctime_idxs)): 
@@ -261,30 +274,30 @@ def spike_sinefit(ctime, Bx, By, Bz, spike_ctime_idxs):
         spike_idx1 = spike_idx1s[idx]
         spike_idx2 = spike_idx2s[idx]
         fit_opt, fit_covar = curve_fit(
-            calibration.sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
+            sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
             Bx[spike_idx1-parameter.spike_10hz_fit:spike_idx2+parameter.spike_10hz_fit],
             p0=[np.max(np.abs(Bx - np.mean(Bx))), 2.2, 0, 0]
         )
-        B_S1_corr_del = calibration.sine_fit2(ctime, *fit_opt)
-        Bx_del = calibration.sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+        B_S1_corr_del = sine_fit2(ctime, *fit_opt)
+        Bx_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
         Bx[spike_idx1:spike_idx2] = Bx_del
 
         fit_opt, fit_covar = curve_fit(
-            calibration.sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
+            sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
             By[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit],
             p0=[np.max(np.abs(By - np.mean(By))), 2.2, 0, 0]
         )
-        B_S2_corr_del = calibration.sine_fit2(ctime, *fit_opt)
-        By_del = calibration.sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+        B_S2_corr_del = sine_fit2(ctime, *fit_opt)
+        By_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
         By[spike_idx1:spike_idx2] = By_del
 
         fit_opt, fit_covar = curve_fit(
-            calibration.sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
+            sine_fit2, ctime[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit], 
             Bz[spike_idx1 - parameter.spike_10hz_fit:spike_idx2 + parameter.spike_10hz_fit],
             p0=[np.max(np.abs(Bz - np.mean(Bz))), 2.2, 0, 0]
         )
-        B_S3_corr_del = calibration.sine_fit2(ctime, *fit_opt)
-        Bz_del = calibration.sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+        B_S3_corr_del = sine_fit2(ctime, *fit_opt)
+        Bz_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
         Bz[spike_idx1:spike_idx2] = Bz_del
 
         if parameter.makeplot == True: 
@@ -292,3 +305,134 @@ def spike_sinefit(ctime, Bx, By, Bz, spike_ctime_idxs):
                 ctime, [Bx, B_S1_corr_del], [By, B_S2_corr_del], [Bz, B_S3_corr_del], xlimt = [(spike_idx1-28)/10, (spike_idx2+28)/10], scatter=True, title=f"del_rogue_10hz_{idx}")
 
     return Bx, By, Bz
+
+
+def spike_fill(ctime, cross_times, ctime_idx, ctime_idx_flag, B_x, B_y, B_z, B_x_igrf, B_y_igrf, B_z_igrf, att_x, att_y, att_z):
+    """
+    calibration step 0 for 2.5 s gap
+    cannot put in ctime_calib because ctime_idx has to be shift
+    """
+    for i in range(len(ctime_idx)):
+        if ctime_idx_flag[i] == 3:
+            spike_ctime = np.arange(ctime[ctime_idx[i]]+0.1, ctime[ctime_idx[i]+1], 0.1)
+            # step 1: get avg spin idx, this is the ctime index of 2.5 s segement in 10 spins 
+            avg_ctime_idxs = sepoch_getspin_25(ctime_idx[i], cross_times, ctime, ctime_idx, spike_ctime)
+            if len(avg_ctime_idxs) == 0:
+                breakpoint()
+            # step 2: average and fill in the gap and shift all data    
+            ctime, ctime_idx, B_x, B_y, B_z, B_x_igrf, B_y_igrf, B_z_igrf, att_x, att_y, att_z = sepoch_avg_25(
+                ctime_idx[i], avg_ctime_idxs, spike_ctime, ctime, ctime_idx, 
+                B_x, B_y, B_z, B_x_igrf, B_y_igrf, B_z_igrf, att_x, att_y, att_z
+            )
+            if len(ctime) != len(B_x):
+                print("not same length")
+                breakpoint()
+    return ctime, ctime_idx, B_x, B_y, B_z, B_x_igrf, B_y_igrf, B_z_igrf, att_x, att_y, att_z
+
+
+def sepoch_getspin_25(spike_ctime_idx, cross_times, ctime, ctime_idx, spike_ctime):
+    """
+    calibration step 1 for 2.5 s gap
+    get indexes for 10 segements of 2.5 s data 
+    """
+    # get spin index in ct for spike
+    spike_spin_idx2 = np.where(cross_times>ctime[spike_ctime_idx])[0] # index of spin cross zero after spike
+    if spike_spin_idx2.size != 0 :
+        spike_spin_idx2 = spike_spin_idx2[0] # ct index right after spike
+        if spike_ctime[-1] > cross_times[spike_spin_idx2]:  # spike start in one spin. 
+            spike_spin_idx2 = spike_spin_idx2 + 1
+            spike_find_spin_num = 2
+        else:
+            spike_find_spin_num = 2
+        spike_spin_idx1 = spike_spin_idx2 - spike_find_spin_num # ct index before spike
+
+        spike_ctime_idx1, spike_ctime_time1 = find_closest(ctime, cross_times[spike_spin_idx1]) # ctime idx for ct after spike
+        spike_ctime_idx2, spike_ctime_time2 = find_closest(ctime, cross_times[spike_spin_idx2]) # ctime idx for ct before spike
+        if np.abs(spike_ctime_time1 - cross_times[spike_spin_idx1]) < 0.5 and np.abs(spike_ctime_time2 - cross_times[spike_spin_idx2]) < 0.5:
+            spike_ctime_idx = [*range(spike_ctime_idx1, spike_ctime_idx2)]
+        else:
+            raise error.spikeError25_spikespin(ctime[spike_ctime_idx])
+
+        # get spike relative time in spike spin
+        spike_rela_time1 = spike_ctime[0] - spike_ctime_time1
+        spike_rela_time2 = spike_ctime[-1] - spike_ctime_time1
+
+        # get index for average spins
+        avg_spin_idx1 = spike_spin_idx1 - 5 if spike_spin_idx1 > 5 else 0 # left end of the avg spin start
+        avg_spin_idx2 = spike_spin_idx1 + 5 if spike_spin_idx2 < len(cross_times) - 5 else len(cross_times) - spike_find_spin_num # right end of the avg spin start
+
+        avg_ctime_idxs = []
+        for spin_i in range(avg_spin_idx1, avg_spin_idx2):
+            avg_ctime_idx1, avg_ctime_time1 = find_closest(ctime, cross_times[spin_i]) # ctime idx for start of this avg spin
+            avg_ctime_idx2, avg_ctime_time2 = find_closest(ctime, cross_times[spin_i + spike_find_spin_num]) # ctime idx for end of this avg spin
+            avg_ctime_idx_range = range(avg_ctime_idx1, avg_ctime_idx2)
+            if np.abs(avg_ctime_time1 - cross_times[spin_i]) < 0.1 and np.abs(avg_ctime_time2 - cross_times[spin_i + spike_find_spin_num]) < 0.1:
+                avg_rela_times = ctime[avg_ctime_idx_range] - avg_ctime_time1  # get relative time to ct
+                avg_rela_time_idx1 = find_closest(avg_rela_times, spike_rela_time1)[0]  # idx for spike_rela_time1 in avg_rela_times
+                avg_rela_time_idx2 = find_closest(avg_rela_times, spike_rela_time2)[0] + 1  # idx for spike_rela_time1 in avg_rela_times
+                if avg_rela_time_idx2 - avg_rela_time_idx1  == len(spike_ctime): 
+                    avg_ctime_idx1 = avg_ctime_idx_range[avg_rela_time_idx1] # ctime idx for 2.5s average segment
+                    avg_ctime_idx2 = avg_ctime_idx_range[avg_rela_time_idx2]
+                    # if spin includes other spikes, delete it
+                    flag = 0
+                    for ctime_idx_i in ctime_idx:
+                        if ctime[avg_ctime_idx1] <= ctime[ctime_idx_i] <= ctime[avg_ctime_idx2]:
+                            flag = 1
+
+                    if flag == 0:
+                        avg_ctime_idxs.append([*range(avg_ctime_idx1, avg_ctime_idx2)])              
+        
+        return avg_ctime_idxs
+    else:
+        raise error.spikeError25_spikcrosstime(ctime[spike_ctime_idx])
+
+
+def sepoch_avg_25(
+    spike_ctime_idx, avg_ctime_idxs, spike_ctime, ctime, ctime_idx, 
+    Bx, By, Bz, Bx_igrf, By_igrf, Bz_igrf, att_x, att_y, att_z):
+    """
+    calibration step 2 for 2.5 s gap
+    get average Bx, By, Bz 
+    replace the ctime and Bx, By, Bz with fill in
+    """
+    avg_Bx = np.average(Bx[avg_ctime_idxs], axis = 0)
+    avg_By = np.average(By[avg_ctime_idxs], axis = 0)
+    avg_Bz = np.average(Bz[avg_ctime_idxs], axis = 0)
+    avg_Bx_igrf = np.average(Bx_igrf[avg_ctime_idxs], axis = 0)
+    avg_By_igrf = np.average(By_igrf[avg_ctime_idxs], axis = 0)
+    avg_Bz_igrf = np.average(Bz_igrf[avg_ctime_idxs], axis = 0)
+    avg_att_x = np.average(att_x[avg_ctime_idxs], axis = 0)
+    avg_att_y = np.average(att_y[avg_ctime_idxs], axis = 0)
+    avg_att_z = np.average(att_z[avg_ctime_idxs], axis = 0)
+
+    ctime_fill = np.insert(ctime, spike_ctime_idx+1, spike_ctime)
+    Bx_fill = np.insert(Bx, spike_ctime_idx+1, avg_Bx)
+    By_fill = np.insert(By, spike_ctime_idx+1, avg_By)
+    Bz_fill = np.insert(Bz, spike_ctime_idx+1, avg_Bz)
+    Bx_igrf_fill = np.insert(Bx_igrf, spike_ctime_idx+1, avg_Bx_igrf)
+    By_igrf_fill = np.insert(By_igrf, spike_ctime_idx+1, avg_By_igrf)
+    Bz_igrf_fill = np.insert(Bz_igrf, spike_ctime_idx+1, avg_Bz_igrf)
+    att_x_fill = np.insert(att_x, spike_ctime_idx+1, avg_att_x)
+    att_y_fill = np.insert(att_y, spike_ctime_idx+1, avg_att_y)
+    att_z_fill = np.insert(att_z, spike_ctime_idx+1, avg_att_x)
+
+    #Bplot.B_ctime_plot(ctime_fill, Bx_fill, By_fill, Bz_fill, 
+    #    ctime_idx_time=ctime[ctime_idx], xlimt = [ctime[spike_ctime_idx]-15, ctime[spike_ctime_idx]+15], cross_times=[ctime[avg_ctime_idxs[0]][0], ctime[avg_ctime_idxs[0]][-1]])
+    #breakpoint()
+    ctime_idx_fill = [ i+len(spike_ctime) if i > spike_ctime_idx else i for i in ctime_idx ]
+
+    return [ctime_fill, ctime_idx_fill, Bx_fill, By_fill, Bz_fill, 
+        Bx_igrf_fill, By_igrf_fill, Bz_igrf_fill, att_x_fill, att_y_fill, att_z_fill]
+
+def getidx_spike_fsp_25(ctime, ctime_idx, ctime_idx_flag, cross_times):
+    """
+    get cross time index for 2.5s spike in fsp resolution
+    """
+    spike25_fsp_idx = []
+    for ctime_idx_i in range(len(ctime_idx)):
+        if ctime_idx_flag[ctime_idx_i] == 3 :
+            idx = np.where(cross_times > ctime[ctime_idx[ctime_idx_i]])[0]
+            if len(idx) != 0 :
+                spike25_fsp_idx.append(idx[0])
+
+    return spike25_fsp_idx

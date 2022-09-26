@@ -4,12 +4,13 @@ from scipy.optimize import curve_fit
 from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
+from .ctime_spike import find_closest
 from .Bplot import B_ctime_plot_single
 from .error import CrossTime1Error
 func = calibration.cube_fit
 
 def cross_time_stage_1(
-    ctime: List[float], B_S3: List[float]
+    ctime: List[float], B_S3: List[float], ctime_idx = None, ctime_idx_flag = None,
 ):
     """cross time determination stage 1
     1. use dB/dt = 0 find the peak of B_z
@@ -223,7 +224,8 @@ def cross_time_stage_2(
 
 def cross_time_stage_3(
     ctime: List[float], B_S3: List[float],
-    cross_times_2_select: List[float], T_spins_d_pad_2_select: List[float],
+    cross_times_2_select: List[float], T_spins_d_pad_2_select: List[float], 
+    ctime_idx = None, ctime_idx_flag = None, ctime_idx_timediff = None
 ):
     """cross time determination stage 3
     1. curvefit to find B peak
@@ -234,7 +236,7 @@ def cross_time_stage_3(
     cross_times_3 = []
     w_syn_d_3 = []
     R2score = []
-
+    dt0 = []
     for i in range(len(cross_times_2_select)):
         # Get the crossing time, synodic period, and angular velocity from stage 2
         t0 = cross_times_2_select[i]
@@ -263,6 +265,67 @@ def cross_time_stage_3(
         # Initialize time for this segment at the zero-crossing
         ctime_slice = ctime[idx] - t0
 
+        """
+        if i > 0 and i < len(cross_times_2_select) -  1:
+            cross_time1 = cross_times_2_select[i-1]
+            cross_time2 = cross_times_2_select[i+1]
+        elif i == 0:
+            cross_time1 = ctime[0]
+            cross_time2 = cross_times_2_select[i+1]
+        elif i == len(cross_times_2_select) - 1:
+            cross_time1 = cross_times_2_select[i-1]
+            cross_time2 = ctime[-1]
+        """
+        # delete spins with 2.5s gap, they may result in spikes in fsp 
+        if parameter.del_spike25 == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
+            flag = 0
+            for ctime_idx_idx, ctime_idx_val in enumerate(ctime_idx):
+                if ctime_idx_flag[ctime_idx_idx] >= 3:
+                    spike_time1 = ctime[ctime_idx_val]
+                    spike_time2 = ctime[ctime_idx_val] + ctime_idx_timediff[ctime_idx_idx]
+                    if (spike_time2 < low_lim or spike_time1 > high_lim) == 0 : 
+                        if low_lim < spike_time2 < cross_times_2_select[i]:
+                            low_lim = spike_time2 + np.pi/w_avg
+                            idx = (ctime >= low_lim) & (ctime <= high_lim)
+                            if len(ctime[idx]) <= 5 :
+                                flag = 1
+                            else:
+                                ctime_slice = ctime[idx] - t0
+                        elif cross_times_2_select[i] < spike_time1 < high_lim:
+                            high_lim = spike_time1 - np.pi/w_avg
+                            idx = (ctime >= low_lim) & (ctime <= high_lim)
+                            if len(ctime[idx]) <= 5 :
+                                flag = 1
+                            else:    
+                                ctime_slice = ctime[idx] - t0
+                        elif spike_time1 < cross_times_2_select[i] < spike_time2 :
+                            flag = 1
+                            break
+
+                    """
+                    # use previous result if this fit include spike
+                    if spike_time2 < low_lim or spike_time1 > high_lim : 
+                        pass
+                    else:
+                        flag = 1 # if slice include spike, then skip fitting and use cross time stage 2 result
+                    """
+                    """
+                    if spike_time2 < cross_time1 or spike_time1 > cross_time2 : 
+                        pass
+                    else:
+                        flag = 3
+                        breakpoint()
+                        break
+                    """
+
+            if flag == 1:
+                cross_times_3.append(t0)
+                w_syn_d_3.append(w_syn)
+                R2score.append(1)
+                continue
+            elif flag == 3:
+                continue
+
         # Slice the signal itself
 
         # In case you are trying to find the maxima of B_S3 directly
@@ -289,7 +352,8 @@ def cross_time_stage_3(
             # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
             delta_t0 = -spin_opt[2] / spin_opt[1]
         except:
-            print(f"{i}\n")
+            #breakpoint()
+            print(f"cross time 3 determination fitting error: {i}\n")
             spin_opt, spin_covar = curve_fit(
                 spin_func,
                 ctime_slice,
@@ -302,14 +366,15 @@ def cross_time_stage_3(
         signal_slice_fit = spin_func(ctime_slice, *spin_opt)
         R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
 
-        #if parameter.makeplot == True:
-        #    B_ctime_plot_single(ctime_slice, [signal_slice, B_S3[idx], signal_slice_fit])
-        #    breakpoint()   
+ #       if t0 > 280 and t0 < 315:
+ #           B_ctime_plot_single(ctime_slice, [signal_slice, B_S3[idx], signal_slice_fit], title = f"{int(t0)}")
+ #           print(f"{t0} omega:{spin_opt[1]} p:{spin_opt[2]} delta_t0:{delta_t0}")
 
         # Contextualize the computing perturbation in terms of the relative time for the science zone
         if t0 + delta_t0 < 0:
             delta_t0 = -(spin_opt[2] - 2*np.pi) / spin_opt[1]
         cross_times_3.append(t0 + delta_t0)
+        dt0.append(delta_t0)
         # Also save the fitted value for the angular velocity
         w_syn_d_3.append(spin_opt[1])
 
@@ -322,6 +387,22 @@ def cross_time_stage_3(
 
     cross_times_3 = np.array(cross_times_3)
     w_syn_d_3 = np.array(w_syn_d_3)
+
+    """
+    2.5s spike: delete zero crossings within  2.5s + halft spin
+    """
+    if parameter.del_spike25 == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
+        ctime_idx_time = ctime[ctime_idx[ctime_idx_flag >= 3]]
+        ctime_idx_timediffs = ctime_idx_timediff[ctime_idx_flag >= 3]
+        for ctime_idx_time_idx, ctime_idx_time_val in enumerate(ctime_idx_time):
+            try:
+                idx1 = np.where(cross_times_3 > ctime_idx_time_val - np.pi/w_avg)[0][0]
+                idx2 = np.where(cross_times_3 < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + np.pi/w_avg)[0][-1]
+                idxs = range(idx1, idx2) if idx2 + 1 >= len(w_syn_d_3) else range(idx1, idx2+1)
+                cross_times_3 = np.delete(cross_times_3, idxs)
+                w_syn_d_3 = np.delete(w_syn_d_3, idxs)
+            except:
+                continue
 
     #--------------------------------------------
     #   2 select

@@ -6,6 +6,6 @@ __pycache__
 .venv
 *.log
 *.cdf
-sp/fgm_utils/temp/
+sp/fgm_utils/temp*/
 \**/*.gitignore
 log/

@@ -28,7 +28,7 @@ bidirectional_integrate = False
 
 eps_1 = 5
 eps_2 = 5
-eps_3 = 3
+eps_3 = 4
 N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
@@ -49,15 +49,20 @@ savepng = False
 
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
 
-R2_filter = False  # in cross time determination stage 3, use R2_thrhld to exclude bad fit
+R2_filter = True  # in cross time determination stage 3, use R2_thrhld to exclude bad fit
 R2_thrhld = 0.8
 
 Spinrate_thrhld = 0.2  # if std of spin rate > median of spin rate * Spinrate_thrhld, funky fgm skip collection
 
 output = False
 
-del_spike_fsp = False  # outdated, no godd performance
+del_spike_fsp = False  # outdated, no godd performance, delete spike in fsp resolution
 del_spike_10hz = True
 
 spike_find_spin_num = 3 # num of spins in which to find [t1, t2] 
 spike_10hz_fit = 28 # number of points to fit around spike
+
+download_data = False
+del_spike25 = True # 2.5s gap: before sine fit delete spins with spike in zero crossing determine stage 3
+fake_spike = False
+

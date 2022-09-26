@@ -16,9 +16,6 @@ def cube_fit(x, a, b, c, d):
 def sine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.sin(w * x + p) + k
 
-def sine_fit2(x, A, w, p, k):
-    return A * np.sin(w * x + p) + k
-
 def cosine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.cos(w * x + p) + k
 

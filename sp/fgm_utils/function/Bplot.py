@@ -86,10 +86,14 @@ def B_ctime_plot(
                 for j in range(3):           
                     ax[j].plot(ctime[i], B[j][i], label=labels[j][i], alpha=.5)
                     ax[j].scatter(ctime[i], B[j][i], label=[], alpha=.5) if scatter == True else None
-                    if ctime_idx_time is not None and ctime_idx_flag is not None and len(ctime_idx_time) != 0:
-                        colors = ['red','orange','magenta','darkviolet']
-                        for k in range(len(ctime_idx_time)):
-                            ax[j].axvline(ctime_idx_time[k], color=colors[ctime_idx_flag[k]-1]) 
+                    if ctime_idx_time is not None and len(ctime_idx_time) != 0:
+                        if ctime_idx_flag is not None: 
+                            colors = ['red','orange','magenta','darkviolet']
+                            for k in range(ctime_idx_time.size):
+                                ax[j].axvline(ctime_idx_time[k], color=colors[ctime_idx_flag[k]-1]) 
+                        else:
+                            for k in range(len(ctime_idx_time)):
+                                ax[j].axvline(ctime_idx_time[k], color='black') 
                     ax[j].set_title(filename) if j == 0 else None
                     ax[j].set_xlim(xlimt) if xlimt is not None else None
                     ax[j].set_ylim(ylimt[j]) if ylimt is not None else None

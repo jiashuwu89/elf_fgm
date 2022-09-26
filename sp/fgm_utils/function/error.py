@@ -55,11 +55,11 @@ class SCreadError(Exception):
     def __str__(self):
         return f"{self.message}" 
 
-class spikeError_spikcrosstime(Exception):
+class spikeError80_spikcrosstime(Exception):
     """Exception raised when the cloest cross zero time after spike is not found
 
     """
-    def __init__(self, ctime_idx_time, message = "No cross zero time found with this spike for"):
+    def __init__(self, ctime_idx_time, message = "1/80s spike: No cross zero time found with this spike for"):
         self.ctime_idx_time = ctime_idx_time
         self.message = message
         super().__init__(self.message)
@@ -67,10 +67,12 @@ class spikeError_spikcrosstime(Exception):
     def __str__(self):
         return f"{self.message}: {self.ctime_idx_time}!" 
 
-class spikeError_spikespin(Exception):
+
+class spikeError80_spikespin(Exception):
     """Exception raised when spike t1 t2 is not found
+    t1 is the actually start of the spike, usually happen earlier than the actual ctime spike
     """
-    def __init__(self, ctime_idx_time, message = "spike spins determine error(spike_ctime_idx1/2) for"):
+    def __init__(self, ctime_idx_time, message = "1/80s spike: Spike spins determine error(spike_ctime_idx1/2) for"):
         self.ctime_idx_time = ctime_idx_time
         self.message = message
         super().__init__(self.message)
@@ -79,11 +81,11 @@ class spikeError_spikespin(Exception):
         return f"{self.message}: {self.ctime_idx_time}!" 
 
 
-class spikeError_t1t2(Exception):
+class spikeError80_t1t2(Exception):
     """Exception raised when spike t1 t2 is not found after spike - avg
 
     """
-    def __init__(self, ctime_idx_time, message = "No spike t1/t2 found in avg - spike for"):
+    def __init__(self, ctime_idx_time, message = "1/80s spike: No spike t1/t2 found in avg - spike for"):
         self.ctime_idx_time = ctime_idx_time
         self.message = message
         super().__init__(self.message)
@@ -91,5 +93,15 @@ class spikeError_t1t2(Exception):
     def __str__(self):
         return f"{self.message}: {self.ctime_idx_time}!" 
 
+class spikeError25_spikcrosstime(Exception):
+    """Exception raised when the cloest cross zero time after spike is not found
 
+    """
+    def __init__(self, ctime_idx_time, message = "2.5 spike: No cross zero time found with this spike for"):
+        self.ctime_idx_time = ctime_idx_time
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"{self.message}: {self.ctime_idx_time}!" 
 

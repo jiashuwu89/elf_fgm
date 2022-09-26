@@ -1,8 +1,9 @@
 import datetime as dt
 import pandas as pd
 import logging.config
-from . import fgm_fsp_calib
+from . import fgm_fsp_calib, parameter
 from .function import error, preprocess
+import requests
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -25,8 +26,9 @@ if __name__ == "__main__":
     config_file = ('../logging.conf')
     logging.config.fileConfig(config_file)
     logger = logging.getLogger("sp")
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
+    elfin_url = "https://data.elfin.ucla.edu/"
     
     """
     startdate = "2022-01-01"
@@ -38,39 +40,59 @@ if __name__ == "__main__":
     """
 
 
-    #starttime_str = ["2022-01-14/15:45:50"]
-    #endtime_str = ["2022-01-14/15:52:04"]
-    starttime_str = ["2022-06-23/04:00:07"]
-    endtime_str = ["2022-06-23/04:06:19"]
+    #starttime_str = ["2022-01-01/12:05:24"]
+    #endtime_str = ["2022-01-01/12:11:39"]
+    #starttime_str = ["2022-07-14/23:43:05"]
+    #endtime_str = ["2022-07-14/23:49:17"]
+    #starttime_str = ["2022-07-18/11:29:48"]
+    #endtime_str = ["2022-07-18/11:36:00"]
     #starttime_str = ["2022-01-14/23:26:43"] # no unipolar spike
     #endtime_str = ["2022-01-14/23:32:54"]
     #starttime_str = ["2022-01-14/17:17:52"]
     #endtime_str = ["2022-01-14/17:24:03"]
-    #starttime_str = ["2022-01-04/04:52:28"] # big gaps
-    #endtime_str = ["2022-01-04/04:58:36"]
-    #starttime_str = ["2022-06-23/04:00:07"]
+    starttime_str = ["2022-01-01/18:14:17"] 
+    endtime_str = ["2022-01-01/18:20:32"]
+    #starttime_str = ["2022-01-01/11:52:27"]
+    #endtime_str = ["2022-01-01/11:58:42"]
+    #starttime_str = ["2022-08-17/23:24:26"] # ela
+    #endtime_str = ["2022-08-17/23:30:39"]
+    #starttime_str = ["2022-08-12/12:56:24"] # elb
+    #endtime_str = ["2022-08-12/13:02:36"]
+    #starttime_str = ["2022-08-07/21:55:33"] # elb
+    #endtime_str = ["2022-08-07/22:01:51"]
+    #starttime_str = ["2022-08-07/18:50:59"] # elb
+    #endtime_str = ["2022-08-07/18:57:15"]
+    #starttime_str = ["2022-07-01/03:01:40"]
+    #endtime_str = ["2022-07-01/03:07:53"]
+    #starttime_str = ["2022-06-23/11:36:39"]
+    #endtime_str = ["2022-06-23/11:42:52"]
+    #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
     #endtime_str = ["2022-06-23/04:06:19"]
-    #starttime_str = ["2022-01-12/15:45:51"]
-    #endtime_str = ["2022-01-12/15:52:04"]
-    #starttime_str = ["2022-01-14/15:45:50"]
-    #endtime_str = ["2022-01-14/15:52:04"]
-    #starttime_str = ["2022-01-12/17:17:52"]
-    #endtime_str = ["2022-01-12/17:24:05"]
-    #starttime_str = ["2022-01-12/19:02:20"]
-    #endtime_str = ["2022-01-12/19:08:31"]
-    #starttime_str = ["2022-01-12/20:21:48"]
-    #endtime_str = ["2022-01-12/20:27:57"]
-    #starttime_str = ["2022-01-14/18:49:45"]
-    #endtime_str = ["2022-01-14/18:55:58"]
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 
         sta_datestr = start_time[i].strftime("%Y%m%d")
-        sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
-        fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf"  
         logger.info(f"Received {mission} collection from {start_time[i]} to {end_time[i]}")
+        sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+        fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf" 
+
+        if parameter.download_data == True:
+            try:
+                sta_url = f"{elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+                res = requests.get(sta_url)
+                open(sta_cdfpath, 'wb').write(res.content)
+            except:
+                print(f"download error:{sta_url}")
+
+            try:
+                fgm_url = f"{elfin_url}{mission}/l1/fgm/survey/{start_time[i].year}/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
+                res = requests.get(fgm_url)
+                open(fgm_cdfpath, 'wb').write(res.content)
+            except:
+                print(f"download error:{fgm_url}") 
+                breakpoint()   
 
         try: 
             fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
