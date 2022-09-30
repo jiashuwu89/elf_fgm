@@ -24,7 +24,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
 relative_integrate = True
-bidirectional_integrate = False
+bidirectional_integrate = True
 
 eps_1 = 5
 eps_2 = 5
@@ -36,12 +36,12 @@ zero_crossing_method = 3
 f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
-del_rogue = True   # del rogue points in the first and last three points         
+del_rogue = False   # del rogue points in the first and last three points         
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 del_rogue_fsp = True # del rogue points in fsp resolution
 
 
-ctime_correct = True  # degap unipolar gap if true
+ctime_correct = True  # degap unipolar gap 1/80s if true
 ctime_thrhld = 0.005  # criterion for finding ctime gaps difference between jumps and ctime median in seconds
 
 makeplot = False
@@ -57,9 +57,9 @@ Spinrate_thrhld = 0.2  # if std of spin rate > median of spin rate * Spinrate_th
 output = False
 
 del_spike_fsp = False  # outdated, no godd performance, delete spike in fsp resolution
-del_spike_10hz = True
+del_spike_10hz = False
 
-spike_find_spin_num = 3 # num of spins in which to find [t1, t2] 
+spike_find_spin_num = 4 # num of spins in which to find [t1, t2] 
 spike_10hz_fit = 28 # number of points to fit around spike
 
 download_data = False

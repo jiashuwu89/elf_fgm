@@ -48,10 +48,10 @@ if __name__ == "__main__":
     #endtime_str = ["2022-07-18/11:36:00"]
     #starttime_str = ["2022-01-14/23:26:43"] # no unipolar spike
     #endtime_str = ["2022-01-14/23:32:54"]
-    #starttime_str = ["2022-01-14/17:17:52"]
-    #endtime_str = ["2022-01-14/17:24:03"]
-    starttime_str = ["2022-01-01/18:14:17"] 
-    endtime_str = ["2022-01-01/18:20:32"]
+    starttime_str = ["2022-01-06/04:52:49"]
+    endtime_str = ["2022-01-06/04:59:03"]
+    #starttime_str = ["2022-01-05/20:33:27"]  # still has gap in 1/80s spike. because t1 t2 not found
+    #endtime_str = ["2022-01-05/20:39:40"]
     #starttime_str = ["2022-01-01/11:52:27"]
     #endtime_str = ["2022-01-01/11:58:42"]
     #starttime_str = ["2022-08-17/23:24:26"] # ela

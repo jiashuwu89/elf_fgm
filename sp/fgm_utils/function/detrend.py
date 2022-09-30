@@ -1,3 +1,4 @@
+from this import d
 from typing import List
 import numpy as np
 from scipy.optimize import curve_fit
@@ -149,12 +150,33 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
     dB = np.gradient(B) / np.gradient(ctime)
     dB_ave = np.average(dB)
     dB_std = np.std(dB)
+    dBx = np.gradient(B_x) / np.gradient(ctime)
+    dBx_ave = np.average(dBx)
+    dBx_std = np.std(dBx)
+    dBy = np.gradient(B_y) / np.gradient(ctime)
+    dBy_ave = np.average(dBy)
+    dBy_std = np.std(dBy)
+    dBz = np.gradient(B_z) / np.gradient(ctime)
+    dBz_ave = np.average(dBz)
+    dBz_std = np.std(dBz)
+    #Bplot.B_ctime_plot_single(ctime, dB)
+    #Bplot.B_ctime_plot(ctime, dBx, dBy, dBz)
 
-    index = [*range(10)] + [*range(len(dB)-10, len(dB))]
-    del_index = [
+    index = [*range(10)] + [*range(len(dB)-10, len(dB))] if np.median(np.diff(ctime)) < 0.15 else [*range(3)] + [*range(len(dB)-3, len(dB))]
+   
+    del_index_1 = [
         i for i in index 
         if (
             dB[i] > dB_ave + parameter.eps_rogue * dB_std or 
             dB[i] < dB_ave - parameter.eps_rogue * dB_std)
         ]
-    return del_index
+
+    del_index_3 = [
+        i for i in index 
+        if (
+            (dBx[i] > dBx_ave + parameter.eps_rogue * dBx_std or dBx[i] < dBx_ave - parameter.eps_rogue * dBx_std) and
+            (dBy[i] > dBy_ave + parameter.eps_rogue * dBy_std or dBy[i] < dBy_ave - parameter.eps_rogue * dBy_std) and 
+            (dBz[i] > dBz_ave + parameter.eps_rogue * dBz_std or dBz[i] < dBz_ave - parameter.eps_rogue * dBz_std)
+            )
+        ]
+    return np.union1d(np.array(del_index_1, dtype=int),np.array(del_index_3, dtype=int)).tolist()

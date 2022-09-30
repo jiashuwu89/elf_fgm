@@ -219,6 +219,7 @@ def fgm_fsp_calib(
 
     ctime_idx_time = ctime[ctime_idx]
 
+    """outdated"""
     if parameter.ctime_correct == True and parameter.del_spike_10hz == True:
         B_S1_corr, B_S2_corr, B_S3_corr = ctime_spike.spike_sinefit(
             ctime, B_S1_corr, B_S2_corr, B_S3_corr, spike_ctime_idxs
@@ -314,12 +315,14 @@ def fgm_fsp_calib(
         T_spins_d_pad_calib_2_select, w_syn_d_calib_2_select] = cross_time.cross_time_stage_2(
         ctime, fgs_ful_fgm_z, cross_times_calib_1_select, T_spins_d_pad_calib_1_select,
     )
+
     if parameter.makeplot == True:
         Bplot.B_ctime_plot(
         ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
         fgs_ful_fgm_z, title="2cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-20, ctime[ctime_idx[0]]+20],
         ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_2_select,
         )
+
     [
         cross_times_calib_3_select, T_spins_d_calib_3_select, w_syn_d_calib_3_select] = cross_time.cross_time_stage_3(
             ctime, fgs_ful_fgm_z, cross_times_calib_2_select, T_spins_d_pad_calib_2_select, 
@@ -516,7 +519,25 @@ def fgm_fsp_calib(
         fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_index)
         fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
         fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
-
+    
+    # delete rogue points again in fsp data
+    if parameter.del_rogue_fsp == True:
+        del_index = detrend.del_rogue(
+            cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z
+        )
+        cross_times_calib = np.delete(cross_times_calib, del_index)
+        fgs_fsp_res_dmxl_x = np.delete(fgs_fsp_res_dmxl_x, del_index)
+        fgs_fsp_res_dmxl_y = np.delete(fgs_fsp_res_dmxl_y, del_index)
+        fgs_fsp_res_dmxl_z = np.delete(fgs_fsp_res_dmxl_z, del_index)
+        fgs_fsp_res_gei_x = np.delete(fgs_fsp_res_gei_x, del_index)
+        fgs_fsp_res_gei_y = np.delete(fgs_fsp_res_gei_y, del_index)
+        fgs_fsp_res_gei_z = np.delete(fgs_fsp_res_gei_z, del_index)
+        fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_index)
+        fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_index)
+        fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_index)
+        fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_index)
+        fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
+        fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
 
     fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
     fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)

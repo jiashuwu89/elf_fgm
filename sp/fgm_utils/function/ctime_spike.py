@@ -26,8 +26,9 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
     flag = 1 multiploar spike, corrected
     flag = 2 unipolar spike 1/80 s
     flag = 3 unipolar gap 2.5 s
-    flag = 4 other spike
-    ['red','orange','magenta','darkviolet']
+    flag = 4 unipolar large gap
+    flag = 5 unipolar negative spike
+    ['red','orange','magenta','darkviolet', 'green']
     """
     ctime_idx_flag = np.zeros(len(ctime_idx), dtype = int)
     ctime_idx_timediff = np.zeros(len(ctime_idx))
@@ -52,7 +53,7 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
             """
                 this code only works for unipolar spike of 1/80 s, larger than that is gaps
             """
-            if np.abs(np.abs(delta_dt) - 0.0125) < 0.01 :
+            if np.abs(delta_dt - 0.0125) < 0.001 :
                 """ unipolar spike with 1/80 s
                     if no calibration, then mark the orginal spike locaiton
                     if calibrate, then find the actual spike before the original one and mark 
@@ -61,7 +62,12 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                     spike_ctime_idxs.append(ctime_idx[i]) 
                     ctime_idx_flag[i] = 2 
                 else:  
-                    # first everything on the right of the spike
+                    """
+                    spike = 1/80s procedure:
+                        1. get average B for three spins
+                        2. determine true spike start and end with average B - spike B
+                        3. sine fit
+                    """
                     ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_dt
                     try:
                         # get the index for 3 spins with spike, and idx for other spins without spike
@@ -82,7 +88,6 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                         
                         spike_ctime_idx1 = spike_ctime_idx[spike_idx1]
                         spike_ctime_idx2 = spike_ctime_idx[spike_idx2]
-                        
                     except (error.spikeError80_t1t2, error.spikeError80_spikespin, error.spikeError80_spikcrosstime) as e:
                         
                         logger.error(e.__str__())
@@ -92,14 +97,24 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                     ctime[spike_ctime_idx1:] = ctime[spike_ctime_idx1:] + delta_dt
                     spike_ctime_idxs.append(spike_ctime_idx1)
                     ctime_idx_flag[i] = 2 
+            elif np.abs((np.abs(delta_dt) - 0.01)) < 0.01:
+                """
+                a negative spike a little bit smaller than 1/80s, example:     
+                                starttime_str = ["2022-01-05/13:26:12"] 
+                                endtime_str = ["2022-01-05/13:32:24"]
+                        this type spike starts at ctime[citme_idx], no need to find true start
+                """
+                ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_dt
+                ctime_idx_flag[i] = 5
+                ctime_idx_timediff[i] = delta_dt
 
             elif np.abs(delta_dt) > 2.4 and  np.abs(delta_dt) < 2.7 : # gaps
             #elif np.abs(delta_dt) > 1.4 and  np.abs(delta_dt) < 1.6 : # gaps
                 ctime_idx_flag[i] = 3
-                ctime_idx_timediff[i] = np.abs(delta_dt)
+                ctime_idx_timediff[i] = delta_dt
             else:
                 ctime_idx_flag[i] = 4
-                ctime_idx_timediff[i] = np.abs(delta_dt)
+                ctime_idx_timediff[i] = delta_dt
             i += 1
 
 
@@ -214,7 +229,8 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
         Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
             title="x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
-
+    
+    # B_spike_idx_chunk: index of chunk
     B_spike_idx_chunk = np.where(np.diff(B_spike_idx) != 1)[0] + 1
     B_spike_idx_chunk = np.insert(B_spike_idx_chunk, 0, 0)
     B_spike_idx_chunk = np.insert(B_spike_idx_chunk, len(B_spike_idx_chunk), len(B_spike_idx))
@@ -223,6 +239,7 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
     spike_idx2 = []
     for B_spike_idx_chunk_i in range(1, len(B_spike_idx_chunk)):
         B_spike_idx_current = B_spike_idx[B_spike_idx_chunk[B_spike_idx_chunk_i-1]:B_spike_idx_chunk[B_spike_idx_chunk_i]]
+        # if chunk start < spike time < chunk end
         if ctime[spike_ctime_idx[B_spike_idx_current[0]]] <= ctime[ctime_idx] <= ctime[spike_ctime_idx[B_spike_idx_current[-1]]]: 
             spike_idx1 = B_spike_idx_current[0] - 1 
             spike_idx2 = B_spike_idx_current[-1]+ 1 
@@ -237,7 +254,7 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
             Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
                 title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
-        
+      
     return spike_idx1, spike_idx2
 
 

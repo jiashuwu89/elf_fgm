@@ -30,7 +30,7 @@ def ctimediff_plot(
     ctime_adj = ctime[1:]-ctime[:-1]
     #ax.plot(ctime_adj, color='blue')
     ax.scatter(ctime[:-1], ctime_adj, color='blue')
-    colors = ['red','orange','magenta','darkviolet']
+    colors = ['red','orange','magenta','darkviolet','green']
     [ax.scatter(ctime[ctime_idx[i]], ctime_adj[ctime_idx[i]], color=colors[ctime_idx_flag[i]-1]) for i in range(len(ctime_idx))]
     ax.set_title('Differences between consecutive time steps')
     ax.set_xlabel('ctime')
@@ -42,7 +42,6 @@ def ctimediff_plot(
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}1.png") 
     ax.set_ylim([0, 0.2])
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}2.png")  
-
     plt.close()
 
 
@@ -88,7 +87,7 @@ def B_ctime_plot(
                     ax[j].scatter(ctime[i], B[j][i], label=[], alpha=.5) if scatter == True else None
                     if ctime_idx_time is not None and len(ctime_idx_time) != 0:
                         if ctime_idx_flag is not None: 
-                            colors = ['red','orange','magenta','darkviolet']
+                            colors = ['red','orange','magenta','darkviolet','green']
                             for k in range(ctime_idx_time.size):
                                 ax[j].axvline(ctime_idx_time[k], color=colors[ctime_idx_flag[k]-1]) 
                         else:
