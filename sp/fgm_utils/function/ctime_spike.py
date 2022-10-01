@@ -31,7 +31,7 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
     ['red','orange','magenta','darkviolet', 'green']
     """
     ctime_idx_flag = np.zeros(len(ctime_idx), dtype = int)
-    ctime_idx_timediff = np.zeros(len(ctime_idx))
+    ctime_idx_timediff = ctime_adj[ctime_idx]
     spike_ctime_idxs = []  # save 1/80 spike
     i = 0
     while i < len(ctime_idx):
@@ -83,21 +83,30 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                         #Bplot.B_3d(spike_Bx, spike_By, spike_Bz)
                         #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], spike_Bx**2+spike_By**2+spike_Bz**2, scatter = True)
                         
+                        idx_beforespike = int(np.where(spike_ctime_idx == ctime_idx[i])[0])+10
                         # subtract Bx, By, Bz, get spike index
-                        spike_idx1, spike_idx2 = sepoch_sub_80(ctime, ctime_idx[i], spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz)
-                        
-                        spike_ctime_idx1 = spike_ctime_idx[spike_idx1]
-                        spike_ctime_idx2 = spike_ctime_idx[spike_idx2]
-                    except (error.spikeError80_t1t2, error.spikeError80_spikespin, error.spikeError80_spikcrosstime) as e:
-                        
-                        logger.error(e.__str__())
-                        spike_ctime_idx1 = ctime_idx[i]
+                        spike_idx1, spike_idx2 = sepoch_sub_80(
+                            ctime, ctime_idx[i], spike_ctime_idx[:idx_beforespike], 
+                            avg_Bx[:idx_beforespike], avg_By[:idx_beforespike], avg_Bz[:idx_beforespike], 
+                            spike_Bx[:idx_beforespike], spike_By[:idx_beforespike], spike_Bz[:idx_beforespike]
+                        )
 
-                    # move delta_t to t1
-                    ctime[spike_ctime_idx1:] = ctime[spike_ctime_idx1:] + delta_dt
-                    spike_ctime_idxs.append(spike_ctime_idx1)
-                    ctime_idx_flag[i] = 2 
-            elif np.abs((np.abs(delta_dt) - 0.01)) < 0.01:
+                        spike_ctime_idx1 = spike_ctime_idx[spike_idx1]
+                        #spike_ctime_idx2 = spike_ctime_idx[spike_idx2]
+
+                        # move delta_t to t1
+                        ctime[spike_ctime_idx1:] = ctime[spike_ctime_idx1:] + delta_dt
+                        spike_ctime_idxs.append(spike_ctime_idx1)
+                        ctime_idx_flag[i] = 2 
+                    except (error.spikeError80_t1t2, error.spikeError80_spikespin, error.spikeError80_spikcrosstime) as e:
+                        #ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] + delta_dt
+                        logger.error(e.__str__())
+                        ctime_idx_flag[i] = 2
+                        spike_ctime_idx1 = ctime_idx[i]
+                        spike_ctime_idxs.append(spike_ctime_idx1)
+                        ctime[spike_ctime_idx1:] = ctime[spike_ctime_idx1:] + delta_dt
+
+            elif np.abs(delta_dt) < 0.0115:
                 """
                 a negative spike a little bit smaller than 1/80s, example:     
                                 starttime_str = ["2022-01-05/13:26:12"] 
@@ -106,17 +115,13 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None):
                 """
                 ctime[ctime_idx[i]+1:] = ctime[ctime_idx[i]+1:] - delta_dt
                 ctime_idx_flag[i] = 5
-                ctime_idx_timediff[i] = delta_dt
 
-            elif np.abs(delta_dt) > 2.4 and  np.abs(delta_dt) < 2.7 : # gaps
+            elif np.abs(delta_dt) > 2.4 : # gaps
             #elif np.abs(delta_dt) > 1.4 and  np.abs(delta_dt) < 1.6 : # gaps
                 ctime_idx_flag[i] = 3
-                ctime_idx_timediff[i] = delta_dt
             else:
                 ctime_idx_flag[i] = 4
-                ctime_idx_timediff[i] = delta_dt
             i += 1
-
 
     return ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, spike_ctime_idxs    
 
@@ -224,6 +229,7 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
 
     B_std = np.std(np.sort(diff_B2)[:int(len(diff_B2)*0.6)])
     B_spike_idx = np.where((diff_B2 > np.median(diff_B2) + B_std*4))[0]
+
     #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
     if len(B_spike_idx) == 0:
         Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
@@ -237,6 +243,55 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
 
     spike_idx1 = []
     spike_idx2 = []
+    """find chunk start < spike < chunk end
+    """
+    for B_spike_idx_chunk_i in range(1, len(B_spike_idx_chunk)):
+        B_spike_idx_current = B_spike_idx[B_spike_idx_chunk[B_spike_idx_chunk_i-1]:B_spike_idx_chunk[B_spike_idx_chunk_i]]
+        # if chunk start < spike time < chunk end
+        if ctime[spike_ctime_idx[B_spike_idx_current[0]]] <= ctime[ctime_idx] : 
+            spike_idx1 = B_spike_idx_current[0] - 1 
+            if parameter.makeplot == True:
+                Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                    title="x1 = B_avg, x2 = B_spike", scatter = True, ctime_idx_time=ctime[spike_ctime_idx][[spike_idx1]], ctime_idx_flag = [2]
+                ) 
+
+    if spike_idx1 == []:
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", ctime_idx_time=[ctime[ctime_idx]], scatter = True)
+        raise error.spikeError80_t1t2(ctime[ctime_idx])
+      
+    return spike_idx1, spike_idx2
+
+
+def sepoch_sub_80_0(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spike_Bx, spike_By, spike_Bz):
+    """
+    calibration step 3 for 1/80 s 
+    subtract avg and spike Bx, By, Bz and find t1, t2
+    """
+    diff_Bx = avg_Bx - spike_Bx
+    diff_By = avg_By - spike_By
+    diff_Bz = avg_Bz - spike_Bz
+    diff_B2 = diff_Bx**2+diff_By**2+diff_Bz**2
+
+    B_std = np.std(np.sort(diff_B2)[:int(len(diff_B2)*0.6)])
+    B_spike_idx = np.where((diff_B2 > np.median(diff_B2) + B_std*4))[0]
+
+    #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
+    if len(B_spike_idx) == 0:
+        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+            title="x1 = B_avg, x2 = B_spike", scatter = True)
+        raise error.spikeError80_t1t2(ctime[ctime_idx])
+    
+    # B_spike_idx_chunk: index of chunk
+    B_spike_idx_chunk = np.where(np.diff(B_spike_idx) != 1)[0] + 1
+    B_spike_idx_chunk = np.insert(B_spike_idx_chunk, 0, 0)
+    B_spike_idx_chunk = np.insert(B_spike_idx_chunk, len(B_spike_idx_chunk), len(B_spike_idx))
+
+    spike_idx1 = []
+    spike_idx2 = []
+    """find chunk start < spike < chunk end
+    """
     for B_spike_idx_chunk_i in range(1, len(B_spike_idx_chunk)):
         B_spike_idx_current = B_spike_idx[B_spike_idx_chunk[B_spike_idx_chunk_i-1]:B_spike_idx_chunk[B_spike_idx_chunk_i]]
         # if chunk start < spike time < chunk end
@@ -246,13 +301,25 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
             if parameter.makeplot == True:
                 Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
                     title="x1 = B_avg, x2 = B_spike", scatter = True, ctime_idx_time=ctime[spike_ctime_idx][[spike_idx1,spike_idx2]], ctime_idx_flag = [2, 2]
-                )
-      
-    if spike_idx1 == []:
+                ) 
 
+    if spike_idx1 == []:
+        """if chunk around spike not found, use the cloest chunk before spike
+        """
+        for B_spike_idx_chunk_i in range(1, len(B_spike_idx_chunk)):
+            B_spike_idx_current = B_spike_idx[B_spike_idx_chunk[B_spike_idx_chunk_i-1]:B_spike_idx_chunk[B_spike_idx_chunk_i]]
+            if ctime[spike_ctime_idx[B_spike_idx_current[0]]] <= ctime[ctime_idx]: 
+                spike_idx1 = B_spike_idx_current[0] - 1 
+                spike_idx2 = B_spike_idx_current[-1]+ 1 
+                if parameter.makeplot == True:
+                    Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                        title="x1 = B_avg, x2 = B_spike", scatter = True, ctime_idx_time=ctime[spike_ctime_idx][[spike_idx1,spike_idx2]], ctime_idx_flag = [2, 2]
+                    ) 
+
+    if spike_idx1 == []:
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
+                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", ctime_idx_time=[ctime[ctime_idx]], scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
       
     return spike_idx1, spike_idx2

@@ -62,7 +62,7 @@ del_spike_10hz = False
 spike_find_spin_num = 4 # num of spins in which to find [t1, t2] 
 spike_10hz_fit = 28 # number of points to fit around spike
 
-download_data = False
+download_data = True
 del_spike25 = True # 2.5s gap: before sine fit delete spins with spike in zero crossing determine stage 3
 fake_spike = False
 

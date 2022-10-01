@@ -5,7 +5,7 @@ from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
 from .ctime_spike import find_closest
-from .Bplot import B_ctime_plot_single
+from .Bplot import B_ctime_plot, B_ctime_plot_single
 from .error import CrossTime1Error
 func = calibration.cube_fit
 
@@ -403,7 +403,8 @@ def cross_time_stage_3(
                 w_syn_d_3 = np.delete(w_syn_d_3, idxs)
             except:
                 continue
-
+    #B_ctime_plot_single(cross_times_3, dt0)
+    #breakpoint()
     #--------------------------------------------
     #   2 select
     #--------------------------------------------

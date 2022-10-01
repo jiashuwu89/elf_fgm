@@ -112,7 +112,6 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-
     """ add 2.5 s gap to the data
     """
     if parameter.fake_spike == True:
@@ -316,24 +315,24 @@ def fgm_fsp_calib(
         ctime, fgs_ful_fgm_z, cross_times_calib_1_select, T_spins_d_pad_calib_1_select,
     )
 
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(
-        ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
-        fgs_ful_fgm_z, title="2cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-20, ctime[ctime_idx[0]]+20],
-        ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_2_select,
-        )
+    # if parameter.makeplot == True:
+    #     Bplot.B_ctime_plot(
+    #     ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
+    #     fgs_ful_fgm_z, title="2cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-20, ctime[ctime_idx[0]]+20],
+    #     ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_2_select,
+    #     )
 
     [
         cross_times_calib_3_select, T_spins_d_calib_3_select, w_syn_d_calib_3_select] = cross_time.cross_time_stage_3(
             ctime, fgs_ful_fgm_z, cross_times_calib_2_select, T_spins_d_pad_calib_2_select, 
             ctime_idx = ctime_idx, ctime_idx_flag = ctime_idx_flag, ctime_idx_timediff = ctime_idx_timediff
     )
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(
-            ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
-            fgs_ful_fgm_z, title="3cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
-            ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
-       )
+    # if parameter.makeplot == True:
+    #     Bplot.B_ctime_plot(
+    #         ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
+    #         fgs_ful_fgm_z, title="3cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
+    #         ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
+    #    )
     """
         1.5 calib - phase angle integration
     """
@@ -360,12 +359,12 @@ def fgm_fsp_calib(
             fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z
     )
 
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(
-        ctime, fgs_ful_smxl_x, fgs_ful_smxl_y, 
-        fgs_ful_smxl_z, title="3cross_time_ful_smxl", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-20, ctime[ctime_idx[0]]+20],
-        ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
-        )
+    # if parameter.makeplot == True:
+    #     Bplot.B_ctime_plot(
+    #     ctime, fgs_ful_smxl_x, fgs_ful_smxl_y, 
+    #     fgs_ful_smxl_z, title="3cross_time_ful_smxl", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-20, ctime[ctime_idx[0]]+20],
+    #     ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
+    #     )
 
     # B full rotate from smxl to dmxl
     [
@@ -373,13 +372,14 @@ def fgm_fsp_calib(
             fgs_ful_smxl_x, fgs_ful_smxl_y, fgs_ful_smxl_z, phi_calib
     )
 
-    if parameter.makeplot == True:
-        for i in ctime_idx:
-            Bplot.B_ctime_plot(
-            ctime, fgs_ful_dmxl_x, fgs_ful_dmxl_y, 
-            fgs_ful_dmxl_z, title=f"3cross_time_ful_dmxl_{i}", datestr = datestr, xlimt = [ctime[i]-20, ctime[i]+20],
-            ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
-            )
+    # if parameter.makeplot == True:
+    #     for i in ctime_idx:
+    #         Bplot.B_ctime_plot(
+    #         ctime, fgs_ful_dmxl_x, fgs_ful_dmxl_y, 
+    #         fgs_ful_dmxl_z, title=f"3cross_time_ful_dmxl_{i}", datestr = datestr, xlimt = [ctime[i]-20, ctime[i]+20],
+    #         ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
+    #         )
+
     """
         1.7 second calibration
     """

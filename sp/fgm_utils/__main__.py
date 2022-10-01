@@ -30,28 +30,25 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
-    """
-    startdate = "2022-01-01"
-    enddate = "2022-01-30"
+    startdate = "2022-03-01"
+    enddate = "2022-03-30"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
         logger.error(e.__str__())
-    """
 
-
-    #starttime_str = ["2022-01-01/12:05:24"]
-    #endtime_str = ["2022-01-01/12:11:39"]
-    #starttime_str = ["2022-07-14/23:43:05"]
-    #endtime_str = ["2022-07-14/23:49:17"]
+    #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
+    #endtime_str = ["2022-02-08/22:30:58"]
+    #starttime_str = ["2022-02-18/16:12:38"] # 1/80 spike. fixed
+    #endtime_str = ["2022-02-18/16:18:50"]
     #starttime_str = ["2022-07-18/11:29:48"]
     #endtime_str = ["2022-07-18/11:36:00"]
-    #starttime_str = ["2022-01-14/23:26:43"] # no unipolar spike
-    #endtime_str = ["2022-01-14/23:32:54"]
-    starttime_str = ["2022-01-06/04:52:49"]
-    endtime_str = ["2022-01-06/04:59:03"]
-    #starttime_str = ["2022-01-05/20:33:27"]  # still has gap in 1/80s spike. because t1 t2 not found
-    #endtime_str = ["2022-01-05/20:39:40"]
+    #starttime_str = ["2022-01-05/23:38:30"] # no unipolar spike
+    #endtime_str = ["2022-01-05/23:44:41"]
+    #starttime_str = ["2022-01-04/06:26:23"] # still has jagged
+    #endtime_str = ["2022-01-04/06:32:34"]
+    #starttime_str = ["2022-01-05/20:33:27"]  #still has gap in 1/80s spike. t1 found but not calibrated well
+    #endtime_str = ["2022-01-05/20:39:40"]  
     #starttime_str = ["2022-01-01/11:52:27"]
     #endtime_str = ["2022-01-01/11:58:42"]
     #starttime_str = ["2022-08-17/23:24:26"] # ela
@@ -68,8 +65,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-06-23/11:42:52"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
     #endtime_str = ["2022-06-23/04:06:19"]
-    start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
-    end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
+    #start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
+    #end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 
