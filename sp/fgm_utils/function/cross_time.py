@@ -4,7 +4,6 @@ from scipy.optimize import curve_fit
 from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
-from .ctime_spike import find_closest
 from .Bplot import B_ctime_plot, B_ctime_plot_single
 from .error import CrossTime1Error
 func = calibration.cube_fit
@@ -291,14 +290,14 @@ def cross_time_stage_3(
                                 flag = 1
                             else:
                                 ctime_slice = ctime[idx] - t0
-                        elif cross_times_2_select[i] < spike_time1 < high_lim:
+                        elif cross_times_2_select[i] < spike_time1 < high_lim: 
                             high_lim = spike_time1 - np.pi/w_avg
                             idx = (ctime >= low_lim) & (ctime <= high_lim)
                             if len(ctime[idx]) <= 5 :
                                 flag = 1
                             else:    
                                 ctime_slice = ctime[idx] - t0
-                        elif spike_time1 < cross_times_2_select[i] < spike_time2 :
+                        elif spike_time1 < cross_times_2_select[i] < spike_time2 : # if current zero crossing is inside spike
                             flag = 1
                             break
 
@@ -392,12 +391,12 @@ def cross_time_stage_3(
     2.5s spike: delete zero crossings within  2.5s + halft spin
     """
     if parameter.del_spike25 == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
-        ctime_idx_time = ctime[ctime_idx[ctime_idx_flag >= 3]]
-        ctime_idx_timediffs = ctime_idx_timediff[ctime_idx_flag >= 3]
+        ctime_idx_time = ctime[ctime_idx[ctime_idx_flag == 3]]
+        ctime_idx_timediffs = ctime_idx_timediff[ctime_idx_flag == 3]
         for ctime_idx_time_idx, ctime_idx_time_val in enumerate(ctime_idx_time):
             try:
-                idx1 = np.where(cross_times_3 > ctime_idx_time_val - np.pi/w_avg)[0][0]
-                idx2 = np.where(cross_times_3 < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + np.pi/w_avg)[0][-1]
+                idx1 = np.where(cross_times_3 > ctime_idx_time_val - 1.5*np.pi/w_avg)[0][0]
+                idx2 = np.where(cross_times_3 < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + 1.5*np.pi/w_avg)[0][-1]
                 idxs = range(idx1, idx2) if idx2 + 1 >= len(w_syn_d_3) else range(idx1, idx2+1)
                 cross_times_3 = np.delete(cross_times_3, idxs)
                 w_syn_d_3 = np.delete(w_syn_d_3, idxs)

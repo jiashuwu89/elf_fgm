@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
-from .function import calibration, coordinate, cross_time, Bplot, detrend, igrf, preprocess, error, ctime_spike
+from .function import calibration, coordinate, cross_time, Bplot, detrend, igrf, preprocess, error, ctime_spike, ctime_spike_80
 from .function import output
 
 datestr = ""
@@ -107,25 +107,27 @@ def fgm_fsp_calib(
     # check data sanity
     try:
         preprocess.funkyfgm_check(B_S1_corr, ctime, datestr)
-    except (error.funkyFGMError, error.CrossTime1Error) as e:
+    except error.funkyFGMError as e:
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-    """ add 2.5 s gap to the data
-    """
-    if parameter.fake_spike == True:
-        del_idx = list(range(3000, 3000+25))
-        ctime = np.delete(ctime, del_idx)
-        B_S1_corr = np.delete(B_S1_corr, del_idx)
-        B_S2_corr = np.delete(B_S2_corr, del_idx)
-        B_S3_corr = np.delete(B_S3_corr, del_idx)
-        fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, del_idx)
-        fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, del_idx)
-        fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, del_idx)
-        att_gei_x = np.delete(att_gei_x, del_idx)
-        att_gei_y = np.delete(att_gei_y, del_idx)
-        att_gei_z = np.delete(att_gei_z, del_idx)
+    
+    # check repeated ctime
+    if parameter.ctime_repeat_check == True:
+        ctime_idx_repeat = preprocess.ctime_check(ctime)
+        if ctime_idx_repeat is not None:
+            ctime = np.delete(ctime, ctime_idx_repeat)
+            B_S1_corr = np.delete(B_S1_corr, ctime_idx_repeat)
+            B_S2_corr = np.delete(B_S2_corr, ctime_idx_repeat)
+            B_S3_corr = np.delete(B_S3_corr, ctime_idx_repeat)
+            fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, ctime_idx_repeat)
+            fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, ctime_idx_repeat)
+            fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, ctime_idx_repeat)
+            att_gei_x = np.delete(att_gei_x, ctime_idx_repeat)
+            att_gei_y = np.delete(att_gei_y, ctime_idx_repeat)
+            att_gei_z = np.delete(att_gei_z, ctime_idx_repeat)
+            logger.error("repeat ctime found!")
 
     """
         0. precalibration: time calibration
@@ -213,18 +215,20 @@ def fgm_fsp_calib(
     fgs_res_fgm_z = fgs_ful_fgm_z - fgs_igrf_fgm_z
 
     ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, spike_ctime_idxs = ctime_spike.ctime_calib(
-            ctime, fgs_res_fgm_x, fgs_res_fgm_y, fgs_res_fgm_z, cross_times_corr, logger = logger
+            ctime, fgs_res_fgm_x, fgs_res_fgm_y, fgs_res_fgm_z, cross_times_corr, logger = logger, datestr = datestr
     )
 
     ctime_idx_time = ctime[ctime_idx]
 
-    """outdated"""
-    if parameter.ctime_correct == True and parameter.del_spike_10hz == True:
-        B_S1_corr, B_S2_corr, B_S3_corr = ctime_spike.spike_sinefit(
+    # fit 1/80 s spike with sine 
+    if parameter.ctime_correct_80 == True:
+        B_S1_corr, B_S2_corr, B_S3_corr = ctime_spike_80.spike_sinefit_80(
             ctime, B_S1_corr, B_S2_corr, B_S3_corr, spike_ctime_idxs
     )
 
+
     if parameter.makeplot == True:
+        #Bplot.B_ctime_plot(ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z, ctime_idx_time = ctime[ctime_idx], ctime_idx_flag = ctime_idx_flag)
         Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_flag, datestr = datestr)
     
     """
@@ -413,7 +417,7 @@ def fgm_fsp_calib(
 
     #if parameter.makeplot == True: 
     #    Bplot.B_ctime_plot(ctime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, scatter = True) 
-
+    """
     # delete rogue points
     if parameter.del_rogue == True:
         del_index = detrend.del_rogue(
@@ -436,6 +440,7 @@ def fgm_fsp_calib(
         fgs_ful_gei_y = np.delete(fgs_ful_gei_y, del_index)
         fgs_ful_gei_z = np.delete(fgs_ful_gei_z, del_index)
         DMXL_2_GEI = np.delete(DMXL_2_GEI, del_index, axis = 0)  
+    """
 
     #if parameter.makeplot == True and len(ctime_idx) != 0 :
     #    Bplot.B_ctime_plot(
@@ -543,16 +548,8 @@ def fgm_fsp_calib(
     fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
     fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
+    """
     if parameter.del_spike_fsp == True:
-        """
-        [
-            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z] = calibration.del_spike_fsp(
-            cross_times_calib, ctime[ctime_idx], 
-            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z
-        )
-        """
         for ispike in ctime[ctime_idx]:
             index = min(range(len(cross_times_calib)), key=lambda i: abs(cross_times_calib[i] - ispike))
             if index - 1 < 0 :
@@ -579,6 +576,7 @@ def fgm_fsp_calib(
             fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_index)
             fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_index)
 
+    """
     if parameter.makeplot == True:
         #Bplot.B_ctime_plot(
         #    cross_times_calib, fgs_fsp_res_dmxl_x, 

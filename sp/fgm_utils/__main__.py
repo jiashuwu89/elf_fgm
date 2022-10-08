@@ -30,12 +30,14 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
-    startdate = "2022-03-01"
-    enddate = "2022-03-30"
+    """
+    startdate = "2022-04-01"
+    enddate = "2022-04-30"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
         logger.error(e.__str__())
+    """
 
     #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
     #endtime_str = ["2022-02-08/22:30:58"]
@@ -59,14 +61,18 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/22:01:51"]
     #starttime_str = ["2022-08-07/18:50:59"] # elb
     #endtime_str = ["2022-08-07/18:57:15"]
-    #starttime_str = ["2022-07-01/03:01:40"]
-    #endtime_str = ["2022-07-01/03:07:53"]
-    #starttime_str = ["2022-06-23/11:36:39"]
-    #endtime_str = ["2022-06-23/11:42:52"]
+    starttime_str = ["2022-04-01/01:14:19"]
+    endtime_str = ["2022-04-01/01:20:30"]
+    #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
+    #endtime_str = ["2022-03-28/03:14:24"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
     #endtime_str = ["2022-06-23/04:06:19"]
-    #start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
-    #end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
+    #starttime_str = ["2022-03-01/02:25:52"] # 101% correct, still has spike not sure
+    #endtime_str = ["2022-03-01/02:32:03"]
+    #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
+    #endtime_str = ["2022-03-29/02:22:44"]    
+    start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
+    end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 
@@ -118,108 +124,3 @@ if __name__ == "__main__":
                 fgs_fsp_igrf_gei_z,
             ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
             logger.info(f"End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
-
-
-    #starttime_str = "2022-01-12 15:45:51"
-    #endtime_str = "2022-01-12 15:52:04"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220112_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220112_v01.cdf"
-
-    # SPIKE
-    #starttime_str = "2022-01-14 15:45:50"
-    #endtime_str = "2022-01-14 15:52:04"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220114_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220114_v01.cdf"
-
-    #starttime_str = "2022-01-14 23:26:43"
-    #endtime_str = "2022-01-14 23:32:54"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220114_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220114_v01.cdf"
-
-    #starttime_str = "2022-06-27 08:52:34"
-    #endtime_str = "2022-06-27 08:58:47"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220627_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220627_v01.cdf"
-
-    #starttime_str = "2022-01-25 16:28:23"
-    #endtime_str = "2022-01-25 16:34:35"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220125_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220125_v01.cdf"
-
-    #starttime_str = "2022-07-06/09:45:53"
-    #endtime_str = "2022-07-06/09:52:11"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220706_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220706_v01.cdf"
-
-    #starttime_str = "2022-06-25 06:27:08"	
-    #endtime_str = "2022-06-25/06:33:20"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220625_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220625_v01.cdf"
-
-    # TODO:has spike
-    #starttime_str = "2022-06-25 09:29:30"
-    #endtime_str = "2022-06-25 09:35:44"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220625_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220625_v01.cdf"
-
-    # TODO: has unipolar spike in the middle
-    #starttime_str = "2022-06-25 18:36:12"	
-    #endtime_str = "2022-06-25/18:42:25"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220625_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220625_v01.cdf"
-
-    # TODO: no spikes but first point rogue; example asked by V
-    #starttime_str = "2022-06-23 02:27:59"
-    #endtime_str = "2022-06-23 02:34:12"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
-
-    # TODO: two unipolar spikes, example asked by V
-    #starttime_str = "2022-06-23 04:00:07"
-    #endtime_str = "2022-06-23 04:06:19"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
-
-    # TODO: one spikes
-    #starttime_str = "2022-06-23 08:34:48"
-    #endtime_str = "2022-06-23 08:41:01"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
-
-    #
-    #starttime_str = "2022-06-23 11:36:39"
-    #endtime_str = "2022-06-23 11:42:52"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220623_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220623_v01.cdf"
-
-    #starttime_str = "2022-06-17 01:08:33"
-    #endtime_str = "2022-06-17 01:14:47"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-
-    #starttime_str = "2022-06-17 04:13:18"
-    #endtime_str = "2022-06-17 04:19:30"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-
-    #starttime_str = "2022-06-17 08:48:13"
-    #endtime_str = "2022-06-17 08:54:24"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-
-    # has gap
-    #starttime_str = "2022-06-17 11:50:13"
-    #endtime_str = "2022-06-17 11:56:26"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-
-    #starttime_str = "2022-06-17 14:52:03"
-    #endtime_str = "2022-06-17 14:58:16"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-
-    #starttime_str = "2022-06-17 20:59:35"
-    #endtime_str = "2022-06-17 21:05:48"
-    #sta_cdfpath = "fgm_utils/test/ela_l1_state_defn_20220617_v01.cdf"
-    #fgm_cdfpath = "fgm_utils/test/ela_l1_fgs_20220617_v01.cdf"
-

@@ -9,6 +9,7 @@ from . import error
 from .. import parameter
 from . import Bplot
 
+
 def get_cdf(cdfpath: str, vars: Union[List[str], None]):
     """Read CDF
     """
@@ -95,6 +96,7 @@ def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"],
     )
     return att_cdfdata, pos_cdfdata
 
+
 def funkyfgm_check(B_x, ctime, datestr):
 
     cross_times = []
@@ -124,3 +126,22 @@ def funkyfgm_check(B_x, ctime, datestr):
     if med < 2.5 or med > 3.2 or std > parameter.Spinrate_thrhld * med:
         raise error.funkyFGMError(med, std)
     return
+
+
+def ctime_check(ctime):
+    """some collections have completeness over 100%, example 
+        2022-03-01/02:25:52	2022-03-01/02:32:03
+        ctime repeated with very small difference, delete repeated ones
+    """
+    delta_t = np.median(ctime[1:]-ctime[:-1])
+    ctime_adj = ctime[1:]-ctime[:-1] - delta_t
+    ctime_idx_repeat = []
+    i = 0
+    while i < len(ctime_adj):
+        # if two adjacent ctime_idx sum up to one, delete the repeat one
+        if i < len(ctime_adj)-1 and np.abs(np.abs(ctime_adj[i] + ctime_adj[i+1]) - 0.1) < 0.001:
+            ctime_idx_repeat.append(i+1)
+            i += 2
+        else:
+            i += 1
+    return ctime_idx_repeat
