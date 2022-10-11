@@ -39,7 +39,7 @@ init_secs = 0 # seconds
 """ctime spike paramter
 """
 # in ctime_calib, criterion for finding ctime gaps difference between jumps and ctime median in seconds
-ctime_thrhld = 0.004
+ctime_thrhld = 0.003
 
 # in ctime_calib, degap unipolar gap 1/80s if true
 ctime_correct_80 = True  # degap unipolar gap 1/80s if true
@@ -54,12 +54,17 @@ spike_find_spin_num = 4
 spike_fit_len_80 = 28 
 
 # in ctime_calib, degap unipolar gap < 0.01s if true
-ctime_correct_100 = True 
+ctime_correct_100 = True
 
 """zero crossing stage 3
 """
-# init, cross_time, ctime_spike
-del_spike25 = True # 2.5s gap: before sine fit delete spins with spike in zero crossing determine stage 3
+# cross_time, ctime_spike
+cross0_spike_del = True # 2.5s gap: before sine fit delete spins with spike in zero crossing determine stage 3
+# init, if true delete fsp data points aroud spike for both 1/80s
+fsp_spike_del_80 = True # compare std with and without spike
+# init, if true delete fsp data points aroud spike for both 2.5s
+fsp_spike_del_25 = True # compare std with and without spike
+
 R2_filter = True  # in cross time determination stage 3, use R2_thrhld to exclude bad fit
 R2_thrhld = 0.8
 

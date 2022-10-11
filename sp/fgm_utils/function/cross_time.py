@@ -276,24 +276,24 @@ def cross_time_stage_3(
             cross_time2 = ctime[-1]
         """
         # delete spins with 2.5s gap, they may result in spikes in fsp 
-        if parameter.del_spike25 == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
+        if parameter.cross0_spike_del == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
             flag = 0
             for ctime_idx_idx, ctime_idx_val in enumerate(ctime_idx):
-                if ctime_idx_flag[ctime_idx_idx] >= 3:
+                if ctime_idx_flag[ctime_idx_idx] == 2 or ctime_idx_flag[ctime_idx_idx] == 3 or ctime_idx_flag[ctime_idx_idx] == 4:
                     spike_time1 = ctime[ctime_idx_val]
                     spike_time2 = ctime[ctime_idx_val] + ctime_idx_timediff[ctime_idx_idx]
                     if (spike_time2 < low_lim or spike_time1 > high_lim) == 0 : 
                         if low_lim < spike_time2 < cross_times_2_select[i]:
                             low_lim = spike_time2 + np.pi/w_avg
                             idx = (ctime >= low_lim) & (ctime <= high_lim)
-                            if len(ctime[idx]) <= 5 :
+                            if len(ctime[idx]) <= 5 : # if too little date for fit after delete spike
                                 flag = 1
                             else:
                                 ctime_slice = ctime[idx] - t0
                         elif cross_times_2_select[i] < spike_time1 < high_lim: 
                             high_lim = spike_time1 - np.pi/w_avg
                             idx = (ctime >= low_lim) & (ctime <= high_lim)
-                            if len(ctime[idx]) <= 5 :
+                            if len(ctime[idx]) <= 5 : # if too little date for fit after delete spike
                                 flag = 1
                             else:    
                                 ctime_slice = ctime[idx] - t0
@@ -390,7 +390,9 @@ def cross_time_stage_3(
     """
     2.5s spike: delete zero crossings within  2.5s + halft spin
     """
-    if parameter.del_spike25 == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
+    """
+    if parameter.cross0_spike_del == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
+        # delete 2.5 purple spike
         ctime_idx_time = ctime[ctime_idx[ctime_idx_flag == 3]]
         ctime_idx_timediffs = ctime_idx_timediff[ctime_idx_flag == 3]
         for ctime_idx_time_idx, ctime_idx_time_val in enumerate(ctime_idx_time):
@@ -402,6 +404,7 @@ def cross_time_stage_3(
                 w_syn_d_3 = np.delete(w_syn_d_3, idxs)
             except:
                 continue
+    """
     #B_ctime_plot_single(cross_times_3, dt0)
     #breakpoint()
     #--------------------------------------------

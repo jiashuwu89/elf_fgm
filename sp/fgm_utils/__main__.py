@@ -61,8 +61,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/22:01:51"]
     #starttime_str = ["2022-08-07/18:50:59"] # elb
     #endtime_str = ["2022-08-07/18:57:15"]
-    starttime_str = ["2022-04-01/01:14:19"]
-    endtime_str = ["2022-04-01/01:20:30"]
+    starttime_str = ["2022-04-22/16:34:39"]
+    endtime_str = ["2022-04-22/16:40:53"]
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike

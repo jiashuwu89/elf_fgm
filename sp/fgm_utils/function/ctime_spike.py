@@ -30,7 +30,7 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None, datestr = Non
         color:
             magenta
         parameter:
-            del_spike25 
+            cross0_spike_del 
         procedure: 
             3.1 in cross_time stage 3, exclude spins with spikes when do sine fit  
             3.2 in cross_time stage 3, exclude zero crossing adjacent to spike
