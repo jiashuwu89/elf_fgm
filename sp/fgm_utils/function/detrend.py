@@ -1,4 +1,3 @@
-from this import d
 from typing import List
 import numpy as np
 from scipy.optimize import curve_fit
@@ -143,6 +142,7 @@ def detrend_cube(
     )
     return [B_x_trend, B_y_trend, B_z_trend]
     #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
+
 
 def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]):
 

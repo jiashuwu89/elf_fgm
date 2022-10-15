@@ -1,13 +1,7 @@
-from audioop import maxpp
-from calendar import c
 import numpy as np
-from scipy.interpolate import interp1d
 from .. import parameter 
-from . import Bplot, calibration, error, ctime_spike_80
+from . import error, ctime_spike_80
 from bisect import bisect_left
-from scipy.optimize import curve_fit
-import traceback
-from functools import reduce
 from datetime import datetime, timedelta
 
 def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None, datestr = None):
@@ -61,7 +55,7 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None, datestr = Non
     spike_ctime_idxs = []  # save 1/80 spike
     i = 0
     while i < len(ctime_idx):
-        if i < len(ctime_idx)-1 and (ctime_adj[ctime_idx[i]]*ctime_adj[ctime_idx[i+1]] < 0 # multipolar jumps
+        if (i < len(ctime_idx)-1 and ctime_adj[ctime_idx[i]] > 0 and ctime_adj[ctime_idx[i+1]] < 0 # multipolar jumps
             and np.abs(np.abs(ctime_adj[ctime_idx[i]]) - np.abs(ctime_adj[ctime_idx[i+1]])) < 1e-3): # pos and neg jumps similar magnitude
             ctime_idx_flag[i] = 1
             ctime_idx_flag[i+1] = 1

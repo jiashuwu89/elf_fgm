@@ -61,9 +61,11 @@ ctime_correct_100 = True
 # cross_time, ctime_spike
 cross0_spike_del = True # 2.5s gap: before sine fit delete spins with spike in zero crossing determine stage 3
 # init, if true delete fsp data points aroud spike for both 1/80s
-fsp_spike_del_80 = True # compare std with and without spike
+fsp_spike_del_type2 = True # compare std with and without spike
 # init, if true delete fsp data points aroud spike for both 2.5s
-fsp_spike_del_25 = True # compare std with and without spike
+fsp_spike_del_type3 = True # compare std with and without spike
+# init, if true delete fsp data points around purple spike
+fsp_spike_del_type4 = True # compare std with and without spike
 
 R2_filter = True  # in cross time determination stage 3, use R2_thrhld to exclude bad fit
 R2_thrhld = 0.8

@@ -279,7 +279,7 @@ def cross_time_stage_3(
         if parameter.cross0_spike_del == True and ctime_idx is not None and ctime_idx_flag is not None and ctime_idx_timediff is not None:
             flag = 0
             for ctime_idx_idx, ctime_idx_val in enumerate(ctime_idx):
-                if ctime_idx_flag[ctime_idx_idx] == 2 or ctime_idx_flag[ctime_idx_idx] == 3 or ctime_idx_flag[ctime_idx_idx] == 4:
+                if ctime_idx_flag[ctime_idx_idx] >= 2:
                     spike_time1 = ctime[ctime_idx_val]
                     spike_time2 = ctime[ctime_idx_val] + ctime_idx_timediff[ctime_idx_idx]
                     if (spike_time2 < low_lim or spike_time1 > high_lim) == 0 : 
@@ -326,16 +326,15 @@ def cross_time_stage_3(
                 continue
 
         # Slice the signal itself
-
         # In case you are trying to find the maxima of B_S3 directly
         if parameter.peak_detect == True:
             signal_slice = B_S3[idx]
-            spin_func = lambda x, A, w, p: calibration.cosine_fit(x, -1, A, w, p, 0)
+            spin_func = lambda x, A, w, p, k: calibration.cosine_fit(x, -1, A, w, p, k)
 
         # In case you are trying to go the derivative/ zero-crossing route
         else:
             signal_slice = d_B_S3[idx]
-            spin_func = lambda x, A, w, p: calibration.sine_fit(x, 1, A, w, p, 0)
+            spin_func = lambda x, A, w, p, k: calibration.sine_fit(x, 1, A, w, p, k)
 
         # Fit the curve you want to work with!
         # Good initial guesses p0 really help
@@ -345,19 +344,19 @@ def cross_time_stage_3(
                 spin_func,
                 ctime_slice,
                 signal_slice,
-                p0=[-np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0],
-                bounds=((-np.inf, -np.inf, -np.inf), (0, np.inf, np.inf)),
+                p0=[-np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0, 0],
+                bounds=((-np.inf, -np.inf, -np.inf, -100), (0, np.inf, np.inf, 100)),
             )
             # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
             delta_t0 = -spin_opt[2] / spin_opt[1]
         except:
             #breakpoint()
-            print(f"cross time 3 determination fitting error: {i}\n")
+            print(f"cross time 3 determination fitting fail first try: {i}\n")
             spin_opt, spin_covar = curve_fit(
                 spin_func,
                 ctime_slice,
                 signal_slice,
-                p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0]
+                p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0, 0]
             )
             # Using the phase == pi , computing the deviation to the crossing time
             delta_t0 = (np.pi - spin_opt[2]) / spin_opt[1]
