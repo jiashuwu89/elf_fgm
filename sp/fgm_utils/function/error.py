@@ -109,11 +109,9 @@ class fsp_spike_del_error(Exception):
     """Exception raised when the cloest cross zero time after spike is not found
 
     """
-    def __init__(self, ctime_idx_time, type, message = "Fsp spike delete error!"):
-        self.ctime_idx_time = ctime_idx_time
-        self.type = type
+    def __init__(self, message = "[POSTPROCESS] Fsp spike delete error, too few points left!"):
         self.message = message
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}: ctime time {self.ctime_idx_time} type {self.type}!" 
+        return f"{self.message}" 

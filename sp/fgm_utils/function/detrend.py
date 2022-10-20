@@ -163,7 +163,6 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
     #Bplot.B_ctime_plot(ctime, dBx, dBy, dBz)
 
     index = [*range(10)] + [*range(len(dB)-10, len(dB))] if np.median(np.diff(ctime)) < 0.15 else [*range(3)] + [*range(len(dB)-3, len(dB))]
-   
     del_index_1 = [
         i for i in index 
         if (

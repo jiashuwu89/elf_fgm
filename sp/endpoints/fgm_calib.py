@@ -107,7 +107,7 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         traceback_msg = traceback.format_exc()
         logger.error(f"fsp calibration failed ({e}): {traceback_msg}")
         raise
-    logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}")
+    logger.info(f"End of fsp calibration for {mission} from {start_time} to {end_time}\n")
 
     # Note: Transposing
     return FgmCalibResponse(
