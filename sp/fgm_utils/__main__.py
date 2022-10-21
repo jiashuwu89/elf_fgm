@@ -65,8 +65,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/18:57:15"]
     #starttime_str = ["2022-04-04/11:01:50"] # step even without time spike
     #endtime_str = ["2022-04-04/11:08:04"]
-    starttime_str = ["2022-04-03/09:54:57"]
-    endtime_str = ["2022-04-03/10:01:08"]
+    starttime_str = ["2022-06-02/22:04:29"]
+    endtime_str = ["2022-06-02/22:10:42"]
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike

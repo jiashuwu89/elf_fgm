@@ -107,7 +107,7 @@ def fgm_fsp_calib(
     # check data sanity
     try:
         preprocess.funkyfgm_check(B_S1_corr, ctime, datestr)
-    except error.funkyFGMError as e:
+    except (error.funkyFGMError, error.CrossTime1Error) as e:
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
@@ -417,7 +417,6 @@ def fgm_fsp_calib(
         #    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_y, fgs_igrf_dmxl_y], 
         #        [fgs_ful_dmxl_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
 
-
     # B full rotate from dmxl to gei
     [
         fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
@@ -469,6 +468,22 @@ def fgm_fsp_calib(
         fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = cross_time.fsp_ful(
             ctime, cross_times_calib, T_spins_d_calib, fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z
     )
+
+    del_idx = np.where((fgs_fsp_ful_gei_x == 0) & (fgs_fsp_ful_gei_y == 0) & (fgs_fsp_ful_gei_z == 0))
+    fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_idx)
+    fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_idx)
+    fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_idx)
+    fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_idx)
+    fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_idx)
+    fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_idx)
+    fgs_fsp_ful_dmxl_x = np.delete(fgs_fsp_ful_dmxl_x, del_idx)
+    fgs_fsp_ful_dmxl_y = np.delete(fgs_fsp_ful_dmxl_y, del_idx)
+    fgs_fsp_ful_dmxl_z = np.delete(fgs_fsp_ful_dmxl_z, del_idx)
+    fgs_fsp_ful_gei_x = np.delete(fgs_fsp_ful_gei_x, del_idx)
+    fgs_fsp_ful_gei_y = np.delete(fgs_fsp_ful_gei_y, del_idx)
+    fgs_fsp_ful_gei_z = np.delete(fgs_fsp_ful_gei_z, del_idx)
+    cross_times_calib = np.delete(cross_times_calib, del_idx)
+
     fgs_fsp_res_dmxl_x = fgs_fsp_ful_dmxl_x - fgs_fsp_igrf_dmxl_x
     fgs_fsp_res_dmxl_y = fgs_fsp_ful_dmxl_y - fgs_fsp_igrf_dmxl_y
     fgs_fsp_res_dmxl_z = fgs_fsp_ful_dmxl_z - fgs_fsp_igrf_dmxl_z
@@ -476,7 +491,7 @@ def fgm_fsp_calib(
     fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
     fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
     fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
-    
+
     try:
         [
             cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,

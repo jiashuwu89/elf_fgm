@@ -349,32 +349,46 @@ def cross_time_stage_3(
             )
             # Using the zero-phase and the angular velocity, computing the deviation to the crossing time
             delta_t0 = -spin_opt[2] / spin_opt[1]
+            signal_slice_fit = spin_func(ctime_slice, *spin_opt)
+            R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
+            # Contextualize the computing perturbation in terms of the relative time for the science zone
+            if t0 + delta_t0 < 0:
+                delta_t0 = -(spin_opt[2] - 2*np.pi) / spin_opt[1]
+            cross_times_3.append(t0 + delta_t0)
+            dt0.append(delta_t0)
+            # Also save the fitted value for the angular velocity
+            w_syn_d_3.append(spin_opt[1])
+
         except:
             #breakpoint()
             print(f"cross time 3 determination fitting fail first try: {i}\n")
-            spin_opt, spin_covar = curve_fit(
-                spin_func,
-                ctime_slice,
-                signal_slice,
-                p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0, 0]
-            )
-            # Using the phase == pi , computing the deviation to the crossing time
-            delta_t0 = (np.pi - spin_opt[2]) / spin_opt[1]
+            try:
+                spin_opt, spin_covar = curve_fit(
+                    spin_func,
+                    ctime_slice,
+                    signal_slice,
+                    p0=[np.max(np.abs(signal_slice - np.mean(signal_slice))), w_avg, 0, 0]
+                )
+                # Using the phase == pi , computing the deviation to the crossing time
+                delta_t0 = (np.pi - spin_opt[2]) / spin_opt[1]
+                signal_slice_fit = spin_func(ctime_slice, *spin_opt)
+                R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
+                # Contextualize the computing perturbation in terms of the relative time for the science zone
+                if t0 + delta_t0 < 0:
+                    delta_t0 = -(spin_opt[2] - 2*np.pi) / spin_opt[1]
+                cross_times_3.append(t0 + delta_t0)
+                dt0.append(delta_t0)
+                # Also save the fitted value for the angular velocity
+                w_syn_d_3.append(spin_opt[1])
 
-        signal_slice_fit = spin_func(ctime_slice, *spin_opt)
-        R2score.append(1-sum((signal_slice - signal_slice_fit)**2)/sum((signal_slice - np.mean(signal_slice))**2))
-
- #       if t0 > 280 and t0 < 315:
- #           B_ctime_plot_single(ctime_slice, [signal_slice, B_S3[idx], signal_slice_fit], title = f"{int(t0)}")
- #           print(f"{t0} omega:{spin_opt[1]} p:{spin_opt[2]} delta_t0:{delta_t0}")
-
-        # Contextualize the computing perturbation in terms of the relative time for the science zone
-        if t0 + delta_t0 < 0:
-            delta_t0 = -(spin_opt[2] - 2*np.pi) / spin_opt[1]
-        cross_times_3.append(t0 + delta_t0)
-        dt0.append(delta_t0)
-        # Also save the fitted value for the angular velocity
-        w_syn_d_3.append(spin_opt[1])
+            except:
+                # if fit still cannot find
+                delta_t0 = 0
+                R2score.append(0)
+                cross_times_3.append(t0 + delta_t0)
+                dt0.append(delta_t0)
+                # Also save the fitted value for the angular velocity
+                w_syn_d_3.append(2 * np.pi / T_spins_d_pad_2_select[i])
 
     if parameter.R2_filter == True:
         # if R2 too low, replace with the results from stage two 
@@ -449,6 +463,12 @@ def phase_integration(
         cross_times = cross_times_3_select
         w_syn_d = w_syn_d_3_select
         T_spins_d = T_spins_d_3_select
+
+    # in case first cross time is before 0
+    if cross_times[0] < 0:
+        cross_times = np.delete(cross_times, 0)
+        w_syn_d = np.delete(w_syn_d, 0)
+        T_spins_d = np.delete(T_spins_d, 0)
 
     delta_t = np.median(ctime[1:]-ctime[:-1])
     if parameter.fit_running_spline == True:
@@ -576,10 +596,14 @@ def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         T_syn = T_spins_d[i]
 
         idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
-
-        fgs_fsp_x[i] = np.average(fgs_x[idx])
-        fgs_fsp_y[i] = np.average(fgs_y[idx])
-        fgs_fsp_z[i] = np.average(fgs_z[idx])
+        if len(ctime[idx]) > 3:
+            fgs_fsp_x[i] = np.average(fgs_x[idx])
+            fgs_fsp_y[i] = np.average(fgs_y[idx])
+            fgs_fsp_z[i] = np.average(fgs_z[idx])
+        else:
+            fgs_fsp_x[i] = 0
+            fgs_fsp_y[i] = 0
+            fgs_fsp_z[i] = 0 
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
 
@@ -597,20 +621,25 @@ def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         t0 = cross_times[i]
         T_syn = T_spins_d[i]
         w_syn = 2 * np.pi / T_syn
-
         idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
-
-        ctime_slice = ctime[idx]
-
-        fgs_x_slice = fgs_x[idx]
-        fgs_y_slice = fgs_y[idx]
-        fgs_z_slice = fgs_z[idx]
-
-        FAC_func = lambda x, A, k: calibration.sine_fit(x, 1, A, w_syn, -w_syn * t0, k)
         
-        fgs_fsp_x[i] = curve_fit(FAC_func, ctime_slice, fgs_x_slice)[0][1]
-        fgs_fsp_y[i] = curve_fit(FAC_func, ctime_slice, fgs_y_slice)[0][1]
-        fgs_fsp_z[i] = curve_fit(FAC_func, ctime_slice, fgs_z_slice)[0][1]
+        if len(ctime[idx]) > 3:
+            ctime_slice = ctime[idx]
+
+            fgs_x_slice = fgs_x[idx]
+            fgs_y_slice = fgs_y[idx]
+            fgs_z_slice = fgs_z[idx]
+
+            FAC_func = lambda x, A, k: calibration.sine_fit(x, 1, A, w_syn, -w_syn * t0, k)
+            
+            fgs_fsp_x[i] = curve_fit(FAC_func, ctime_slice, fgs_x_slice)[0][1]
+            fgs_fsp_y[i] = curve_fit(FAC_func, ctime_slice, fgs_y_slice)[0][1]
+            fgs_fsp_z[i] = curve_fit(FAC_func, ctime_slice, fgs_z_slice)[0][1]
+        else:
+            # when there is a big gap and no enough data for fitting
+            fgs_fsp_x[i] = 0
+            fgs_fsp_y[i] = 0
+            fgs_fsp_z[i] = 0 
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
 
