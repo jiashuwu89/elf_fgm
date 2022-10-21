@@ -12,7 +12,7 @@ class CrossTime1Error(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"cross time stage {self.stage}: {self.message}"
+        return f"❌ cross time stage {self.stage}: {self.message}"
 
 class cdfError(Exception):
     """Exception raised when reading cdf
@@ -27,7 +27,7 @@ class cdfError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message} - {self.file}"
+        return f"❌ {self.message} - {self.file}"
 
 class funkyFGMError(Exception):
     """Exception raised when reading cdf
@@ -35,14 +35,24 @@ class funkyFGMError(Exception):
      Attributes:
         std -- std of spin rate 
     """
-    def __init__(self, err,std, message = "Funky FGM, skip collection!"):
+    def __init__(self, err,std, message = "[PREPROCESS] Funky FGM, skip collection!"):
         self.std = std
         self.err = err
         self.message = message
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message} - err:{self.err} std:{self.std}"        
+        return f"❌ {self.message} - err:{self.err} std:{self.std}"   
+
+class funkyFGMError_len(Exception):
+    """Exception when too few data
+    """
+    def __init__(self, message = "[PREPROCESS] Too few data, skip collection!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"❌ {self.message}"        
 
 class SCreadError(Exception):
     """Exception raised when not sci zone found
@@ -53,7 +63,7 @@ class SCreadError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}" 
+        return f"❌ {self.message}" 
 
 class spikeError80_spikcrosstime(Exception):
     """Exception raised when the cloest cross zero time after spike is not found
@@ -65,7 +75,7 @@ class spikeError80_spikcrosstime(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}: {self.ctime_idx_time}!" 
+        return f"⚠️ {self.message}: {self.ctime_idx_time}!" 
 
 
 class spikeError80_spikespin(Exception):
@@ -78,7 +88,7 @@ class spikeError80_spikespin(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}: {self.ctime_idx_time}!" 
+        return f"⚠️ {self.message}: {self.ctime_idx_time}!" 
 
 
 class spikeError80_t1t2(Exception):
@@ -91,7 +101,7 @@ class spikeError80_t1t2(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}: {self.ctime_idx_time}!" 
+        return f"⚠️ {self.message}: {self.ctime_idx_time}!" 
 
 class spikeError25_spikcrosstime(Exception):
     """Exception raised when the cloest cross zero time after spike is not found
@@ -114,4 +124,5 @@ class fsp_spike_del_error(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"{self.message}" 
+        return f"❌ {self.message}" 
+

@@ -65,8 +65,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/18:57:15"]
     #starttime_str = ["2022-04-04/11:01:50"] # step even without time spike
     #endtime_str = ["2022-04-04/11:08:04"]
-    starttime_str = ["2022-06-02/22:04:29"]
-    endtime_str = ["2022-06-02/22:10:42"]
+    starttime_str = ["2022-06-29/17:42:51"]
+    endtime_str = ["2022-06-29/17:48:54"]
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     for i in range(len(start_time)):
 
         sta_datestr = start_time[i].strftime("%Y%m%d")
-        logger.info(f"Received {mission} collection from {start_time[i]} to {end_time[i]}")
+        logger.info(f"▶️ Received {mission} collection from {start_time[i]} to {end_time[i]}")
         sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
         fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf" 
 
@@ -127,4 +127,4 @@ if __name__ == "__main__":
                 fgs_fsp_igrf_gei_y,
                 fgs_fsp_igrf_gei_z,
             ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
-            logger.info(f"End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
+            logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")

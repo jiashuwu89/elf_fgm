@@ -107,7 +107,7 @@ def fgm_fsp_calib(
     # check data sanity
     try:
         preprocess.funkyfgm_check(B_S1_corr, ctime, datestr)
-    except (error.funkyFGMError, error.CrossTime1Error) as e:
+    except (error.funkyFGMError, error.CrossTime1Error, error.funkyFGMError_len) as e:
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(ctime, B_S1_corr, B_S2_corr, B_S3_corr, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
@@ -143,7 +143,6 @@ def fgm_fsp_calib(
         )
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
-        logger.error("[CROSSTIME STAGE 1] cross time detection error, return empty!")
         return [ [] for _ in range(16) ]
 
     [

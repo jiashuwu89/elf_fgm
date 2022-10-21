@@ -99,6 +99,8 @@ def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"],
 
 def funkyfgm_check(B_x, ctime, datestr):
 
+    if len(B_x) < 3:
+        raise error.funkyFGMError_len()
     cross_times = []
     dB_x = np.gradient(B_x) / np.gradient(ctime)
     for i in range(1, len(ctime) - 2):

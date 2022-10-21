@@ -58,7 +58,7 @@ def fsp_spike_del(
                 """
             except:
                 #breakpoint()
-                logger.warning(f"[POSTPROCESS] FSP spike delete error: 2.5s pink spike {ctime_idx_time_val} type 3!")
+                logger.warning(f"❗[POSTPROCESS] FSP spike delete error: 2.5s pink spike {ctime_idx_time_val} type 3!")
                 if len(fgs_fsp_res_dmxl_x) < 6:
                     raise fsp_spike_del_error
                 continue
@@ -117,7 +117,7 @@ def fsp_spike_del(
                         cross_times_calib_del.append(idx_ctime+1)
             except:
                 #breakpoint()
-                logger.warning(f"[POSTPROCESS] FSP spike delete error:  1/80s orange spike {ctime_idx_time_val} type 2! ")
+                logger.warning(f"❗[POSTPROCESS] FSP spike delete error:  1/80s orange spike {ctime_idx_time_val} type 2! ")
                 if len(fgs_fsp_res_dmxl_x) < 6:
                     raise fsp_spike_del_error
                 continue
@@ -175,7 +175,7 @@ def fsp_spike_del(
                         cross_times_calib_del.append(idx_ctime+1)
             except:
                 #breakpoint()
-                logger.warning(f"[POSTPROCESS] FSP spike delete error: other purple spike {ctime_idx_time_val} type 4 !")
+                logger.warning(f"❗[POSTPROCESS] FSP spike delete error: other purple spike {ctime_idx_time_val} type 4 !")
                 if len(fgs_fsp_res_dmxl_x) < 6:
                     raise fsp_spike_del_error
                 continue
@@ -232,7 +232,7 @@ def fsp_spike_del(
                         cross_times_calib_del.append(idx_ctime+1)
             except:
                 #breakpoint()
-                logger.warning(f"[POSTPROCESS] FSP spike delete error: < 0.1s green spike {ctime_idx_time_val} type 5!")
+                logger.warning(f"❗[POSTPROCESS] FSP spike delete error: < 0.1s green spike {ctime_idx_time_val} type 5!")
                 continue
         
         if len(fgs_fsp_res_dmxl_x) < 6:
