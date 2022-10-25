@@ -80,8 +80,8 @@ ctime_repeat_check = True
 """post calibration parameter
 """
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
-cali_3rd = False  # add a third calibration 
-cali_4th = False  # add a third calibration 
+cali_3rd = True  # add a third calibration 
+cali_4th = True  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
@@ -90,8 +90,8 @@ eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 
 """output paramter
 """
-makeplot = True
-savepng = True
+makeplot = False
+savepng = False
 output = False # if true output to txt file
 download_data = True
 

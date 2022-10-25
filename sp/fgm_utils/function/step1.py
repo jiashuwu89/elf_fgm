@@ -197,15 +197,14 @@ def step1(
         )
         logger.debug(f"[1.7] second calibration is done. ")
 
-        #if parameter.makeplot == True: 
-        #    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
-        #        [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
 
         #if parameter.makeplot == True :
         #    Bplot.B_ctime_plot(
         #        ctime, fgs_ful_dmxl_3rd_x - fgs_igrf_dmxl_x, fgs_ful_dmxl_3rd_y - fgs_igrf_dmxl_y, 
         #        fgs_ful_dmxl_3rd_z - fgs_igrf_dmxl_z, xlimt = [0,50], title="fgs_res_fgm after 2nd run")
-        #breakpoint()
 
         # 3rd calibration of B in dmxl 
         if parameter.cali_3rd == True:
@@ -233,13 +232,24 @@ def step1(
                 fgs_igrf_fgm_3rd_x, fgs_igrf_fgm_3rd_y, fgs_igrf_fgm_3rd_z] = coordinate.smxl2fgm(
                     fgs_igrf_smxl_3rd_x, fgs_igrf_smxl_3rd_y, fgs_igrf_smxl_3rd_z
             )
+
+            if parameter.makeplot == True: 
+                Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_3rd_x, fgs_igrf_fgm_3rd_x], [fgs_ful_fgm_3rd_y, fgs_igrf_fgm_3rd_y], 
+                    [fgs_ful_fgm_3rd_z, fgs_igrf_fgm_3rd_z], plot3 = True, title="ful_igrf_fgm_before3rdcali")
+
             # 3nd calibration
             [
                 fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z, B_parameter] = calibration.calib_leastsquare(
                 fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z, 
                 fgs_igrf_fgm_3rd_x, fgs_igrf_fgm_3rd_y, fgs_igrf_fgm_3rd_z, init = B_parameter 
             )
+
+            if parameter.makeplot == True: 
+                Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_4th_x, fgs_igrf_fgm_3rd_x], [fgs_ful_fgm_4th_y, fgs_igrf_fgm_3rd_y], 
+                    [fgs_ful_fgm_4th_z, fgs_igrf_fgm_3rd_z], plot3 = True, title="ful_igrf_fgm_after3rdcali")
+
             logger.debug(f"[1.8] third calibration is done. ")
+
             """
                 1.9 zero crossing in third calibration
             """
@@ -282,12 +292,22 @@ def step1(
                     fgs_ful_smxl_3rd_x, fgs_ful_smxl_3rd_y, fgs_ful_smxl_3rd_z, phi_3rd
             )
             if parameter.cali_4th == True:
+
+                if parameter.makeplot == True: 
+                    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_4th_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_4th_y, fgs_igrf_dmxl_y], 
+                        [fgs_ful_dmxl_4th_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_before4thcali")
+
                 # 4th calibration
                 [
                     fgs_ful_dmxl_5th_x, fgs_ful_dmxl_5th_y, fgs_ful_dmxl_5th_z, B_parameter] = calibration.calib_leastsquare(
                     fgs_ful_dmxl_4th_x, fgs_ful_dmxl_4th_y, fgs_ful_dmxl_4th_z, 
                     fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
                 )
+
+                if parameter.makeplot == True: 
+                    Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_5th_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_5th_y, fgs_igrf_dmxl_y], 
+                        [fgs_ful_dmxl_5th_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after4thcali")
+
                 logger.debug(f"[1.8] third calibration is done. ")
                 cross_times = cross_times_3rd
                 w_syn = w_syn_3rd

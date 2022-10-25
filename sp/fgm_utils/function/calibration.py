@@ -114,7 +114,7 @@ def calib_leastsquare(
     if init is None:
         x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
     else:
-        x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
+        x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init, damp=0.5)[0]
         #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
 
     orth = np.array([[x[0], x[1], x[2]], [x[4], x[5], x[6]], [x[8], x[9], x[10]]])
