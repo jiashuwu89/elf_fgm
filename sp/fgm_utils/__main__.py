@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -65,8 +65,11 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/18:57:15"]
     #starttime_str = ["2022-04-04/11:01:50"] # step even without time spike
     #endtime_str = ["2022-04-04/11:08:04"]
-    starttime_str = ["2022-06-29/17:42:51"]
-    endtime_str = ["2022-06-29/17:48:54"]
+    #starttime_str = ["2022-08-08/19:41:15"] # good example
+    #endtime_str = ["2022-08-08/19:47:27"]
+    starttime_str = ["2022-08-07/22:28:33"] # large magnitude
+    endtime_str = ["2022-08-07/22:34:58"]
+
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
     #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
