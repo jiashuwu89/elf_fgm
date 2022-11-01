@@ -1,6 +1,7 @@
 from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
+import numpy as np
 
 def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -37,7 +38,23 @@ def step1(
         cross_times_1st_3, w_syn_1st_3, T_spins_1st_3,
     )    
     logger.debug(f"[1.1] phase angle is done. ")
-
+    """test
+    [
+        fgs_ful_smxl_1st_x, fgs_ful_smxl_1st_y, fgs_ful_smxl_1st_z] = coordinate.fgm2smxl(
+            fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z
+    )
+    [
+        fgs_ful_dmxl_1st_x, fgs_ful_dmxl_1st_y, fgs_ful_dmxl_1st_z] = coordinate.smxl2dmxl(
+            fgs_ful_smxl_1st_x, fgs_ful_smxl_1st_y, fgs_ful_smxl_1st_z, phi_1st
+    )
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot(
+        ctime, fgs_ful_dmxl_1st_x, fgs_ful_dmxl_1st_y, 
+        fgs_ful_dmxl_1st_z, title="ful_dmxl_1st", datestr = datestr,
+        ctime_idx_time = ctime[ctime_idx],
+        )
+    breakpoint()
+    """
     """
         # 1.2 IGRF coorindate transformation: gei -> dmxl -> smxl -> fgm
     """
@@ -66,26 +83,27 @@ def step1(
     logger.debug(f"[1.2] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
     """
-        # 1.3 use igrf to calibrate fgs data
+        # 1.3 use igrf to calibrate fgs data: 1st calibration
     """
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
-    #        [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="ful_igrf_dmxl_before1stcali", xlimt = [0, 50])       
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], datestr = datestr, title="ful_igrf_dmxl_before1stcali")       
 
     # 1st calibration of B in dmxl 
     [
         fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare(
         fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
-    #        [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="ful_igrf_dmxl_after1stcali", xlimt = [0, 50]) 
-  
-    #if parameter.makeplot == True :
-    #    Bplot.B_ctime_plot(
-    #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
-    #        fgs_ful_fgm_2nd_z - fgs_igrf_fgm_1st_z, xlimt = [0,50],
-    #       title="fgs_res_fgm after 1st run")
+
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], datestr = datestr, title="ful_igrf_dmxl_after1stcali") 
+    
+    if parameter.makeplot == True :
+        Bplot.B_ctime_plot(
+            ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
+            fgs_ful_fgm_2nd_z - fgs_igrf_fgm_1st_z, datestr = datestr,
+           title="fgs_res_fgm_after1stcali")
 
     logger.debug(f"[1.3] first calibration done in fgm coordinate. ")
 
@@ -144,10 +162,9 @@ def step1(
 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
     #    Bplot.phase_plot(
-    #        ctime, phi_calib, cross_times_calib, datestr = datestr, 
-    #        xlimt = [ctime[ctime_idx[3]]-20, ctime[ctime_idx[3]]+20], ctime_idx = ctime_idx
+    #        ctime, phi_2nd, cross_times_2nd, datestr = datestr, ctime_idx = ctime_idx
     #        )
-
+    #breakpoint()
     """
         1.6 rotate fgs data from fgm coordinate to dmxl
     """
@@ -181,14 +198,22 @@ def step1(
         1.7 second calibration
     """
     if parameter.cali_2nd == True:
+        fgs_res_dmxl_x = fgs_ful_dmxl_2nd_x - fgs_igrf_dmxl_x
+        fgs_res_dmxl_y = fgs_ful_dmxl_2nd_y - fgs_igrf_dmxl_y
+        fgs_res_dmxl_z = fgs_ful_dmxl_2nd_z - fgs_igrf_dmxl_z
+        [fsp_res_dmxl_x, fsp_res_dmxl_y, fsp_res_dmxl_z]= cross_time.fsp_ful(ctime, cross_times_2nd, T_spins_2nd, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z)
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(cross_times_2nd, fsp_res_dmxl_x, fsp_res_dmxl_y, fsp_res_dmxl_z, datestr = datestr,
+            title="fsp_res_dmxl_before2ndcali")       
+
         if parameter.makeplot == True: 
             Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
-                [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_before2ndcali")       
+                [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], datestr = datestr, title="ful_igrf_dmxl_before2ndcali")       
 
-        #if parameter.makeplot == True :
-        #    Bplot.B_ctime_plot(
-        #        ctime, fgs_ful_dmxl_2nd_x - fgs_igrf_dmxl_x,fgs_ful_dmxl_2nd_y - fgs_igrf_dmxl_y, 
-        #        fgs_ful_dmxl_2nd_z - fgs_igrf_dmxl_z, xlimt = [0,50], title="fgs_res_fgm before 2nd run")
+        if parameter.makeplot == True :
+            Bplot.B_ctime_plot(
+                ctime, fgs_ful_dmxl_2nd_x - fgs_igrf_dmxl_x,fgs_ful_dmxl_2nd_y - fgs_igrf_dmxl_y, 
+                fgs_ful_dmxl_2nd_z - fgs_igrf_dmxl_z, datestr = datestr, title="fgs_res_dmxl_before2ndcali")
 
         # 2nd calibration of B in dmxl 
         [
@@ -196,15 +221,25 @@ def step1(
             fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
         )
         logger.debug(f"[1.7] second calibration is done. ")
+        if parameter.makeplot == True :
+            Bplot.B_ctime_plot_single(
+                ctime, [np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2+fgs_ful_dmxl_2nd_z**2), 
+                np.sqrt(fgs_ful_dmxl_3rd_x**2+fgs_ful_dmxl_3rd_y**2+fgs_ful_dmxl_3rd_z**2)], datestr = datestr, 
+                title="fgs_res_dmxl_mag x0 = before 2nd cali x1 = after 2nd cali")
+
+        if parameter.makeplot == True :
+            Bplot.B_ctime_plot(
+                ctime, fgs_ful_dmxl_3rd_x - fgs_igrf_dmxl_x,fgs_ful_dmxl_3rd_y - fgs_igrf_dmxl_y, 
+                fgs_ful_dmxl_3rd_z - fgs_igrf_dmxl_z, datestr = datestr, title="fgs_res_dmxl_after2ndcali")
 
         if parameter.makeplot == True: 
             Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
-                [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after2ndcali") 
+                [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], datestr = datestr, title="ful_igrf_dmxl_after2ndcali") 
 
-        #if parameter.makeplot == True :
-        #    Bplot.B_ctime_plot(
-        #        ctime, fgs_ful_dmxl_3rd_x - fgs_igrf_dmxl_x, fgs_ful_dmxl_3rd_y - fgs_igrf_dmxl_y, 
-        #        fgs_ful_dmxl_3rd_z - fgs_igrf_dmxl_z, xlimt = [0,50], title="fgs_res_fgm after 2nd run")
+        if parameter.makeplot == True :
+            Bplot.B_ctime_plot(
+                ctime, fgs_ful_dmxl_3rd_x - fgs_igrf_dmxl_x, fgs_ful_dmxl_3rd_y - fgs_igrf_dmxl_y, 
+                fgs_ful_dmxl_3rd_z - fgs_igrf_dmxl_z, datestr = datestr, title="fgs_res_fgm_after2ndcali")
 
         # 3rd calibration of B in dmxl 
         if parameter.cali_3rd == True:
@@ -235,7 +270,7 @@ def step1(
 
             if parameter.makeplot == True: 
                 Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_3rd_x, fgs_igrf_fgm_3rd_x], [fgs_ful_fgm_3rd_y, fgs_igrf_fgm_3rd_y], 
-                    [fgs_ful_fgm_3rd_z, fgs_igrf_fgm_3rd_z], plot3 = True, title="ful_igrf_fgm_before3rdcali")
+                    [fgs_ful_fgm_3rd_z, fgs_igrf_fgm_3rd_z], datestr = datestr, title="ful_igrf_fgm_before3rdcali")
 
             # 3nd calibration
             [
@@ -246,7 +281,7 @@ def step1(
 
             if parameter.makeplot == True: 
                 Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_4th_x, fgs_igrf_fgm_3rd_x], [fgs_ful_fgm_4th_y, fgs_igrf_fgm_3rd_y], 
-                    [fgs_ful_fgm_4th_z, fgs_igrf_fgm_3rd_z], plot3 = True, title="ful_igrf_fgm_after3rdcali")
+                    [fgs_ful_fgm_4th_z, fgs_igrf_fgm_3rd_z], datestr = datestr, title="ful_igrf_fgm_after3rdcali")
 
             logger.debug(f"[1.8] third calibration is done. ")
 
@@ -295,7 +330,7 @@ def step1(
 
                 if parameter.makeplot == True: 
                     Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_4th_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_4th_y, fgs_igrf_dmxl_y], 
-                        [fgs_ful_dmxl_4th_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_before4thcali")
+                        [fgs_ful_dmxl_4th_z, fgs_igrf_dmxl_z], datestr = datestr, title="ful_igrf_dmxl_before4thcali")
 
                 # 4th calibration
                 [
@@ -306,7 +341,7 @@ def step1(
 
                 if parameter.makeplot == True: 
                     Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_5th_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_5th_y, fgs_igrf_dmxl_y], 
-                        [fgs_ful_dmxl_5th_z, fgs_igrf_dmxl_z], plot3 = True, title="ful_igrf_dmxl_after4thcali")
+                        [fgs_ful_dmxl_5th_z, fgs_igrf_dmxl_z], datestr = datestr, title="ful_igrf_dmxl_after4thcali")
 
                 logger.debug(f"[1.8] third calibration is done. ")
                 cross_times = cross_times_3rd

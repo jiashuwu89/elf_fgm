@@ -1,5 +1,6 @@
 import datetime as dt
 from pickle import FALSE
+from tkinter.font import families
 import numpy as np
 import os
 from typing import Literal
@@ -80,18 +81,19 @@ ctime_repeat_check = True
 """post calibration parameter
 """
 cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
-cali_3rd = True  # add a third calibration 
-cali_4th = True  # add a third calibration 
+cali_3rd = False  # add a third calibration 
+cali_4th = False # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-
+YZrotate = True
+YZrotate_ang = 45
 #del_spike_fsp = False  # delete spike in fsp resolution
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
-download_data = True
+download_data = False
 

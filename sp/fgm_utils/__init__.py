@@ -216,6 +216,18 @@ def fgm_fsp_calib(
     fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
     fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
 
+
+    if parameter.YZrotate == True:
+        theta = parameter.YZrotate_ang*np.pi/180. 
+        fgs_fsp_res_dmxl_rot_y = np.cos(theta)*fgs_fsp_res_dmxl_y + np.sin(theta)*fgs_fsp_res_dmxl_z
+        #fgs_fsp_res_dmxl_rot_y = np.cos(theta)*fgs_fsp_res_dmxl_y
+        fgs_fsp_res_dmxl_rot_z = -np.sin(theta)*fgs_fsp_res_dmxl_y + np.cos(theta)*fgs_fsp_res_dmxl_z
+        #fgs_fsp_res_dmxl_rot_z = np.cos(theta)*fgs_fsp_res_dmxl_z
+    
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot(cross_times_calib, [fgs_fsp_res_dmxl_x,fgs_fsp_res_dmxl_x], 
+        [fgs_fsp_res_dmxl_y,fgs_fsp_res_dmxl_rot_y], [fgs_fsp_res_dmxl_z, fgs_fsp_res_dmxl_rot_z], datestr=datestr, 
+        title="fsp_res_dmxl x1 = before rotate x2 =  after rotate")
     try:
         [
             cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,

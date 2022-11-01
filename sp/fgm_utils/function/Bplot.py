@@ -50,8 +50,9 @@ def B_ctime_plot(
     title = "B_ctime_plot", xlimt = None, cross_times = None, 
     datestr = None, ylimt = None, ctime_idx_flag = None,
 ):
-    
-    filename = datestr + "_" + title if datestr is not None else title
+    title_s = title.split(' ',1)[0]
+    filename = datestr + "_" + title_s if datestr is not None else title_s
+    filetitle = datestr + "_" + title if datestr is not None else title
     if np.array(B_x).ndim == np.array(B_y).ndim == np.array(B_z).ndim:
         if np.array(B_x).ndim == np.array(ctime).ndim == 1:
             # one set of data and time
@@ -93,7 +94,7 @@ def B_ctime_plot(
                     else:
                         for k in range(len(ctime_idx_time)):
                             ax[j].axvline(ctime_idx_time[k], color='black') 
-                ax[j].set_title(filename) if j == 0 else None
+                ax[j].set_title(filetitle) if j == 0 else None
                 ax[j].set_xlim(xlimt) if xlimt is not None else None
                 ax[j].set_ylim(ylimt[j]) if ylimt is not None else None
                 if cross_times is not None:
@@ -101,17 +102,19 @@ def B_ctime_plot(
                 ax[j].set_xlabel('Relative Time (seconds)')
                 ax[j].set_ylabel(y_labels[j])
                 ax[j].legend()
+                ax[j].grid()
     else: # all in one plot
         fig, ax = plt.subplots(1, figsize=(12,7))
         for i in range(dim):
             for j in range(3):
                 ax.plot(ctime[i], B[j][i], label=labels[j][i], alpha=.5)
-        ax.set_title(filename)
+        ax.set_title(filetitle)
         ax.set_xlim(xlimt) if xlimt is not None else None
         ax.set_ylim(ylimt) if ylimt is not None else None
         ax.set_xlabel('Relative Time (seconds)')
         ax.set_ylabel('Field (nT)')
         ax.legend()
+        ax.grid()
 
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
     plt.close()
@@ -122,22 +125,25 @@ def B_ctime_plot_single(
     title = "B_ctime_plot_single", xlimt = None, ylimt = None, 
     cross_times = None, datestr = None
 ):
-
-    filename = datestr + "_" + title if datestr is not None else title
+    title_s = title.split(' ',1)[0]
+    filename = datestr + "_" + title_s if datestr is not None else title_s
+    filetitle = datestr + "_" + title if datestr is not None else title
     dim = np.array(B).ndim
     fig, ax = plt.subplots(1, figsize=(12,7))
     if dim == 1:
         ax.plot(ctime, B, alpha=.5)
         ax.scatter(ctime, B, alpha=.5) if scatter == True else None
     else:
-        [ax.plot(ctime, B[i], alpha=.5, label = f"X_{i}") for i in range(len(B))]
+        [ax.plot(ctime, B[i], alpha=.5, label = f"X{i}") for i in range(len(B))]
     if cross_times is not None:
         [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_ylim(ylimt) if ylimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')
     ax.set_ylabel('B (nT)')
-    #ax.legend()
+    ax.legend()
+    ax.grid()
+    ax.set_title(filetitle)
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
     plt.close()
 
