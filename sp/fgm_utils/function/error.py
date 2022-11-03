@@ -42,7 +42,7 @@ class funkyFGMError(Exception):
         super().__init__(self.message)
 
     def __str__(self):
-        return f"❌ {self.message} - err:{self.err} std:{self.std}"   
+        return f"❌ {self.message} - median:{self.err} std:{self.std}"   
 
 class funkyFGMError_len(Exception):
     """Exception when too few data

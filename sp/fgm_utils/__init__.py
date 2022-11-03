@@ -104,6 +104,7 @@ def fgm_fsp_calib(
 
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
+    """
     try:
         preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
     except (error.funkyFGMError, error.CrossTime1Error, error.funkyFGMError_len) as e:
@@ -111,7 +112,7 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-    
+    """
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)

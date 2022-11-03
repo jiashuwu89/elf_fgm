@@ -67,8 +67,13 @@ if __name__ == "__main__":
     #endtime_str = ["2022-04-04/11:08:04"]
     #starttime_str = ["2022-08-08/19:41:15"] # good example
     #endtime_str = ["2022-08-08/19:47:27"]
-    starttime_str = ["2022-08-07/22:28:33"] # large magnitude
-    endtime_str = ["2022-08-07/22:34:58"]
+    #starttime_str = ["2019-04-30/18:30:52"] # large magnitude
+    #endtime_str = ["2019-04-30/20:00:04"]
+    starttime_str = ["2019-08-02/02:01:49"] # large magnitude
+    endtime_str = ["2019-08-02/02:56:39"]
+    #starttime_str = ["2019-08-06/07:39:26"] # long collection
+    #endtime_str = ["2019-08-06/08:33:53"]
+
 
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
