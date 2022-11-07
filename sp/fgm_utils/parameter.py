@@ -22,7 +22,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 
 
 proper_pad = False  # fails when data have gaps
-fit_running_spline = True
+fit_running_spline = False
 relative_integrate = True
 bidirectional_integrate = True
 

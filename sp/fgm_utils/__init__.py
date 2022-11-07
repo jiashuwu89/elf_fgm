@@ -132,14 +132,18 @@ def fgm_fsp_calib(
         # 0. step 0, ctime calibration
     """
     logger.info(f"Step 0 ctime calibration starts ... ")
-    [
-        fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
-        ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff
-        ] = step0.step0(
-            ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
-            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-            att_gei_x, att_gei_y, att_gei_z, datestr, logger
-        )
+    try:
+        [
+            fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+            ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff
+            ] = step0.step0(
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, datestr, logger
+            )
+    except error.CrossTime1Error as e:
+        logger.error(e.__str__())
+        return [ [] for _ in range(16) ]
         
     """
         # 1. step 1, B calibration

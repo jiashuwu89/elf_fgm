@@ -33,8 +33,8 @@ if __name__ == "__main__":
     elfin_url = "https://data.elfin.ucla.edu/"
     
     
-    startdate = "2022-01-01"
-    enddate = "2022-01-05"
+    startdate = "2022-01-05"
+    enddate = "2022-01-10"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
@@ -63,8 +63,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/22:01:51"]
     #starttime_str = ["2022-08-07/18:50:59"] # elb
     #endtime_str = ["2022-08-07/18:57:15"]
-    #starttime_str = ["2022-01-01/05:38:27"] # step even without time spike
-    #endtime_str = ["2022-01-01/05:44:42"]
+    #starttime_str = ["2022-01-03/16:42:58"] # step even without time spike
+    #endtime_str = ["2022-01-03/16:49:10"]
     #starttime_str = ["2022-06-25/18:36:12"] # large amplitude
     #endtime_str = ["2022-06-25/18:42:25"]
     #starttime_str = ["2019-04-30/18:30:52"] # long collection

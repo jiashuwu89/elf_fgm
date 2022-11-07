@@ -21,8 +21,7 @@ def step0(
             ctime, fgs_ful_fgm_1st_z,
         )
     except error.CrossTime1Error as e:
-        logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
+        raise error.CrossTime1Error(0)
 
     [
         cross_times_0th_2, cross_times_0th_2_mids, 
