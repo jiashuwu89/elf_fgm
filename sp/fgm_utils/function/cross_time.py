@@ -647,7 +647,6 @@ def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
 def fsp_matrix(ctime, cross_times, T_spins_d, rotation_matrix): 
     """generate rotation matrix in fsp resolution
     """
-
     rotation_matrix_fsp = np.zeros((len(cross_times), 3, 3))
 
     for i in range(0, len(cross_times)):

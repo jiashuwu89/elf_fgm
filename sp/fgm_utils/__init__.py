@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
-from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1
+from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
+from .function.coordinate import dmxl2gei
 
 datestr = ""
 
@@ -117,16 +118,14 @@ def fgm_fsp_calib(
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)
         if ctime_idx_repeat is not None:
-            ctime = np.delete(ctime, ctime_idx_repeat)
-            fgs_ful_fgm_0th_x = np.delete(fgs_ful_fgm_0th_x, ctime_idx_repeat)
-            fgs_ful_fgm_0th_y = np.delete(fgs_ful_fgm_0th_y, ctime_idx_repeat)
-            fgs_ful_fgm_0th_z = np.delete(fgs_ful_fgm_0th_z, ctime_idx_repeat)
-            fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, ctime_idx_repeat)
-            fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, ctime_idx_repeat)
-            fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, ctime_idx_repeat)
-            att_gei_x = np.delete(att_gei_x, ctime_idx_repeat)
-            att_gei_y = np.delete(att_gei_y, ctime_idx_repeat)
-            att_gei_z = np.delete(att_gei_z, ctime_idx_repeat)
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+                    ctime_idx_repeat, ctime, 
+                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z)
             logger.info("[PREPROCESS] repeat ctime found and delete!")
 
     """
@@ -147,9 +146,8 @@ def fgm_fsp_calib(
     """
     logger.info(f"Step 1 calibration starts ... ")
     [
-        cross_times_calib, w_syn_d_calib, T_spins_d_calib,
+        cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
         fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
-        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z,
         fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
         ] = step1.step1(
             ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -182,63 +180,95 @@ def fgm_fsp_calib(
             ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
     )
     [
-        fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z] = cross_time.fsp_igrf(
-            ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z
-    )
-    [
         fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
             ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
     )
-    [
-        fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = cross_time.fsp_ful(
-            ctime, cross_times_calib, T_spins_d_calib, fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z
-    )
 
-    del_idx = np.where((fgs_fsp_ful_gei_x == 0) & (fgs_fsp_ful_gei_y == 0) & (fgs_fsp_ful_gei_z == 0))
-    fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_idx)
-    fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_idx)
-    fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_idx)
-    fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_idx)
-    fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_idx)
-    fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_idx)
-    fgs_fsp_ful_dmxl_x = np.delete(fgs_fsp_ful_dmxl_x, del_idx)
-    fgs_fsp_ful_dmxl_y = np.delete(fgs_fsp_ful_dmxl_y, del_idx)
-    fgs_fsp_ful_dmxl_z = np.delete(fgs_fsp_ful_dmxl_z, del_idx)
-    fgs_fsp_ful_gei_x = np.delete(fgs_fsp_ful_gei_x, del_idx)
-    fgs_fsp_ful_gei_y = np.delete(fgs_fsp_ful_gei_y, del_idx)
-    fgs_fsp_ful_gei_z = np.delete(fgs_fsp_ful_gei_z, del_idx)
-    cross_times_calib = np.delete(cross_times_calib, del_idx)
+    del_idx = np.where((fgs_fsp_ful_dmxl_x == 0) & (fgs_fsp_ful_dmxl_y == 0) & (fgs_fsp_ful_dmxl_z == 0))
+    [
+        cross_times_calib, DMXL_2_GEI_fsp,
+        fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
+        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = detrend.delete_data(
+            del_idx, cross_times_calib, DMXL_2_GEI_fsp,
+            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
+            fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z,
+        )
 
     fgs_fsp_res_dmxl_x = fgs_fsp_ful_dmxl_x - fgs_fsp_igrf_dmxl_x
     fgs_fsp_res_dmxl_y = fgs_fsp_ful_dmxl_y - fgs_fsp_igrf_dmxl_y
     fgs_fsp_res_dmxl_z = fgs_fsp_ful_dmxl_z - fgs_fsp_igrf_dmxl_z
 
-    fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
-    fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y
-    fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z
-
+    """
+        # 3 : step 3 delete spike and rogue points
+    """
     try:
         [
-            cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
+            cross_times_calib, DMXL_2_GEI_fsp, 
+            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
-            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
-            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z
             ] = postprocess.fsp_spike_del(
             ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, 
-            cross_times_calib, w_syn_d_calib,
+            cross_times_calib, w_syn_d_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y,fgs_fsp_igrf_dmxl_z, 
-            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
             logger
         )
     except error.fsp_spike_del_error as e:
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
 
-    fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
-    fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
-    fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
+    """
+        # 4: step 4 detrend
+    """
+    if parameter.fsp_detrend == True:
+        [
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z] = detrend.detrend_linear_2point(
+                cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)
+
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(
+                cross_times_calib, [fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_trend_x], 
+                [fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_trend_y], [fgs_fsp_res_dmxl_z, fgs_fsp_res_dmxl_trend_z], title="res_dmxl_fsp_trend", scatter = True, 
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag
+            )
+        # detrend res dmxl
+        fgs_fsp_res_dmxl_x = fgs_fsp_res_dmxl_x - fgs_fsp_res_dmxl_trend_x
+        fgs_fsp_res_dmxl_y = fgs_fsp_res_dmxl_y - fgs_fsp_res_dmxl_trend_y
+        fgs_fsp_res_dmxl_z = fgs_fsp_res_dmxl_z - fgs_fsp_res_dmxl_trend_z
+
+        # get ful dmxl
+        fgs_fsp_ful_dmxl_x = fgs_fsp_res_dmxl_x + fgs_fsp_igrf_dmxl_x
+        fgs_fsp_ful_dmxl_y = fgs_fsp_res_dmxl_y + fgs_fsp_igrf_dmxl_y
+        fgs_fsp_ful_dmxl_z = fgs_fsp_res_dmxl_z + fgs_fsp_igrf_dmxl_z
+    else:
+        # get ful dmxl
+        fgs_fsp_ful_dmxl_x = fgs_fsp_res_dmxl_x + fgs_fsp_igrf_dmxl_x
+        fgs_fsp_ful_dmxl_y = fgs_fsp_res_dmxl_y + fgs_fsp_igrf_dmxl_y
+        fgs_fsp_ful_dmxl_z = fgs_fsp_res_dmxl_z + fgs_fsp_igrf_dmxl_z
+
+    # transform ful dmxl to ful gei
+    [fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = dmxl2gei(
+        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z, DMXL_2_GEI_fsp)
+    
+    # get igrf gei
+    [
+        fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z] = cross_time.fsp_igrf(
+        ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z
+    )
+
+    # get res gei
+    fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
+    fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y 
+    fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z  
+
+
+    """
+        # 5 : step 5 final data and plot
+    """
+    if parameter.fsp_detrend == False:
+        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
     if parameter.makeplot == True:
         #Bplot.B_ctime_plot(

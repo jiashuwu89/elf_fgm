@@ -32,14 +32,14 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
-    """
-    startdate = "2022-06-01"
-    enddate = "2022-06-30"
+    
+    startdate = "2022-01-01"
+    enddate = "2022-01-05"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
         logger.error(e.__str__())
-    """
+    
 
     #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
     #endtime_str = ["2022-02-08/22:30:58"]
@@ -63,14 +63,14 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-07/22:01:51"]
     #starttime_str = ["2022-08-07/18:50:59"] # elb
     #endtime_str = ["2022-08-07/18:57:15"]
-    #starttime_str = ["2022-04-04/11:01:50"] # step even without time spike
-    #endtime_str = ["2022-04-04/11:08:04"]
-    #starttime_str = ["2022-08-08/19:41:15"] # good example
-    #endtime_str = ["2022-08-08/19:47:27"]
-    #starttime_str = ["2019-04-30/18:30:52"] # large magnitude
+    #starttime_str = ["2022-01-01/05:38:27"] # step even without time spike
+    #endtime_str = ["2022-01-01/05:44:42"]
+    #starttime_str = ["2022-06-25/18:36:12"] # large amplitude
+    #endtime_str = ["2022-06-25/18:42:25"]
+    #starttime_str = ["2019-04-30/18:30:52"] # long collection
     #endtime_str = ["2019-04-30/20:00:04"]
-    starttime_str = ["2019-08-02/02:01:49"] # large magnitude
-    endtime_str = ["2019-08-02/02:56:39"]
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection
+    #endtime_str = ["2019-08-02/02:56:39"]
     #starttime_str = ["2019-08-06/07:39:26"] # long collection
     #endtime_str = ["2019-08-06/08:33:53"]
 
@@ -83,8 +83,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-03-01/02:32:03"]
     #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
     #endtime_str = ["2022-03-29/02:22:44"]    
-    start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
-    end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
+    #start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
+    #end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 

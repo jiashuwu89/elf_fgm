@@ -22,7 +22,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 
 
 proper_pad = False  # fails when data have gaps
-fit_running_spline = False
+fit_running_spline = True
 relative_integrate = True
 bidirectional_integrate = True
 
@@ -79,12 +79,14 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
-cali_3rd = True  # add a third calibration 
-cali_4th = True  # add a third calibration 
+cali_2nd = False  # add a second calibration in dmxl coordinate to solve the trend
+cali_3rd = False  # add a third calibration 
+cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
+fsp_detrend = True # detrend in dmxl if true
+fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 #del_spike_fsp = False  # delete spike in fsp resolution
 

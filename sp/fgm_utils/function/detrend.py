@@ -42,8 +42,8 @@ def detrend_linear_2point(
     for B_i in range(3):
         B = B_all[B_i]
         d_B = np.gradient(B) / np.gradient(ctime)
-        index1 = [i for i in d_B[0:3] if np.abs(i) > parameter.detrend_cutoff*np.average(np.abs(d_B))]
-        index2 = [i for i in d_B[-4:-1] if np.abs(i) > parameter.detrend_cutoff*np.average(np.abs(d_B))]
+        index1 = [i for i in d_B[0:3] if np.abs(i) > parameter.fsp_detrend_cutoff*np.average(np.abs(d_B))]
+        index2 = [i for i in d_B[-4:-1] if np.abs(i) > parameter.fsp_detrend_cutoff*np.average(np.abs(d_B))]
         if (not index1 and not index2):
             trend[B_i, :] = B[0] + (ctime-ctime[0])*(B[-1] - B[0])/(ctime[-1]-ctime[0])
         elif (not index1 and index2):
@@ -179,3 +179,6 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
             )
         ]
     return np.union1d(np.array(del_index_1, dtype=int),np.array(del_index_3, dtype=int)).tolist()
+
+def delete_data(del_idx, *argv):
+    return tuple(np.delete(arg, del_idx, axis = 0) for arg in argv)
