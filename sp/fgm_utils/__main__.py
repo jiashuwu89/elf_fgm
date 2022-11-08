@@ -33,8 +33,8 @@ if __name__ == "__main__":
     elfin_url = "https://data.elfin.ucla.edu/"
     
     """
-    startdate = "2022-06-01"
-    enddate = "2022-06-30"
+    startdate = "2022-01-01"
+    enddate = "2022-01-07"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-05/12:09:37"]
     #starttime_str = ["2022-08-12/12:56:24"]
     #endtime_str = ["2022-08-12/13:02:36"]
-    starttime_str = ["2022-08-17/23:24:26"]
-    endtime_str = ["2022-08-17/23:30:39"]
+    starttime_str = ["2022-01-06/19:01:17"]
+    endtime_str = ["2022-01-06/19:07:31"]
 
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]

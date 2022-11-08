@@ -1,8 +1,16 @@
 from typing import List
 import numpy as np
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, least_squares
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
+
+def IGRF_fgm_fit(x, A, b):
+    y = A@x 
+    res = y - b
+    res[int(2*len(y)/3):] = res[int(2*len(y)/3):]/1000
+    return res
+    #return np.abs(y - b) + np.std(np.abs(y[int(2*len(y)/3):]-b[int(2*len(y)/3):]))**2
+    #return np.abs(y - b) + np.std(np.abs(y[int(len(y)/3)+1:int(2*len(y)/3)]-b[int(len(y)/3)+1:int(2*len(y)/3)]))**2
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -114,9 +122,16 @@ def calib_leastsquare(
     if init is None:
         x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
         #x = lsqr(A, b)[0]
+        #LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+        #res1 = least_squares(LS_func, x0 = [0]*12)
+        #x = res1.x
     else:
         #x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init, damp=1)[0]
         x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
+        LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+        res1 = least_squares(LS_func, x0 = init, method='lm')
+        breakpoint()
+        x = res1.x
 
     orth = np.array([[x[0], x[1], x[2]], [x[4], x[5], x[6]], [x[8], x[9], x[10]]])
     offsets = np.array([x[3], x[7], x[11]])
