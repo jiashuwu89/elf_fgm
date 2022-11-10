@@ -20,9 +20,8 @@ def step0(
             T_spins_0th_1, w_syn_0th_1] = cross_time.cross_time_stage_1(
             ctime, fgs_ful_fgm_1st_z,
         )
-    except error.CrossTime1Error as e:
-        logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
+    except error.CrossTime1Error:
+        raise error.CrossTime1Error(0)
 
     [
         cross_times_0th_2, cross_times_0th_2_mids, 
