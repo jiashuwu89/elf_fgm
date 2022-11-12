@@ -114,6 +114,20 @@ def fgm_fsp_calib(
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
     """
+    if parameter.del_aurora == True:
+        # delete auroral region
+        ctime = np.delete(ctime, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_ful_fgm_0th_x = np.delete(fgs_ful_fgm_0th_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_ful_fgm_0th_y = np.delete(fgs_ful_fgm_0th_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_ful_fgm_0th_z = np.delete(fgs_ful_fgm_0th_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        att_gei_x = np.delete(att_gei_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        att_gei_y = np.delete(att_gei_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        att_gei_z = np.delete(att_gei_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
+    
+
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)

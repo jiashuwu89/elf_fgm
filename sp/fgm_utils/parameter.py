@@ -79,7 +79,7 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = False  # add a second calibration in dmxl coordinate to solve the trend
+cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
 cali_3rd = False  # add a third calibration 
 cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
@@ -92,8 +92,38 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
 download_data = False
 
+# delete auroral region
+del_aurora = False
+# 2019-04-30
+#aurora_start = 4000
+#aurora_end = 4800
+
+# 2019-08-06
+#aurora_start = 2000
+#aurora_end = 2900
+
+# 2019-08-02
+#aurora_start = 2500
+#aurora_end = 3000
+
+# use old B parameter 
+Bparameter_input = True
+# 2019-04-30
+#Bparameter = [ 9.78942402e+01, -1.12169220e+01,  1.13622093e+01, -1.13398711e+04,
+#       -1.82364425e+01,  9.77130715e+01,  9.58461965e+00, -1.32750666e+03,
+#       -3.33214246e-01,  3.92489034e-01,  1.14269349e+02, -8.09474602e+04]
+
+# 2019-08-06
+#Bparameter = [ 9.51663776e+01, -2.19684890e+01,  9.03692449e+00, -5.89833557e+04,
+#       -9.27911127e+00,  9.77477837e+01,  1.26234524e+01, -3.75090744e+04,
+#        1.35271529e+00, -1.26879531e+00,  1.14428940e+02, -7.98022909e+04]
+
+# 2019-08-02
+Bparameter = [ 9.81085775e+01, -2.44691171e+01,  7.32136972e+00, -9.62104948e+04,
+       -4.71597450e+00,  9.91897545e+01,  1.15751595e+01, -7.78249128e+04,
+       -1.06503612e-01,  3.01607182e-02,  1.14606030e+02, -6.82774873e+04]
