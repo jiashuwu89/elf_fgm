@@ -179,3 +179,6 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
             )
         ]
     return np.union1d(np.array(del_index_1, dtype=int),np.array(del_index_3, dtype=int)).tolist()
+
+def delete_data(del_idx, *argv):
+    return tuple(np.delete(arg, del_idx, axis = 0) for arg in argv)

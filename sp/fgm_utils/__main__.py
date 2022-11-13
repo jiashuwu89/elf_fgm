@@ -32,12 +32,14 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
+    """
     startdate = "2022-01-23"
     enddate = "2022-01-30"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
         logger.error(e.__str__())
+    """
 
     #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
     #endtime_str = ["2022-02-08/22:30:58"]
@@ -93,8 +95,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-05/12:09:37"]
     #starttime_str = ["2022-08-12/12:56:24"]
     #endtime_str = ["2022-08-12/13:02:36"]
-    #starttime_str = ["2022-01-22/23:24:43"]
-    #endtime_str = ["2022-01-22/23:30:46"]
+    starttime_str = ["2022-01-22/23:24:43"]
+    endtime_str = ["2022-01-22/23:30:46"]
 
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
@@ -104,8 +106,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-03-01/02:32:03"]
     #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
     #endtime_str = ["2022-03-29/02:22:44"]    
-    #start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
-    #end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
+    start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
+    end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 

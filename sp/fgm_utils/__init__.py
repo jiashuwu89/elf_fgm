@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
-from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1
+from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
 
 datestr = ""
 
@@ -116,16 +116,14 @@ def fgm_fsp_calib(
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)
         if ctime_idx_repeat is not None:
-            ctime = np.delete(ctime, ctime_idx_repeat)
-            fgs_ful_fgm_0th_x = np.delete(fgs_ful_fgm_0th_x, ctime_idx_repeat)
-            fgs_ful_fgm_0th_y = np.delete(fgs_ful_fgm_0th_y, ctime_idx_repeat)
-            fgs_ful_fgm_0th_z = np.delete(fgs_ful_fgm_0th_z, ctime_idx_repeat)
-            fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, ctime_idx_repeat)
-            fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, ctime_idx_repeat)
-            fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, ctime_idx_repeat)
-            att_gei_x = np.delete(att_gei_x, ctime_idx_repeat)
-            att_gei_y = np.delete(att_gei_y, ctime_idx_repeat)
-            att_gei_z = np.delete(att_gei_z, ctime_idx_repeat)
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+                    ctime_idx_repeat, ctime, 
+                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z)
             logger.info("[PREPROCESS] repeat ctime found and delete!")
 
     """
@@ -198,19 +196,14 @@ def fgm_fsp_calib(
     )
 
     del_idx = np.where((fgs_fsp_ful_gei_x == 0) & (fgs_fsp_ful_gei_y == 0) & (fgs_fsp_ful_gei_z == 0))
-    fgs_fsp_igrf_dmxl_x = np.delete(fgs_fsp_igrf_dmxl_x, del_idx)
-    fgs_fsp_igrf_dmxl_y = np.delete(fgs_fsp_igrf_dmxl_y, del_idx)
-    fgs_fsp_igrf_dmxl_z = np.delete(fgs_fsp_igrf_dmxl_z, del_idx)
-    fgs_fsp_igrf_gei_x = np.delete(fgs_fsp_igrf_gei_x, del_idx)
-    fgs_fsp_igrf_gei_y = np.delete(fgs_fsp_igrf_gei_y, del_idx)
-    fgs_fsp_igrf_gei_z = np.delete(fgs_fsp_igrf_gei_z, del_idx)
-    fgs_fsp_ful_dmxl_x = np.delete(fgs_fsp_ful_dmxl_x, del_idx)
-    fgs_fsp_ful_dmxl_y = np.delete(fgs_fsp_ful_dmxl_y, del_idx)
-    fgs_fsp_ful_dmxl_z = np.delete(fgs_fsp_ful_dmxl_z, del_idx)
-    fgs_fsp_ful_gei_x = np.delete(fgs_fsp_ful_gei_x, del_idx)
-    fgs_fsp_ful_gei_y = np.delete(fgs_fsp_ful_gei_y, del_idx)
-    fgs_fsp_ful_gei_z = np.delete(fgs_fsp_ful_gei_z, del_idx)
-    cross_times_calib = np.delete(cross_times_calib, del_idx)
+    [
+        cross_times_calib, DMXL_2_GEI_fsp,
+        fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
+        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = detrend.delete_data(
+            del_idx, cross_times_calib, DMXL_2_GEI_fsp,
+            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
+            fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z,
+        )
 
     fgs_fsp_res_dmxl_x = fgs_fsp_ful_dmxl_x - fgs_fsp_igrf_dmxl_x
     fgs_fsp_res_dmxl_y = fgs_fsp_ful_dmxl_y - fgs_fsp_igrf_dmxl_y
