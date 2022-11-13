@@ -89,7 +89,7 @@ def running_filter(time, signal, eps=1, T=20):
 
 
 def calib_leastsquare(
-    B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z, init = None
+    B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z, init = None, noncalib = False
 ):
 
     """use B igrf to calibrate fgs data in fgm coordinate 
@@ -111,12 +111,14 @@ def calib_leastsquare(
     A[2 * n : 3 * n, 10] = fgs_igrf_fgm_z
     A[2 * n : 3 * n, 11] = np.ones(n)
     A = csc_matrix(A)
-    if init is None:
-        x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
-        #x = lsqr(A, b)[0]
+    if noncalib == False:
+        if init is None:
+            x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+        else:
+            x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
+            #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
     else:
-        #x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init, damp=1)[0]
-        x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
+        x = init
 
     orth = np.array([[x[0], x[1], x[2]], [x[4], x[5], x[6]], [x[8], x[9], x[10]]])
     offsets = np.array([x[3], x[7], x[11]])

@@ -104,6 +104,7 @@ def fgm_fsp_calib(
 
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
+    """
     try:
         preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
     except (error.funkyFGMError, error.CrossTime1Error, error.funkyFGMError_len) as e:
@@ -111,7 +112,18 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-    
+    """
+    if parameter.del_aurora == True:
+        auroral_idx = []
+        for i in range(len(parameter.aurora_end)):
+            for j in range(parameter.aurora_start[i]*10, parameter.aurora_end[i]*10):
+                auroral_idx.append(j)
+        [
+            ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+            auroral_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z)
+
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)
@@ -197,10 +209,10 @@ def fgm_fsp_calib(
 
     del_idx = np.where((fgs_fsp_ful_gei_x == 0) & (fgs_fsp_ful_gei_y == 0) & (fgs_fsp_ful_gei_z == 0))
     [
-        cross_times_calib, DMXL_2_GEI_fsp,
+        cross_times_calib,
         fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
         fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = detrend.delete_data(
-            del_idx, cross_times_calib, DMXL_2_GEI_fsp,
+            del_idx, cross_times_calib,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
             fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z,
         )

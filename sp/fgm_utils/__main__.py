@@ -40,7 +40,6 @@ if __name__ == "__main__":
     except error.SCreadError as e:
         logger.error(e.__str__())
     """
-
     #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
     #endtime_str = ["2022-02-08/22:30:58"]
     #starttime_str = ["2022-02-18/16:12:38"] # 1/80 spike. fixed
@@ -95,8 +94,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-08-05/12:09:37"]
     #starttime_str = ["2022-08-12/12:56:24"]
     #endtime_str = ["2022-08-12/13:02:36"]
-    starttime_str = ["2022-01-22/23:24:43"]
-    endtime_str = ["2022-01-22/23:30:46"]
+    #starttime_str = ["2022-01-22/23:24:43"]
+    #endtime_str = ["2022-01-22/23:30:46"]
 
     #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
     #endtime_str = ["2022-03-28/03:14:24"]
@@ -105,7 +104,13 @@ if __name__ == "__main__":
     #starttime_str = ["2022-03-01/02:25:52"] # 101% correct, still has spike not sure
     #endtime_str = ["2022-03-01/02:32:03"]
     #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
-    #endtime_str = ["2022-03-29/02:22:44"]    
+    #endtime_str = ["2022-03-29/02:22:44"] 
+    #starttime_str = ["2019-04-30/18:30:52"] # long collection
+    #endtime_str = ["2019-04-30/20:00:04"]
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection
+    #endtime_str = ["2019-08-02/02:56:39"]
+    starttime_str = ["2019-08-06/07:39:26"] # long collection
+    endtime_str = ["2019-08-06/08:33:53"]   
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

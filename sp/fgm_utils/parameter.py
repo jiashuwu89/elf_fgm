@@ -92,8 +92,39 @@ YZrotate_ang = 45
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
 download_data = False
+
+# delete auroral region
+del_aurora = False
+# 2019-04-30
+#aurora_start = [3800]
+#aurora_end = [4800]
+
+# 2019-08-02
+#aurora_start = [300, 2500]
+#aurora_end = [700, 3000]
+
+# 2019-08-06
+#aurora_start = [2000]
+#aurora_end = [2900]
+
+# use old B parameter 
+Bparameter_input = True
+# 2019-04-30
+#Bparameter = [ 9.71179072e+01,  4.36924670e-02,  1.14197738e-02, -1.43542870e+03,
+#       -1.92709013e+01,  9.22440414e-01, -2.58068810e-02,  2.54101675e+03,
+#       -3.54688945e-01,  3.37553008e-02,  1.01058442e+00, -1.05094315e+03]
+
+# 2019-08-02
+#Bparameter = [ 9.80624272e+01,  3.84201566e-02,  1.60816427e-03, -7.95829378e+02,
+#       -5.21183017e+00,  9.72459292e-01, -2.36873435e-03,  6.14142009e+02,
+#       -8.31933494e-02,  2.26413184e-02,  9.97808307e-01, -3.13645307e+02]
+
+# 2019-08-06
+Bparameter = [ 9.51663776e+01, -9.60362242e-03, -1.59586522e-02,  1.67104304e+02,
+       -9.27911127e+00,  1.01466197e+00,  3.15515999e-02, -2.92066387e+02,
+        1.35271530e+00, -4.54720575e-03,  9.97653200e-01,  1.18196592e+02]
 

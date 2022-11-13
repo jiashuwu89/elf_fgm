@@ -215,11 +215,21 @@ def step1(
                 ctime, fgs_ful_dmxl_2nd_x - fgs_igrf_dmxl_x,fgs_ful_dmxl_2nd_y - fgs_igrf_dmxl_y, 
                 fgs_ful_dmxl_2nd_z - fgs_igrf_dmxl_z, datestr = datestr, title="fgs_res_dmxl_before2ndcali")
 
-        # 2nd calibration of B in dmxl 
-        [
-            fgs_ful_dmxl_3rd_x, fgs_ful_dmxl_3rd_y, fgs_ful_dmxl_3rd_z, B_parameter] = calibration.calib_leastsquare(
-            fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
-        )
+        # 2nd calibration of B in dmxl
+        if parameter.Bparameter_input == False: 
+            [
+                fgs_ful_dmxl_3rd_x, fgs_ful_dmxl_3rd_y, fgs_ful_dmxl_3rd_z, B_parameter] = calibration.calib_leastsquare(
+                fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, 
+                fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter
+            )
+        else:
+            [
+                fgs_ful_dmxl_3rd_x, fgs_ful_dmxl_3rd_y, fgs_ful_dmxl_3rd_z, B_parameter] = calibration.calib_leastsquare(
+                fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, 
+                fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = parameter.Bparameter, noncalib = True, 
+            )
+        breakpoint()
+
         logger.debug(f"[1.7] second calibration is done. ")
         if parameter.makeplot == True :
             Bplot.B_ctime_plot_single(
