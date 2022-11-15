@@ -67,22 +67,12 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-03/16:49:10"]
     #starttime_str = ["2022-06-25/18:36:12"] # large amplitude
     #endtime_str = ["2022-06-25/18:42:25"]
-    #starttime_str = ["2019-04-30/18:30:52"] # long collection
-    #endtime_str = ["2019-04-30/20:00:04"]
-    starttime_str = ["2019-08-02/02:01:49"] # long collection
-    endtime_str = ["2019-08-02/02:56:39"]
+    starttime_str = ["2019-04-30/18:30:52"] # long collection
+    endtime_str = ["2019-04-30/20:00:04"]
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection
+    #endtime_str = ["2019-08-02/02:56:39"]
     #starttime_str = ["2019-08-06/07:39:26"] # long collection
     #endtime_str = ["2019-08-06/08:33:53"]
-
-
-    #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
-    #endtime_str = ["2022-03-28/03:14:24"]
-    #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
-    #endtime_str = ["2022-06-23/04:06:19"]
-    #starttime_str = ["2022-03-01/02:25:52"] # 101% correct, still has spike not sure
-    #endtime_str = ["2022-03-01/02:32:03"]
-    #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
-    #endtime_str = ["2022-03-29/02:22:44"]    
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

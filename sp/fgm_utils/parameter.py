@@ -85,7 +85,7 @@ cali_4th = False  # add a third calibration
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-fsp_detrend = True # detrend in dmxl if true
+fsp_detrend = False # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 #del_spike_fsp = False  # delete spike in fsp resolution
@@ -98,32 +98,35 @@ output = False # if true output to txt file
 download_data = False
 
 # delete auroral region
+"""for three long collection, first del_aurora = True, B_parameter_input = False, copy B parameter down below
+second, del_aurora = False, B_parameter_input = True
+"""
 del_aurora = False
 # 2019-04-30
-#aurora_start = 4000
-#aurora_end = 4800
-
-# 2019-08-06
-#aurora_start = 2000
-#aurora_end = 2900
+#aurora_start = [3800]
+#aurora_end = [4800]
 
 # 2019-08-02
-#aurora_start = 2500
-#aurora_end = 3000
+#aurora_start = [300, 2500]
+#aurora_end = [700, 3000]
+
+# 2019-08-06
+aurora_start = [2000]
+aurora_end = [2900]
 
 # use old B parameter 
 Bparameter_input = True
 # 2019-04-30
-#Bparameter = [ 9.78942402e+01, -1.12169220e+01,  1.13622093e+01, -1.13398711e+04,
-#       -1.82364425e+01,  9.77130715e+01,  9.58461965e+00, -1.32750666e+03,
-#       -3.33214246e-01,  3.92489034e-01,  1.14269349e+02, -8.09474602e+04]
+Bparameter = [ 9.71179072e+01, -1.07083739e+01,  1.17354030e+01, -5.69534476e+03,
+       -1.92709013e+01,  9.77811809e+01,  9.80274728e+00,  3.46543305e+03,
+       -3.54688944e-01,  3.73808512e-01,  1.14265880e+02, -8.43944571e+04]
+
+# 2019-08-02
+#Bparameter = [ 9.80624272e+01, -2.42576205e+01,  7.59029621e+00, -9.42501648e+04,
+#       -5.21183017e+00,  9.88572837e+01,  1.17303673e+01, -7.70861545e+04,
+#       -8.31933473e-02, -1.76517588e-02,  1.14717827e+02, -6.88063009e+04]
 
 # 2019-08-06
 #Bparameter = [ 9.51663776e+01, -2.19684890e+01,  9.03692449e+00, -5.89833557e+04,
 #       -9.27911127e+00,  9.77477837e+01,  1.26234524e+01, -3.75090744e+04,
 #        1.35271529e+00, -1.26879531e+00,  1.14428940e+02, -7.98022909e+04]
-
-# 2019-08-02
-Bparameter = [ 9.81085775e+01, -2.44691171e+01,  7.32136972e+00, -9.62104948e+04,
-       -4.71597450e+00,  9.91897545e+01,  1.15751595e+01, -7.78249128e+04,
-       -1.06503612e-01,  3.01607182e-02,  1.14606030e+02, -6.82774873e+04]

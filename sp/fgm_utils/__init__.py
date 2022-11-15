@@ -115,17 +115,15 @@ def fgm_fsp_calib(
         return [ [] for _ in range(16) ]
     """
     if parameter.del_aurora == True:
-        # delete auroral region
-        ctime = np.delete(ctime, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_ful_fgm_0th_x = np.delete(fgs_ful_fgm_0th_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_ful_fgm_0th_y = np.delete(fgs_ful_fgm_0th_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_ful_fgm_0th_z = np.delete(fgs_ful_fgm_0th_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_igrf_gei_x = np.delete(fgs_igrf_gei_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_igrf_gei_y = np.delete(fgs_igrf_gei_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        fgs_igrf_gei_z = np.delete(fgs_igrf_gei_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        att_gei_x = np.delete(att_gei_x, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        att_gei_y = np.delete(att_gei_y, range(parameter.aurora_start*10, parameter.aurora_end*10))
-        att_gei_z = np.delete(att_gei_z, range(parameter.aurora_start*10, parameter.aurora_end*10))
+        auroral_idx = []
+        for i in range(len(parameter.aurora_end)):
+            for j in range(parameter.aurora_start[i]*10, parameter.aurora_end[i]*10):
+                auroral_idx.append(j)
+        [
+            ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+            auroral_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z)
     
 
     # check repeated ctime
