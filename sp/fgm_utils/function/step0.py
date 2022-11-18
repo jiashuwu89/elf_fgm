@@ -112,4 +112,5 @@ def step0(
         #Bplot.B_ctime_plot(ctime, fgs_res_fgm_x, fgs_res_fgm_y, fgs_res_fgm_z, ctime_idx_time = ctime[ctime_idx], ctime_idx_flag = ctime_idx_flag)
         Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_flag, datestr = datestr)
 
+
     return [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]

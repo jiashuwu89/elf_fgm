@@ -156,7 +156,7 @@ def fgm_fsp_calib(
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-        
+
     """
         # 1. step 1, B calibration
     """
@@ -233,6 +233,58 @@ def fgm_fsp_calib(
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
 
+    """
+        # 4: step 4 detrend
+    """
+    if parameter.XYrotate == True:
+        XYrotate = range(-40,40)
+        XYrotateSTD = np.zeros(len(XYrotate))
+        for i, theta in enumerate(XYrotate):
+            #theta = parameter.XYrotate_ang*np.pi/180. 
+            theta = theta*np.pi/180. 
+            fgs_fsp_res_dmxl_XYrot_x = np.cos(theta)*fgs_fsp_res_dmxl_x - np.sin(theta)*fgs_fsp_res_dmxl_y
+            fgs_fsp_res_dmxl_XYrot_y = np.sin(theta)*fgs_fsp_res_dmxl_x + np.cos(theta)*fgs_fsp_res_dmxl_y
+            fgs_fsp_res_dmxl_XYrot_z = fgs_fsp_res_dmxl_z
+            #if parameter.makeplot == True:
+            #    Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_rot_x, fgs_fsp_res_dmxl_rot_y, fgs_fsp_res_dmxl_rot_z, 
+            #    title=f"res_dmxl_fsp_rotate_{i}", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+
+            XYrotateSTD[i] = np.std(fgs_fsp_res_dmxl_XYrot_x)
+
+        XYindex = np.where(XYrotateSTD == XYrotateSTD.min())[0]
+        XYangle = XYrotate[int(XYindex)]*np.pi/180. 
+        fgs_fsp_res_dmxl_XYrot_x = np.cos(XYangle)*fgs_fsp_res_dmxl_x - np.sin(XYangle)*fgs_fsp_res_dmxl_y
+        fgs_fsp_res_dmxl_XYrot_y = np.sin(XYangle)*fgs_fsp_res_dmxl_x + np.cos(XYangle)*fgs_fsp_res_dmxl_y
+        fgs_fsp_res_dmxl_XYrot_z = fgs_fsp_res_dmxl_z
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_XYrot_x, fgs_fsp_res_dmxl_XYrot_y, fgs_fsp_res_dmxl_XYrot_z, 
+            title=f"res_dmxl_fsp_XYrotate", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+
+        if parameter.YZrotate == True:
+                YZrotate = range(-70,70)
+                YZrotateSTD = np.zeros(len(YZrotate))
+                for i, theta in enumerate(YZrotate):
+                    #theta = parameter.XYrotate_ang*np.pi/180. 
+                    theta = theta*np.pi/180. 
+                    fgs_fsp_res_dmxl_YZrot_x = fgs_fsp_res_dmxl_XYrot_x 
+                    fgs_fsp_res_dmxl_YZrot_y = np.cos(theta)*fgs_fsp_res_dmxl_XYrot_y - np.sin(theta)*fgs_fsp_res_dmxl_XYrot_z
+                    fgs_fsp_res_dmxl_YZrot_z = np.sin(theta)*fgs_fsp_res_dmxl_XYrot_y + np.cos(theta)*fgs_fsp_res_dmxl_XYrot_z
+                    if parameter.makeplot == True:
+                        Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_YZrot_x, fgs_fsp_res_dmxl_YZrot_y, fgs_fsp_res_dmxl_YZrot_z, 
+                        title=f"res_dmxl_fsp_rotate_{i}", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+
+                    YZrotateSTD[i] = np.std(fgs_fsp_res_dmxl_YZrot_y)
+
+                YZindex = np.where(YZrotateSTD == YZrotateSTD.min())[0]
+                YZangle = YZrotate[int(YZindex)]*np.pi/180. 
+                fgs_fsp_res_dmxl_YZrot_x = fgs_fsp_res_dmxl_XYrot_x 
+                fgs_fsp_res_dmxl_YZrot_y = np.cos(YZangle)*fgs_fsp_res_dmxl_XYrot_y - np.sin(YZangle)*fgs_fsp_res_dmxl_XYrot_z
+                fgs_fsp_res_dmxl_YZrot_z = np.sin(YZangle)*fgs_fsp_res_dmxl_XYrot_y + np.cos(YZangle)*fgs_fsp_res_dmxl_XYrot_z
+                if parameter.makeplot == True:
+                    Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_YZrot_x, fgs_fsp_res_dmxl_YZrot_y, fgs_fsp_res_dmxl_YZrot_z, 
+                    title=f"res_dmxl_fsp_YZrotate", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+
+    breakpoint()
     """
         # 4: step 4 detrend
     """

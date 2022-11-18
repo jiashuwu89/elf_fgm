@@ -87,6 +87,8 @@ del_rogue_fsp = True # del rogue points in fsp resolution, which has a better re
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 fsp_detrend = False # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
+XYrotate = True 
+YZrotate = False # result in 70 degree rotation angle. doesn't make sense
 
 #del_spike_fsp = False  # delete spike in fsp resolution
 
