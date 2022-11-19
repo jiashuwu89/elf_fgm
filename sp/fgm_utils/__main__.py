@@ -69,10 +69,10 @@ if __name__ == "__main__":
     #endtime_str = ["2022-06-25/18:42:25"]
     #starttime_str = ["2019-04-30/18:30:52"] # long collection
     #endtime_str = ["2019-04-30/20:00:04"] # XYrotate = -33
-    #starttime_str = ["2019-08-02/02:01:49"] # long collection
-    #endtime_str = ["2019-08-02/02:56:39"] # XYrotate = -34
-    starttime_str = ["2019-08-06/07:39:26"] # long collection
-    endtime_str = ["2019-08-06/08:33:53"] # XYrotate = -35
+    starttime_str = ["2019-08-02/02:01:49"] # long collection
+    endtime_str = ["2019-08-02/02:56:39"] # XYrotate = -34
+    #starttime_str = ["2019-08-06/07:39:26"] # long collection
+    #endtime_str = ["2019-08-06/08:33:53"] # XYrotate = -35
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

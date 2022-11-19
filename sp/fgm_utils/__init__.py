@@ -236,7 +236,7 @@ def fgm_fsp_calib(
     """
         # 4: step 4 detrend
     """
-    if parameter.XYrotate == True:
+    if parameter.XYrotate_fsp == True:
         XYrotate = range(-40,40)
         XYrotateSTD = np.zeros(len(XYrotate))
         for i, theta in enumerate(XYrotate):
@@ -260,7 +260,7 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_XYrot_x, fgs_fsp_res_dmxl_XYrot_y, fgs_fsp_res_dmxl_XYrot_z, 
             title=f"res_dmxl_fsp_XYrotate", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
 
-        if parameter.YZrotate == True:
+        if parameter.YZrotate_fsp == True:
                 YZrotate = range(-70,70)
                 YZrotateSTD = np.zeros(len(YZrotate))
                 for i, theta in enumerate(YZrotate):

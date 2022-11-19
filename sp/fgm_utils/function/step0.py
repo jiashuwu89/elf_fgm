@@ -1,6 +1,7 @@
 from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
+import numpy as np
 
 def step0(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -113,4 +114,43 @@ def step0(
         Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_flag, datestr = datestr)
 
 
-    return [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]
+    """
+        0.6 XYrotate
+    """
+    if parameter.XYrotate_10hz == True:
+        # B full rotate from fgm to smxl
+        [
+            fgs_ful_smxl_1st_x, fgs_ful_smxl_1st_y, fgs_ful_smxl_1st_z] = coordinate.fgm2smxl(
+                fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_x
+        )
+        # B full rotate from smxl to dmxl
+        [
+            fgs_ful_dmxl_1st_x, fgs_ful_dmxl_1st_y, fgs_ful_dmxl_1st_z] = coordinate.smxl2dmxl(
+               fgs_ful_smxl_1st_x, fgs_ful_smxl_1st_y, fgs_ful_smxl_1st_z, phi_corr
+        )
+        # B full rotate in dmxl as XYrotate angle
+        fgs_ful_dmxl_2nd_x = np.cos(parameter.XYrotate_10hz_angle*np.pi/180)*fgs_ful_dmxl_1st_x - np.sin(parameter.XYrotate_10hz_angle*np.pi/180)*fgs_ful_dmxl_1st_y
+        fgs_ful_dmxl_2nd_y = np.sin(parameter.XYrotate_10hz_angle*np.pi/180)*fgs_ful_dmxl_1st_x + np.cos(parameter.XYrotate_10hz_angle*np.pi/180)*fgs_ful_dmxl_1st_y
+        fgs_ful_dmxl_2nd_z = fgs_ful_dmxl_1st_z
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_1st_x, fgs_ful_dmxl_1st_y, fgs_ful_dmxl_1st_z, 
+                title=f"ful_dmxl_1st", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+            Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, 
+                title=f"ful_dmxl_2nd", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+        # B full rotate from dmxl to smxl 
+        [
+            fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z] = coordinate.dmxl2smxl(
+                fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, phi_corr
+        )
+        # B full rotate from smxl to fgm
+        [
+            fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z] = coordinate.smxl2fgm(
+                fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z
+        )
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                title=f"ful_ful_1st", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+            Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, 
+                title=f"ful_ful_2nd", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+
+    return [fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]
