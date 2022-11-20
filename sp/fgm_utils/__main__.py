@@ -28,45 +28,19 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "ela"
+    mission = "elb"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
-    
+    """
     startdate = "2022-01-01"
     enddate = "2022-01-31"
     try:
         start_time, end_time = getCSV(csvpath, startdate, enddate)
     except error.SCreadError as e:
         logger.error(e.__str__())
-    
+    """
 
-    #starttime_str = ["2022-02-08/22:24:45"] #  still has gap in 1/80s spike. because t1 t2 not found, fixed
-    #endtime_str = ["2022-02-08/22:30:58"]
-    #starttime_str = ["2022-02-18/16:12:38"] # 1/80 spike. fixed
-    #endtime_str = ["2022-02-18/16:18:50"]
-    #starttime_str = ["2022-07-18/11:29:48"]
-    #endtime_str = ["2022-07-18/11:36:00"]
-    #starttime_str = ["2022-01-05/23:38:30"] # no unipolar spike
-    #endtime_str = ["2022-01-05/23:44:41"]
-    #starttime_str = ["2022-01-04/06:26:23"] # still has jagged
-    #endtime_str = ["2022-01-04/06:32:34"]
-    #starttime_str = ["2022-01-05/20:33:27"]  #still has gap in 1/80s spike. t1 found but not calibrated well
-    #endtime_str = ["2022-01-05/20:39:40"]  
-    #starttime_str = ["2022-01-01/11:52:27"]
-    #endtime_str = ["2022-01-01/11:58:42"]
-    #starttime_str = ["2022-08-17/23:24:26"] # ela
-    #endtime_str = ["2022-08-17/23:30:39"]
-    #starttime_str = ["2022-08-12/12:56:24"] # elb
-    #endtime_str = ["2022-08-12/13:02:36"]
-    #starttime_str = ["2022-08-07/21:55:33"] # elb
-    #endtime_str = ["2022-08-07/22:01:51"]
-    #starttime_str = ["2022-08-07/18:50:59"] # elb
-    #endtime_str = ["2022-08-07/18:57:15"]
-    #starttime_str = ["2022-01-03/16:42:58"] # step even without time spike
-    #endtime_str = ["2022-01-03/16:49:10"]
-    #starttime_str = ["2022-06-25/18:36:12"] # large amplitude
-    #endtime_str = ["2022-06-25/18:42:25"]
     #starttime_str = ["2019-04-30/18:30:52"] # long collection
     #endtime_str = ["2019-04-30/20:00:04"]
     #starttime_str = ["2019-08-02/02:01:49"] # long collection
@@ -74,17 +48,20 @@ if __name__ == "__main__":
     #starttime_str = ["2019-08-06/07:39:26"] # long collection
     #endtime_str = ["2019-08-06/08:33:53"]
 
-
-    #starttime_str = ["2022-03-28/03:08:11"] # has 1/80 doesn't need calibration
-    #endtime_str = ["2022-03-28/03:14:24"]
-    #starttime_str = ["2022-06-23/04:00:07"] # ela actual spike
-    #endtime_str = ["2022-06-23/04:06:19"]
-    #starttime_str = ["2022-03-01/02:25:52"] # 101% correct, still has spike not sure
-    #endtime_str = ["2022-03-01/02:32:03"]
-    #starttime_str = ["2022-03-29/02:16:32"] # has a 1/80*2 s spike
-    #endtime_str = ["2022-03-29/02:22:44"]    
-    #start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
-    #end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
+    #starttime_str = ["2021-03-21/08:27:09"] # Qi murong ela
+    #endtime_str = ["2021-03-21/08:33:23"]    
+    #starttime_str = ["2021-03-21/10:00:07"] # Qi murong ela
+    #endtime_str = ["2021-03-21/10:06:20"]    
+    #starttime_str = ["2021-03-21/11:33:13"] # Qi murong ela
+    #endtime_str = ["2021-03-21/11:39:25"]
+    #starttime_str = ["2021-03-22/13:59:54"] # Qi murong ela
+    #endtime_str = ["2021-03-22/14:06:07"]     
+    #starttime_str = ["2021-03-21/06:30:33"] # Qi murong elb
+    #endtime_str = ["2021-03-21/06:36:46"]     
+    starttime_str = ["2021-03-22/12:03:10"] # Qi murong elb
+    endtime_str = ["2021-03-22/12:09:23"]  
+    start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
+    end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
     for i in range(len(start_time)):
 
