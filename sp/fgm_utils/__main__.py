@@ -67,12 +67,25 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-03/16:49:10"]
     #starttime_str = ["2022-06-25/18:36:12"] # large amplitude
     #endtime_str = ["2022-06-25/18:42:25"]
-    #starttime_str = ["2019-04-30/18:30:52"] # long collection
+    #starttime_str = ["2019-04-30/18:30:52"] # long collection 1h 30m
     #endtime_str = ["2019-04-30/20:00:04"] # XYrotate = -33
-    starttime_str = ["2019-08-02/02:01:49"] # long collection
-    endtime_str = ["2019-08-02/02:56:39"] # XYrotate = -34
-    #starttime_str = ["2019-08-06/07:39:26"] # long collection
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
+    #endtime_str = ["2019-08-02/02:56:39"] # XYrotate = -34
+    #starttime_str = ["2019-08-06/07:39:26"] # long collection 55m
     #endtime_str = ["2019-08-06/08:33:53"] # XYrotate = -35
+    #starttime_str = ["2020-06-01/01:28:38"] # XYrotate =-28 
+    #endtime_str = ["2020-06-01/01:44:40"] # 16m
+    #starttime_str = ["2022-03-30/19:53:44"] # XYrotate =-37
+    #endtime_str = ["2022-03-30/20:12:53"] #  19m big gap
+    #starttime_str = ["2022-01-20/10:33:29"] # XYrotate =-39
+    #endtime_str = ["2022-01-20/11:26:21"] #  2 collection with gap in middle
+    #starttime_str = ["2022-01-20/15:11:07"] # XYrotate =-40
+    #endtime_str = ["2022-01-20/16:03:18"] #  2 collection with gap in middle
+    #starttime_str = ["2021-06-03/00:21:45"] # XYrotate =-38
+    #endtime_str = ["2021-06-03/00:27:57"] #  1 collection from south to north
+    starttime_str = ["2021-06-07/03:02:17"] # XYrotate =-38
+    endtime_str = ["2021-06-07/03:54:37"] #  1 collection from south to north
+
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

@@ -152,5 +152,9 @@ def step0(
                 title=f"ful_ful_1st", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
             Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, 
                 title=f"ful_ful_2nd", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+        
+        fgs_ful_fgm_1st_x = fgs_ful_fgm_2nd_x
+        fgs_ful_fgm_1st_y = fgs_ful_fgm_2nd_y
+        fgs_ful_fgm_1st_z = fgs_ful_fgm_2nd_z
 
-    return [fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]
+    return [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]

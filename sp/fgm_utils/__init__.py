@@ -258,7 +258,7 @@ def fgm_fsp_calib(
         fgs_fsp_res_dmxl_XYrot_z = fgs_fsp_res_dmxl_z
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_dmxl_XYrot_x, fgs_fsp_res_dmxl_XYrot_y, fgs_fsp_res_dmxl_XYrot_z, 
-            title=f"res_dmxl_fsp_XYrotate", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
+            title=f"res_dmxl_fsp_XYrotate angle {int(XYangle*180./np.pi)} deg", scatter = True, datestr = datestr, ctime_idx_time = ctime_idx_time, ctime_idx_flag = ctime_idx_flag)
 
         if parameter.YZrotate_fsp == True:
                 YZrotate = range(-70,70)

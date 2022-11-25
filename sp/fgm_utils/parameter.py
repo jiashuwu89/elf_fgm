@@ -87,11 +87,11 @@ del_rogue_fsp = True # del rogue points in fsp resolution, which has a better re
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 fsp_detrend = False # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
-XYrotate_fsp = False 
+XYrotate_fsp = True 
 YZrotate_fsp = False # keep false, result in 70 degree rotation angle. doesn't make sense
 XYrotate_10hz = False # keep false, result is weird
 XYrotate_10hz_angle = -34 # degree
-
+  
 #del_spike_fsp = False  # delete spike in fsp resolution
 
 """output paramter
@@ -99,7 +99,7 @@ XYrotate_10hz_angle = -34 # degree
 makeplot = True
 savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 # delete auroral region
 """for three long collection, first del_aurora = True, B_parameter_input = False, copy B parameter down below
