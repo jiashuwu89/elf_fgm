@@ -21,8 +21,8 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
     return os.path.join("/nfs/elfin-mirror/elfin", mission, "l1/state/defn", year_str, f"{mission}_l1_state_defn_{sta_datestr}_v02.cdf")
 
 
-proper_pad = True  # fails when data have gaps
-fit_running_spline = True
+proper_pad = False  # fails when data have gaps
+fit_running_spline = False
 relative_integrate = True
 bidirectional_integrate = True
 

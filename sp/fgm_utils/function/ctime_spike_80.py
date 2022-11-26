@@ -63,8 +63,10 @@ def sepoch_getspin_80(idx, ctime, cross_times, ctime_idx):
         avg_ctime_idx = []
         for spin_i in range(avg_spin_idx1, avg_spin_idx2):
             if spin_i + spike_find_spin_num <= spike_spin_idx1 or spin_i >= spike_spin_idx2 : # exclude spin with spike
+                
                 avg_ctime_idx1, avg_ctime_time1 = find_closest(ctime, cross_times[spin_i])
                 avg_ctime_idx2, avg_ctime_time2 = find_closest(ctime, cross_times[spin_i + spike_find_spin_num])
+                
                 if np.abs(avg_ctime_time1 - cross_times[spin_i]) < 0.1 and np.abs(avg_ctime_time2 - cross_times[spin_i + spike_find_spin_num]) < 0.1:
                     avg_ctime_idx.append([*range(avg_ctime_idx1, avg_ctime_idx2)])
 

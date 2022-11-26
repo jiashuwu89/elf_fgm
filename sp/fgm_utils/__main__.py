@@ -58,8 +58,11 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-22/14:06:07"]     
     #starttime_str = ["2021-03-21/06:30:33"] # Qi murong elb
     #endtime_str = ["2021-03-21/06:36:46"]     
-    starttime_str = ["2021-03-22/12:03:10"] # Qi murong elb
-    endtime_str = ["2021-03-22/12:09:23"]  
+    #starttime_str = ["2021-03-22/12:03:10"] # Qi murong elb
+    #endtime_str = ["2021-03-22/12:09:23"]  
+    starttime_str = ["2022-07-20/13:32:24"] # Vassilis event
+    endtime_str = ["2022-07-20/13:38:27"]  
+
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

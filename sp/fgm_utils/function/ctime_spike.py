@@ -127,6 +127,8 @@ def ctime_calib(ctime, B_x, B_y , B_z, cross_times, logger = None, datestr = Non
                         spike_ctime_idx1 = ctime_idx[i]
                         spike_ctime_idxs.append(spike_ctime_idx1)
                         ctime[spike_ctime_idx1:] = ctime[spike_ctime_idx1:] + delta_dt
+                    except:
+                        logger.error(f"⚠️ 1/80s spike: other error")
 
             elif np.abs(delta_dt) < 0.0115:
                 """

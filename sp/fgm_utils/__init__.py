@@ -144,22 +144,29 @@ def fgm_fsp_calib(
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
+    except:
+        logger.error(f"❌ step 0 other error. Stop processing.")
+        return [ [] for _ in range(16) ]
         
     """
         # 1. step 1, B calibration
     """
     logger.info(f"Step 1 calibration starts ... ")
-    [
-        cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
-        fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
-        fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
-        ] = step1.step1(
-            ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
-            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-            att_gei_x, att_gei_y, att_gei_z,
-            datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff
-        )
-
+    try:
+        [
+            cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+            ] = step1.step1(
+                ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z,
+                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff
+            )
+    except:
+        logger.error(f"❌ step 1 other error. Stop processing.")
+        return [ [] for _ in range(16) ]
+        
     if parameter.output == True:
         # full res
         fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x

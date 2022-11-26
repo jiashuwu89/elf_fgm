@@ -58,7 +58,6 @@ def resample_data(
     cur_data_np = np.array(cur_data.to_list())
     dimens = cur_data_np.shape[1]  # x, y, z
     interp_data = np.zeros((len(target_time), dimens))
-
     x = (cur_time - target_time[0]).total_seconds()
     x_interp = (target_time - target_time[0]).total_seconds()
     for dimen in range(dimens):

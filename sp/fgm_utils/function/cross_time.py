@@ -132,8 +132,10 @@ def cross_time_stage_2(
         idx = ((ctime - t0) >= -T_spins_d_pad_1_select[i] / 2) & (
             (ctime - t0) <= T_spins_d_pad_1_select[i] / 2
         )
+        
         # Use the arcsine function to get phase angle around the zero-crossing
         phase[idx] = np.arcsin(d_B_S3[idx] / np.max(np.abs(d_B_S3[idx])))  
+        
         # if gap exists, idx could be []; example starttime_str = "2022-01-01 14:57:42"
              
     # Record zero crossings as locations of the phase passing over from positive to negative
