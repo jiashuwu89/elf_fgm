@@ -92,8 +92,8 @@ YZrotate_ang = 45
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
