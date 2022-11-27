@@ -36,6 +36,7 @@ zero_crossing_method = 3
 f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
+funkyfgm = True
 """ctime spike paramter
 """
 # in ctime_calib, criterion for finding ctime gaps difference between jumps and ctime median in seconds
@@ -92,8 +93,14 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
-savepng = True
+makeplot = False
+savepng = False
 output = False # if true output to txt file
-download_data = True
+download_data = False
 
+
+"""specify time interval for some events
+"""
+del_time = True
+del_time_idxstart = [260] # 2022-07-20/13:32:24
+del_time_idxend = [306]

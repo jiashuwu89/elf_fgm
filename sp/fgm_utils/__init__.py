@@ -105,15 +105,28 @@ def fgm_fsp_calib(
 
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
-    """
-    try:
-        preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
-    except (error.funkyFGMError, error.CrossTime1Error, error.funkyFGMError_len) as e:
-        if parameter.makeplot == True:
-            Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
-        logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
-    """
+    
+    if parameter.funkyfgm == True:
+        try:
+            preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
+        except (error.funkyFGMError, error.CrossTime1Error, error.funkyFGMError_len) as e:
+            if parameter.makeplot == True:
+                Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
+            logger.error(e.__str__())
+            return [ [] for _ in range(16) ]
+    
+    if parameter.del_time == True:
+        del_time_idx = []
+        for i in range(len(parameter.del_time_idxend)):
+            for j in range(parameter.del_time_idxstart[i]*10, parameter.del_time_idxend[i]*10):
+                del_time_idx.append(j)
+        [
+            ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+            del_time_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z)
+    
+
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)
