@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "ela"
+    mission = "elb"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -83,9 +83,11 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-20/16:03:18"] #  2 collection with gap in middle
     #starttime_str = ["2021-06-03/00:21:45"] # XYrotate =-38
     #endtime_str = ["2021-06-03/00:27:57"] #  1 collection from south to north
-    starttime_str = ["2021-06-07/03:02:17"] # XYrotate =-38
-    endtime_str = ["2021-06-07/03:54:37"] #  1 collection from south to north
-
+    #starttime_str = ["2021-06-07/03:02:17"] # XYrotate =-38
+    #endtime_str = ["2021-06-07/03:54:37"] #  1 collection from south to north
+    starttime_str = ["2022-07-20/13:32:24"] # Vassilis event for proposal
+    endtime_str = ["2022-07-20/13:38:27"] #  
+    
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 

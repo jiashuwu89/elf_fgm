@@ -79,15 +79,15 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = True  # add a second calibration in dmxl coordinate to solve the trend
+cali_2nd = False  # add a second calibration in dmxl coordinate to solve the trend
 cali_3rd = False  # add a third calibration 
 cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-fsp_detrend = False # detrend in dmxl if true
+fsp_detrend = True # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
-XYrotate_fsp = True 
+XYrotate_fsp = False 
 YZrotate_fsp = False # keep false, result in 70 degree rotation angle. doesn't make sense
 XYrotate_10hz = False # keep false, result is weird
 XYrotate_10hz_angle = -34 # degree
@@ -105,7 +105,7 @@ download_data = True
 """for three long collection, first del_aurora = True, B_parameter_input = False, copy B parameter down below
 second, del_aurora = False, B_parameter_input = True
 """
-del_aurora = False
+del_aurora = True
 # 2019-04-30
 #aurora_start = [3800]
 #aurora_end = [4800]
@@ -115,15 +115,19 @@ del_aurora = False
 #aurora_end = [700, 3000]
 
 # 2019-08-06
-aurora_start = [2000]
-aurora_end = [2900]
+#aurora_start = [2000]
+#aurora_end = [2900]
 
+# 2022-07-20
+aurora_start = [260]
+aurora_end = [306]
+# 
 # use old B parameter 
-Bparameter_input = True
+Bparameter_input = False
 # 2019-04-30
-Bparameter = [ 9.71179072e+01, -1.07083739e+01,  1.17354030e+01, -5.69534476e+03,
-       -1.92709013e+01,  9.77811809e+01,  9.80274728e+00,  3.46543305e+03,
-       -3.54688944e-01,  3.73808512e-01,  1.14265880e+02, -8.43944571e+04]
+#Bparameter = [ 9.71179072e+01, -1.07083739e+01,  1.17354030e+01, -5.69534476e+03,
+#       -1.92709013e+01,  9.77811809e+01,  9.80274728e+00,  3.46543305e+03,
+#       -3.54688944e-01,  3.73808512e-01,  1.14265880e+02, -8.43944571e+04]
 
 # 2019-08-02
 #Bparameter = [ 9.80624272e+01, -2.42576205e+01,  7.59029621e+00, -9.42501648e+04,
@@ -134,3 +138,8 @@ Bparameter = [ 9.71179072e+01, -1.07083739e+01,  1.17354030e+01, -5.69534476e+03
 #Bparameter = [ 9.51663776e+01, -2.19684890e+01,  9.03692449e+00, -5.89833557e+04,
 #       -9.27911127e+00,  9.77477837e+01,  1.26234524e+01, -3.75090744e+04,
 #        1.35271529e+00, -1.26879531e+00,  1.14428940e+02, -7.98022909e+04]
+
+# 2022-07-20
+Bparameter = [-9.87314926e+01, -8.07378599e+00,  5.61354331e+01, -5.47967014e+04,
+        3.03848559e+01, -1.08915077e+02,  4.37993653e+01, -2.09724701e+05,
+        2.30815689e-01, -2.88647595e-01,  3.86987923e+01,  9.97144473e+03]
