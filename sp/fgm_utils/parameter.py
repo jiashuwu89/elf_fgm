@@ -93,14 +93,14 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 
 """specify time interval for some events
 """
-del_time = True
+del_time = False
 del_time_idxstart = [260] # 2022-07-20/13:32:24
 del_time_idxend = [306]

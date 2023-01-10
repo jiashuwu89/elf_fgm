@@ -60,8 +60,14 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-21/06:36:46"]     
     #starttime_str = ["2021-03-22/12:03:10"] # Qi murong elb
     #endtime_str = ["2021-03-22/12:09:23"]  
-    starttime_str = ["2022-07-20/13:32:24"] # Vassilis event
-    endtime_str = ["2022-07-20/13:38:27"]  
+    #starttime_str = ["2022-07-20/13:32:24"] # Vassilis event
+    #endtime_str = ["2022-07-20/13:38:27"] 
+    #starttime_str = ["2021-12-01/22:19:07"] # check error events
+    #endtime_str = ["2021-12-01/22:25:10"]
+    #starttime_str = ["2021-03-14/15:45:48"] # yangyang gap event
+    #endtime_str = ["2021-03-14/15:52:02"]   
+    starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
+    endtime_str = ["2022-09-07/19:19:57"] 
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))

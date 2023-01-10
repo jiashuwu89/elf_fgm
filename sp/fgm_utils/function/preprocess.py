@@ -46,6 +46,8 @@ def clip_cdfdata(
     """
     startindex = df.index.get_indexer([starttime], method="nearest")[0]
     endindex = df.index.get_indexer([endtime], method="nearest")[0]
+    if endindex == len(df) - 1 :
+        endindex = len(df)
 
     return df[startindex:endindex]
 

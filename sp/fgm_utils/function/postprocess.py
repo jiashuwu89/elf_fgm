@@ -131,6 +131,7 @@ def fsp_spike_del(
 
     """type 4, purple spike, other gaps
     """
+   
     cross_times_calib_del = []
     if parameter.fsp_spike_del_type4 == True:
         ctime_idx_time_2 = ctime[ctime_idx[ctime_idx_flag == 4]]
@@ -139,6 +140,7 @@ def fsp_spike_del(
         cross_times_calib_del = []
         for ctime_idx_time_idx, ctime_idx_time_val in enumerate(ctime_idx_time_2):
             try:
+                # pick a interval around ctime_idx and calc std
                 idx1 = np.where(cross_times_calib > ctime_idx_time_val - 15*np.pi/w_avg)[0][0]
                 idx2 = np.where(cross_times_calib < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + 15*np.pi/w_avg)[0][-1]
                 idxs = range(idx1, idx2) if idx2 + 1 >= len(cross_times_calib) else range(idx1, idx2+1)
@@ -147,21 +149,23 @@ def fsp_spike_del(
                 clip_std = np.std(clip)
                 #logger.info(f"1/80s orange spike {ctime_idx_time_val} clip1 std:{clip_std}")  # this is the std around orange spike
                 
-                idx = find_closest(clip_ctime, ctime_idx_time_val)[0]
+                idx = find_closest(clip_ctime, ctime_idx_time_val)[0] # position of ctime_idx in clip
                 clip2 = np.delete(clip, idx)
                 clip2_std = np.std(clip2)
                 #logger.info(f"1/80s orange spike {ctime_idx_time_val} clip2 std:{clip2_std}") # this is the std around orange spike if exclude the spike 
                 if clip_std > clip2_std:
-                    idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0]
+                    idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0] # position of cime_idx in cross_times_calib
                     cross_times_calib_del.append(idx_ctime)
                     logger.debug(f"[POSTPROCESS] FSP spike delete success: other purple spike {ctime_idx_time_val} type 4.")
+                # check the point before ctime_idx and within a spin period, if std decrease after delete this point, then delete it   
                 if idx > 0 and idx < len(clip_ctime) and clip_ctime[idx] - clip_ctime[idx-1] < 3:
                     clip2 = np.delete(clip, idx-1)
                     clip2_std = np.std(clip2)
                     if clip_std > clip2_std:
-                        idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0]
+                        idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0] # position of cime_idx in cross_times_calib
                         cross_times_calib_del.append(idx_ctime-1)
-                if idx < len(clip_ctime)-1 and clip_ctime[idx+1] - clip_ctime[idx] < 3:
+                # check the point after ctime_idx and within a spin period, if std decrease after delete this point, then delete it   
+                if idx < len(clip_ctime)-1 and clip_ctime[idx+1] - clip_ctime[idx] < 3: 
                     clip2 = np.delete(clip, idx+1)
                     clip2_std = np.std(clip2)
                     if clip_std > clip2_std:
