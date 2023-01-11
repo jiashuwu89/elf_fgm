@@ -9,6 +9,9 @@ def fsp_spike_del(
     cross_times_calib, w_syn_d_calib, DMXL_2_GEI_fsp,
     fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
     fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y,fgs_fsp_igrf_dmxl_z, 
+    fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+    fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+    fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
     logger):
 
     """type 3, 2.5s pink spike
@@ -65,10 +68,16 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp, 
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 cross_times_calib_del, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
         
         
@@ -122,16 +131,21 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 cross_times_calib_del, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
 
 
     """type 4, purple spike, other gaps
     """
-   
     cross_times_calib_del = []
     if parameter.fsp_spike_del_type4 == True:
         ctime_idx_time_2 = ctime[ctime_idx[ctime_idx_flag == 4]]
@@ -140,35 +154,34 @@ def fsp_spike_del(
         cross_times_calib_del = []
         for ctime_idx_time_idx, ctime_idx_time_val in enumerate(ctime_idx_time_2):
             try:
+                
                 # pick a interval around ctime_idx and calc std
-                idx1 = np.where(cross_times_calib > ctime_idx_time_val - 15*np.pi/w_avg)[0][0]
-                idx2 = np.where(cross_times_calib < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + 15*np.pi/w_avg)[0][-1]
+                idx1 = np.where(cross_times_calib > ctime_idx_time_val - 30*np.pi/w_avg)[0][0]
+                idx2 = np.where(cross_times_calib < ctime_idx_time_val + ctime_idx_timediffs[ctime_idx_time_idx] + 30*np.pi/w_avg)[0][-1]
                 idxs = range(idx1, idx2) if idx2 + 1 >= len(cross_times_calib) else range(idx1, idx2+1)
+                idxs= list(idxs)
+                idxs_inters = list(set(cross_times_calib_del) & set(idxs))
+                idxs = [i for i in idxs if i not in idxs_inters]
                 clip = fgs_fsp_res_dmxl_norm[idxs]
                 clip_ctime = cross_times_calib[idxs]
+                clip_mean = np.mean(clip)
                 clip_std = np.std(clip)
                 #logger.info(f"1/80s orange spike {ctime_idx_time_val} clip1 std:{clip_std}")  # this is the std around orange spike
                 
                 idx = find_closest(clip_ctime, ctime_idx_time_val)[0] # position of ctime_idx in clip
-                clip2 = np.delete(clip, idx)
-                clip2_std = np.std(clip2)
-                #logger.info(f"1/80s orange spike {ctime_idx_time_val} clip2 std:{clip2_std}") # this is the std around orange spike if exclude the spike 
-                if clip_std > clip2_std:
+                # if the ctime_idx is too large than three sigma
+                if clip[idx] > clip_mean + clip_std*3 or clip[idx] < clip_mean - clip_std*3:
                     idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0] # position of cime_idx in cross_times_calib
                     cross_times_calib_del.append(idx_ctime)
                     logger.debug(f"[POSTPROCESS] FSP spike delete success: other purple spike {ctime_idx_time_val} type 4.")
                 # check the point before ctime_idx and within a spin period, if std decrease after delete this point, then delete it   
                 if idx > 0 and idx < len(clip_ctime) and clip_ctime[idx] - clip_ctime[idx-1] < 3:
-                    clip2 = np.delete(clip, idx-1)
-                    clip2_std = np.std(clip2)
-                    if clip_std > clip2_std:
+                    if clip[idx-1] > clip_mean + clip_std*3 or clip[idx-1] < clip_mean - clip_std*3:
                         idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0] # position of cime_idx in cross_times_calib
                         cross_times_calib_del.append(idx_ctime-1)
                 # check the point after ctime_idx and within a spin period, if std decrease after delete this point, then delete it   
                 if idx < len(clip_ctime)-1 and clip_ctime[idx+1] - clip_ctime[idx] < 3: 
-                    clip2 = np.delete(clip, idx+1)
-                    clip2_std = np.std(clip2)
-                    if clip_std > clip2_std:
+                    if clip[idx+1] > clip_mean + clip_std*3 or clip[idx+1] < clip_mean - clip_std*3:
                         idx_ctime = find_closest(cross_times_calib, ctime_idx_time_val)[0]
                         cross_times_calib_del.append(idx_ctime+1)
             except:
@@ -182,10 +195,16 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 cross_times_calib_del, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
 
     """type 5, green spike, < 0.1 
@@ -238,10 +257,16 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 cross_times_calib_del, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
 
     """delete rogue points
@@ -254,10 +279,16 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 del_index, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
     
     # delete rogue points again in fsp data
@@ -269,14 +300,23 @@ def fsp_spike_del(
             cross_times_calib, DMXL_2_GEI_fsp,
             fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             ] = delete_data(
                 del_index, cross_times_calib, DMXL_2_GEI_fsp,
                 fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
         )
         logger.debug(f"[POSTPROCESS] detrend successfully done. ")
     
     return [cross_times_calib, DMXL_2_GEI_fsp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
-        fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+        fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
+        fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+        fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+        fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
     ]
 

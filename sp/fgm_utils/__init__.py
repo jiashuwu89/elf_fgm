@@ -223,27 +223,14 @@ def fgm_fsp_calib(
     fgs_fsp_res_dmxl_z = fgs_fsp_ful_dmxl_z - fgs_fsp_igrf_dmxl_z
 
     """
-        # 3 : step 3 delete spike and rogue points
+        # 3: step 4 detrend
+        this step is swap with step 4, because in postporcess, ctime_idx needs to compare with average. if big trend exists, the spike is not prominent
     """
-    try:
-        [
-            cross_times_calib, DMXL_2_GEI_fsp, 
-            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
-            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
-            ] = postprocess.fsp_spike_del(
-            ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, 
-            cross_times_calib, w_syn_d_calib, DMXL_2_GEI_fsp,
-            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y,fgs_fsp_igrf_dmxl_z, 
-            logger
-        )
-    except error.fsp_spike_del_error as e:
-        logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
+    if parameter.fsp_detrend == False:
+        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
 
-    """
-        # 4: step 4 detrend
-    """
     if parameter.fsp_detrend == True:
         [
             fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z] = detrend.detrend_quad(
@@ -269,7 +256,7 @@ def fgm_fsp_calib(
         fgs_fsp_ful_dmxl_x = fgs_fsp_res_dmxl_x + fgs_fsp_igrf_dmxl_x
         fgs_fsp_ful_dmxl_y = fgs_fsp_res_dmxl_y + fgs_fsp_igrf_dmxl_y
         fgs_fsp_ful_dmxl_z = fgs_fsp_res_dmxl_z + fgs_fsp_igrf_dmxl_z
-
+    
     # transform ful dmxl to ful gei
     [fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = dmxl2gei(
         fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z, DMXL_2_GEI_fsp)
@@ -277,23 +264,41 @@ def fgm_fsp_calib(
     # get igrf gei
     [
         fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z] = cross_time.fsp_igrf(
-        ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z
-    )
+        ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z)
 
     # get res gei
     fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
     fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y 
-    fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z  
-
+    fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z 
+    
+    """
+        # 4 : step 3 delete spike and rogue points
+    """
+    try:
+        [
+            cross_times_calib, DMXL_2_GEI_fsp, 
+            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
+            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
+            ] = postprocess.fsp_spike_del(
+            ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, 
+            cross_times_calib, w_syn_d_calib, DMXL_2_GEI_fsp,
+            fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
+            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y,fgs_fsp_igrf_dmxl_z, 
+            fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+            fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z,
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
+            logger,
+        )
+    except error.fsp_spike_del_error as e:
+        logger.error(e.__str__())
+        return [ [] for _ in range(16) ]
 
     """
         # 5 : step 5 final data and plot
     """
-    if parameter.fsp_detrend == False:
-        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
-
     if parameter.makeplot == True:
         #Bplot.B_ctime_plot(
         #    cross_times_calib, fgs_fsp_res_dmxl_x, 
