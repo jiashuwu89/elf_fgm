@@ -168,7 +168,7 @@ def fgm_fsp_calib(
     try:
         [
             cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
-            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+            fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, 
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
             ] = step1.step1(
                 ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -180,21 +180,6 @@ def fgm_fsp_calib(
         logger.error(f"❌ step 1 other error. Stop processing.")
         return [ [] for _ in range(16) ]
         
-    if parameter.output == True:
-        # full res
-        fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x
-        fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
-        fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z
-
-        FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
-                        datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
-        output.output_txt(FGM_datetime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, title='ela_fgs_res_dmxl')  
-
-        print(f"std res_x: {np.std(fgs_res_dmxl_x)}") 
-        print(f"std res_y: {np.std(fgs_res_dmxl_y)}") 
-        print(f"std res_z: {np.std(fgs_res_dmxl_z)}")  
-        #breakpoint()  
-
     """
         # 2 : step 2 fgs fsp resolution
     """
@@ -204,9 +189,13 @@ def fgm_fsp_calib(
             ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
     )
     [
-        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
-            ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+        fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z] = cross_time.fsp_ful(
+            ctime, cross_times_calib, T_spins_d_calib, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z
     )
+
+    fgs_fsp_ful_dmxl_x = fgs_fsp_res_dmxl_x + fgs_fsp_igrf_dmxl_x
+    fgs_fsp_ful_dmxl_y = fgs_fsp_res_dmxl_y + fgs_fsp_igrf_dmxl_y
+    fgs_fsp_ful_dmxl_z = fgs_fsp_res_dmxl_z + fgs_fsp_igrf_dmxl_z
 
     del_idx = np.where((fgs_fsp_ful_dmxl_x == 0) & (fgs_fsp_ful_dmxl_y == 0) & (fgs_fsp_ful_dmxl_z == 0))
     [
@@ -217,10 +206,6 @@ def fgm_fsp_calib(
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, 
             fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z,
         )
-
-    fgs_fsp_res_dmxl_x = fgs_fsp_ful_dmxl_x - fgs_fsp_igrf_dmxl_x
-    fgs_fsp_res_dmxl_y = fgs_fsp_ful_dmxl_y - fgs_fsp_igrf_dmxl_y
-    fgs_fsp_res_dmxl_z = fgs_fsp_ful_dmxl_z - fgs_fsp_igrf_dmxl_z
 
     """
         # 3: step 4 detrend
@@ -270,7 +255,7 @@ def fgm_fsp_calib(
     fgs_fsp_res_gei_x = fgs_fsp_ful_gei_x - fgs_fsp_igrf_gei_x
     fgs_fsp_res_gei_y = fgs_fsp_ful_gei_y - fgs_fsp_igrf_gei_y 
     fgs_fsp_res_gei_z = fgs_fsp_ful_gei_z - fgs_fsp_igrf_gei_z 
-    
+
     """
         # 4 : step 3 delete spike and rogue points
     """
@@ -313,6 +298,11 @@ def fgm_fsp_calib(
         Bplot.B_ctime_plot(
             cross_times_calib, fgs_fsp_res_gei_x, 
             fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title="res_gei_fsp", scatter = True, 
+            ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
+        )
+        Bplot.B_ctime_plot(
+            cross_times_calib, fgs_fsp_igrf_dmxl_x, 
+            fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z, title="igrf_dmxl_fsp", scatter = True, 
             ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
         )
     

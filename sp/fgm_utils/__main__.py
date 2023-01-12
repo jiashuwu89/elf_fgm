@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -66,8 +66,12 @@ if __name__ == "__main__":
     #endtime_str = ["2021-12-01/22:25:10"]
     #starttime_str = ["2021-03-14/15:45:48"] # yangyang gap event
     #endtime_str = ["2021-03-14/15:52:02"]   
-    starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
-    endtime_str = ["2022-09-07/19:19:57"] 
+    #starttime_str = ["2022-01-14/18:46:04"] # yangyang gap event elb
+    #endtime_str = ["2022-01-14/18:52:18"] 
+    #starttime_str = ["2022-01-14/18:49:45"] # yangyang gap event ela
+    #endtime_str = ["2022-01-14/18:55:58"] 
+    starttime_str = ["2022-09-10/23:42:55"] # event check by jiang liu ela
+    endtime_str = ["2022-09-10/23:49:06"] 
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
