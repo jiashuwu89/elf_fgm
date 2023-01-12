@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -41,8 +41,8 @@ if __name__ == "__main__":
         logger.error(e.__str__())
     """
 
-    starttime_str = ["2022-07-20/13:32:24"] 
-    endtime_str = ["2022-07-20/13:38:27"]    
+    starttime_str = ["2022-09-10/23:42:55"] # event check by jiang liu ela
+    endtime_str = ["2022-09-10/23:49:06"]  
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
