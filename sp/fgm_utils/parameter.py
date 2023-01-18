@@ -104,3 +104,15 @@ download_data = True
 del_time = False
 del_time_idxstart = [260] # 2022-07-20/13:32:24
 del_time_idxend = [306]
+
+"""gei to obw
+"""
+gei2obw = True
+
+"""change zero crossing location according to omege, in phase inter  
+"""
+CrossTime_Update = True
+
+"""add boundary to least square fitting, in calibration
+"""
+fit_bound = False

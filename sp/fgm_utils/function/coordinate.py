@@ -166,3 +166,84 @@ def fgm2smxl(fgs_fgm_x, fgs_fgm_y, fgs_fgm_z):
     fgs_smxl_z = np.sin(parameter.f) * fgs_fgm_x - np.cos(parameter.f) * fgs_fgm_y
 
     return [fgs_smxl_x, fgs_smxl_y, fgs_smxl_z]     
+
+
+def gei_obw_matrix(
+    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, pos_gei_x, pos_gei_y, pos_gei_z
+    ):
+    """use igrf and pos to get the rotation matrix between gei and obw
+        obw: 
+            get b first by normalizing the model field (IGRF)
+            then get w = (rxb)/|rxb|
+            then get o = bxw
+    """
+    fgs_igrf_gei_x_hat = fgs_igrf_gei_x / np.sqrt(
+        fgs_igrf_gei_x**2 + fgs_igrf_gei_y**2 + fgs_igrf_gei_z**2
+    )
+    fgs_igrf_gei_y_hat = fgs_igrf_gei_y / np.sqrt(
+        fgs_igrf_gei_x**2 + fgs_igrf_gei_y**2 + fgs_igrf_gei_z**2
+    )
+    fgs_igrf_gei_z_hat = fgs_igrf_gei_z / np.sqrt(
+        fgs_igrf_gei_x**2 + fgs_igrf_gei_y**2 + fgs_igrf_gei_z**2
+    )
+    pos_gei_x_hat = pos_gei_x / np.sqrt(
+        pos_gei_x**2 + pos_gei_y**2 + pos_gei_z**2 
+    )
+    pos_gei_y_hat = pos_gei_y / np.sqrt(
+        pos_gei_x**2 + pos_gei_y**2 + pos_gei_z**2 
+    )
+    pos_gei_z_hat = pos_gei_z / np.sqrt(
+        pos_gei_x**2 + pos_gei_y**2 + pos_gei_z**2 
+    )
+
+    OBW_2_GEI = np.zeros((len(fgs_igrf_gei_x), 3, 3))
+    GEI_2_OBW = np.zeros((len(fgs_igrf_gei_x), 3, 3))
+    for i in range(len(fgs_igrf_gei_x)):
+        r_hat = np.array([pos_gei_x_hat[i], pos_gei_y_hat[i], pos_gei_z_hat[i]])
+        b_hat = np.array(
+            [fgs_igrf_gei_x_hat[i], fgs_igrf_gei_y_hat[i], fgs_igrf_gei_z_hat[i]]
+        )
+        BperpWest = np.cross(r_hat, b_hat)
+        BperpWest_norm = BperpWest / np.linalg.norm(BperpWest)
+        BperpOut = np.cross(b_hat, BperpWest_norm)
+        BperpOut_norm = BperpOut / np.linalg.norm(BperpOut)
+        
+        GEI_2_OBW[i, 0, :] = BperpOut_norm
+        GEI_2_OBW[i, 1, :] = b_hat
+        GEI_2_OBW[i, 2, :] = BperpWest_norm
+
+        OBW_2_GEI[i, :, :] = np.linalg.inv(GEI_2_OBW[i, :, :])
+
+    return [GEI_2_OBW, OBW_2_GEI]
+
+
+def gei2obw(fgs_gei_x, fgs_gei_y, fgs_gei_z, GEI_2_OBW):
+    """TODO:combine this with dmxl2gei
+    """
+    fgs_obw_x = np.zeros(len(fgs_gei_x))
+    fgs_obw_y = np.zeros(len(fgs_gei_x))
+    fgs_obw_z = np.zeros(len(fgs_gei_x))
+
+    for i in range(len(fgs_obw_x)):
+        fgs_obw_x[i] = (
+            GEI_2_OBW[i][0, 0] * fgs_gei_x[i]
+            + GEI_2_OBW[i][0, 1] * fgs_gei_y[i]
+            + GEI_2_OBW[i][0, 2] * fgs_gei_z[i]
+        )
+        fgs_obw_y[i] = (
+            GEI_2_OBW[i][1, 0] * fgs_gei_x[i]
+            + GEI_2_OBW[i][1, 1] * fgs_gei_y[i]
+            + GEI_2_OBW[i][1, 2] * fgs_gei_z[i]
+        )
+        fgs_obw_z[i] = (
+            GEI_2_OBW[i][2, 0] * fgs_gei_x[i]
+            + GEI_2_OBW[i][2, 1] * fgs_gei_y[i]
+            + GEI_2_OBW[i][2, 2] * fgs_gei_z[i]
+        )
+
+    return [fgs_obw_x, fgs_obw_y, fgs_obw_z] 
+
+
+def obw2gei(fgs_obw_x, fgs_obw_y, fgs_obw_z, OBW_2_GEI):
+    
+    pass

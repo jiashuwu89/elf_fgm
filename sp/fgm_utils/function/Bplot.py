@@ -148,3 +148,47 @@ def B_3d(B_x: List[float],B_y: List[float], B_z: List[float]):
     ax.scatter3D(B_x, B_y, B_z, 'gray')
     plt.show()
     plt.close()
+
+
+def omega_stage123(cross_times_1, w_syn_1, 
+    cross_times_2,  w_syn_2, 
+    cross_times_3,  w_syn_3,
+    cross_times_fit,  w_syn_fit,
+    title = "omega_stage_fit", datestr = None, xlimt = None, ylimt = None):
+
+    filename = datestr + "_" + title if datestr is not None else title
+    fig, ax = plt.subplots(1, figsize=(15,7))
+
+    ax.scatter(cross_times_1, w_syn_1, label='Stage 1')
+    ax.scatter(cross_times_2, w_syn_2, label='Stage 2')
+    ax.scatter(cross_times_3, w_syn_3, label='Stage 3')
+    ax.scatter(cross_times_fit, w_syn_fit, label='Fit')
+    ax.set_xlabel('Relative Time (s)')
+    ax.set_ylabel(r'$\omega_{synodic}$')
+
+    ax.legend() 
+    if ylimt is not None: ax.set_ylim(ylimt)
+    if xlimt is not None: ax.set_xlim(xlimt)
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
+    plt.close()
+
+
+def omega_fit(cross_times_org, w_syn_org, 
+    cross_times_fit,  w_syn_fit, 
+    title = "omega_fit", datestr = None, xlimt = None, ylimt = None):
+
+    filename = datestr + "_" + title if datestr is not None else title
+    fig, ax = plt.subplots(1, figsize=(15,7))
+
+    ax.scatter(cross_times_org, w_syn_org, label='org')
+    ax.scatter(cross_times_fit, w_syn_fit, label='fit')
+    ax.set_xlabel('Relative Time (s)')
+    ax.set_ylabel(r'$\omega_{synodic}$')
+
+    #ax.set_ylim(2.217, 2.2225)
+    ax.legend() 
+    breakpoint()
+    if ylimt is not None: ax.set_ylim(ylimt)
+    if xlimt is not None: ax.set_xlim(xlimt)
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
+    plt.close()

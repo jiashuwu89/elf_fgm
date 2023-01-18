@@ -4,9 +4,9 @@ from scipy.optimize import curve_fit
 from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
-from .Bplot import B_ctime_plot, B_ctime_plot_single
+from .Bplot import B_ctime_plot, B_ctime_plot_single, omega_fit
 from .error import CrossTime1Error
-func = calibration.cube_fit
+func = calibration.quad_fit
 
 def cross_time_stage_1(
     ctime: List[float], B_S3: List[float], ctime_idx = None, ctime_idx_flag = None,
@@ -447,6 +447,9 @@ def phase_integration(
 ):
     """cross time determination stage 3
     curvefit to find B peak
+    w_syn_d is the measured spin period
+    w_syn is the spin period at ctime
+    w_t0s is the fitted spin period at cross time
     """
     if parameter.zero_crossing_method == 1:
         cross_times = cross_times_1_select
@@ -493,7 +496,6 @@ def phase_integration(
             w_syn = func(
                 ctime, *curve_fit(func, cross_times, w_syn_d)[0]
             )
-
     if parameter.relative_integrate == True:
         # Use multiple reference points for integration
         idx0s = np.array(
@@ -522,6 +524,9 @@ def phase_integration(
                     cross_times,
                     *curve_fit(func, cross_times, w_syn_d)[0],
                 )
+        cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
+        if parameter.CrossTime_Update == True:
+            cross_times = cross_times_fit
     else:
         # Use just one reference point for integration
         t0 = cross_times[0]
@@ -582,7 +587,7 @@ def phase_integration(
             0.5 * (w_t0 + w_syn[idx0]) * (t0 - ctime[idx0])
         )            
 
-    return [phi, cross_times, w_syn_d, T_spins_d]     
+    return [phi, cross_times, w_syn_d, T_spins_d, cross_times_fit, w_t0s]     
 
 
 def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z): 

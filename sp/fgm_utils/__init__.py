@@ -6,7 +6,7 @@ import pandas as pd
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
-from .function.coordinate import dmxl2gei
+from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
 
 datestr = ""
 
@@ -102,6 +102,7 @@ def fgm_fsp_calib(
     fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z = np.array(list(zip(*df["fgm_fgm"])))
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
+    pos_gei_x, pos_gei_y, pos_gei_z = np.array(list(zip(*df["pos_gei"])))
 
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
@@ -122,9 +123,11 @@ def fgm_fsp_calib(
                 del_time_idx.append(j)
         [
             ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
-            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+            att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
             del_time_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
-            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z)
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+            pos_gei_x, pos_gei_y, pos_gei_z)
     
 
     # check repeated ctime
@@ -160,7 +163,7 @@ def fgm_fsp_calib(
     except:
         logger.error(f"❌ step 0 other error. Stop processing.")
         return [ [] for _ in range(16) ]
-        
+ 
     """
         # 1. step 1, B calibration
     """
@@ -171,7 +174,8 @@ def fgm_fsp_calib(
             fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
             ] = step1.step1(
-                ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                #ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
                 datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff
@@ -203,8 +207,12 @@ def fgm_fsp_calib(
         fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z] = cross_time.fsp_igrf(
             ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
     )
+    #[
+    #    fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
+    #        ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+    #)
     [
-        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
+        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
             ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
     )
 
@@ -320,6 +328,14 @@ def fgm_fsp_calib(
     #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
     #breakpoint()
     FGM_timestamp = df["timestamp"][0] + cross_times_calib     
+    
+    if parameter.gei2obw == True:
+        [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)
+        [GEI_2_OBW, OBW_2_GEI] = gei_obw_matrix(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z)
+        [fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z] = gei2obw(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, GEI_2_OBW)
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title="res_obw_fsp", 
+            ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
 
     return [
         FGM_timestamp,

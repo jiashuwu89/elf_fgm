@@ -39,7 +39,7 @@ def step0(
         0.2 corr - phase angle integration
     """
     [
-        phi_corr, cross_times_corr, w_syn_d_corr, T_spins_d_corr] = cross_time.phase_integration(
+        phi_corr, cross_times_corr, w_syn_d_corr, T_spins_d_corr, cross_times_corr_fit, w_syn_d_corr_fit] = cross_time.phase_integration(
         ctime, cross_times_0th_1, cross_times_0th_1_mids, w_syn_0th_1, T_spins_0th_1,
         cross_times_0th_2, cross_times_0th_2_mids, w_syn_0th_2, T_spins_0th_2,
         cross_times_0th_3, w_syn_0th_3, T_spins_0th_3,

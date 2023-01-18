@@ -1,8 +1,18 @@
 from typing import List
 import numpy as np
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, least_squares, minimize
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
+from .. import parameter
+#import function.Bplot as plot
+
+def IGRF_fgm_fit(x, A, b):
+    y = A@x 
+    res = y - b
+    return res
+    #return res[:int(2*len(y)/3)]
+    #return np.abs(y - b) + np.std(np.abs(y[int(2*len(y)/3):]-b[int(2*len(y)/3):]))**2
+    #return np.abs(y - b) + np.std(np.abs(y[int(len(y)/3)+1:int(2*len(y)/3)]-b[int(len(y)/3)+1:int(2*len(y)/3)]))**2
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -111,12 +121,34 @@ def calib_leastsquare(
     A[2 * n : 3 * n, 10] = fgs_igrf_fgm_z
     A[2 * n : 3 * n, 11] = np.ones(n)
     A = csc_matrix(A)
+   
     if init is None:
-        x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+        #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+        LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+
+        x0 = [1, 0, 0, 0, 0, 1, 0 , 0, 0, 0, 114, 0]
+        if parameter.fit_bound == True:
+            bounds = ([0, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf], 
+                [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+            #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
+            #        -0.01, -np.inf, -0.01, -np.inf,
+            #        -np.inf, -np.inf, -np.inf, -np.inf], 
+            #        [np.inf, 0.01, 0.01, np.inf,  # upper
+            #        0.01, np.inf, 0.01, np.inf, 
+            #        np.inf, np.inf, np.inf, np.inf])
+            res1 = least_squares(LS_func, x0, bounds = bounds)
+        else:
+            res1 = least_squares(LS_func, x0)
+
+        x = res1.x
     else:
         x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
         #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
-
+    
+    breakpoint()
+    #x = [ -1,  0,  0,  0,
+    #   0, 1,  0, 0,
+    #    0,  0,  1, 0]
     orth = np.array([[x[0], x[1], x[2]], [x[4], x[5], x[6]], [x[8], x[9], x[10]]])
     offsets = np.array([x[3], x[7], x[11]])
     calib = np.linalg.inv(orth)

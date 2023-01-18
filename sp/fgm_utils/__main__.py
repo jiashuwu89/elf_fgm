@@ -66,8 +66,23 @@ if __name__ == "__main__":
     #endtime_str = ["2021-12-01/22:25:10"]
     #starttime_str = ["2021-03-14/15:45:48"] # yangyang gap event
     #endtime_str = ["2021-03-14/15:52:02"]   
-    starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
-    endtime_str = ["2022-09-07/19:19:57"] 
+    #starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
+    #endtime_str = ["2022-09-07/19:19:57"] 
+    #starttime_str = ["2022-09-10/23:42:55"] # jiang event
+    #endtime_str = ["2022-09-10/23:49:06"] 
+    #starttime_str = ["2022-03-13/19:33:28"]
+    #endtime_str = ["2022-03-13/19:39:41"]
+    #starttime_str = ["2022-03-31/16:11:16"] # a good event
+    #endtime_str = ["2022-03-31/16:17:27"] 
+    #starttime_str = ["2022-04-01/13:48:32"] # a good event
+    #endtime_str = ["2022-04-01/13:54:45"] 
+    #starttime_str = ["2022-04-01/15:20:07"] # a good event
+    #endtime_str = ["2022-04-01/15:26:20"] 
+    #starttime_str = ["2021-03-23/03:39:52"] # another event with o larger than w
+    #endtime_str = ["2021-03-23/03:46:04"] 
+    starttime_str = ["2021-03-23/06:44:45"] # another event with o larger than w
+    endtime_str = ["2021-03-23/06:50:57"] 
+
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))

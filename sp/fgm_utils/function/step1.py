@@ -1,6 +1,7 @@
 from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
+import numpy as np
 
 def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -31,7 +32,7 @@ def step1(
         # 1.1 corr - phase angle integration
     """
     [
-        phi_1st, cross_times_1st, w_syn_1st, T_spins_1st] = cross_time.phase_integration(
+        phi_1st, cross_times_1st, w_syn_1st, T_spins_1st, cross_times_1st_fit, w_syn_1st_fit] = cross_time.phase_integration(
         ctime, cross_times_1st_1, cross_times_1st_1_mids, w_syn_1st_1, T_spins_1st_1,
         cross_times_1st_2, cross_times_1st_2_mids, w_syn_1st_2, T_spins_1st_2,
         cross_times_1st_3, w_syn_1st_3, T_spins_1st_3,
@@ -68,19 +69,44 @@ def step1(
     """
         # 1.3 use igrf to calibrate fgs data
     """
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
-    #        [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="ful_igrf_dmxl_before1stcali", xlimt = [0, 50])       
-
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
+          
+    [
+        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
+            ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z
+    )
+    [
+        fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z] = cross_time.fsp_ful(
+            ctime, cross_times_1st, T_spins_1st, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
+    )
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
+    
     # 1st calibration of B in dmxl 
     [
         fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare(
         fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
+    [
+        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
+            ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z
+    )
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="ful_igrf_fgm_after1stcali") 
-  
+            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
+
+    #[
+    #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
+    #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z
+    #)
+
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_after1stcali") 
+    breakpoint()
     #if parameter.makeplot == True :
     #    Bplot.B_ctime_plot(
     #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
@@ -129,19 +155,27 @@ def step1(
     #         ctime, fgs_ful_fgm_x, fgs_ful_fgm_y, 
     #         fgs_ful_fgm_z, title="3cross_time_ful_fgm", datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10],
     #         ctime_idx_time = ctime[ctime_idx], cross_times = cross_times_calib_3_select,
-    #    )
+    #    )    
+
     """
         1.5 calib - phase angle integration
     """
     # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
     [
-        phi_2nd, cross_times_2nd, w_syn_2nd, T_spins_2nd] = cross_time.phase_integration(
+        phi_2nd, cross_times_2nd, w_syn_2nd, T_spins_2nd, cross_times_2nd_fit, w_syn_2nd_fit] = cross_time.phase_integration(
         ctime, cross_times_2nd_1, cross_times_2nd_1_mids, w_syn_2nd_1, T_spins_2nd_1,
         cross_times_2nd_2, cross_times_2nd_2_mids, w_syn_2nd_2, T_spins_2nd_2,
         cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3,
     )
     logger.debug(f"[1.5] phi angle calib is done. ")
-
+    if parameter.makeplot == True:
+        Bplot.omega_stage123(
+            cross_times_2nd_1_mids, w_syn_2nd_1, 
+            cross_times_2nd_2_mids, w_syn_2nd_2, 
+            cross_times_2nd,  w_syn_2nd, 
+            cross_times_2nd_fit, w_syn_2nd_fit,
+            title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+        ) 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
     #    Bplot.phase_plot(
     #        ctime, phi_calib, cross_times_calib, datestr = datestr, 
@@ -164,6 +198,19 @@ def step1(
     if parameter.makeplot == True :
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after1stcali") 
+    if parameter.makeplot == True: 
+        Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
+            [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
+        [
+            fgs_fsp_ful_smxl_2nd_x, fgs_fsp_ful_smxl_2nd_y, fgs_fsp_ful_smxl_2nd_z] = cross_time.fsp_ful(
+                ctime, cross_times_1st, T_spins_1st, fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z
+        )
+        [
+            fgs_fsp_igrf_smxl_1st_x, fgs_fsp_igrf_smxl_1st_y, fgs_fsp_igrf_smxl_1st_z] = cross_time.fsp_ful(
+                ctime, cross_times_1st, T_spins_1st, fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z
+        )
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
+            [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fsp_sxml_after1stcali")
 
     if parameter.cali_2nd == True:
         """
@@ -209,7 +256,7 @@ def step1(
         if parameter.makeplot == True: 
             Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
                 [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], title="ful_igrf_fgm_after2ndcali") 
-    
+
         #if parameter.makeplot == True :
         #    Bplot.B_ctime_plot(
         #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
@@ -264,7 +311,7 @@ def step1(
         """
         # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
         [
-            phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd] = cross_time.phase_integration(
+            phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd, cross_times_3rd_fit, w_syn_3rd_fit] = cross_time.phase_integration(
             ctime, cross_times_3rd_1, cross_times_3rd_1_mids, w_syn_3rd_1, T_spins_3rd_1,
             cross_times_3rd_2, cross_times_3rd_2_mids, w_syn_3rd_2, T_spins_3rd_2,
             cross_times_3rd_3, w_syn_3rd_3, T_spins_3rd_3,
@@ -387,7 +434,7 @@ def step1(
             """
             # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
             [
-                phi_4th, cross_times_4th, w_syn_4th, T_spins_4th] = cross_time.phase_integration(
+                phi_4th, cross_times_4th, w_syn_4th, T_spins_4th, cross_times_4th_fit, w_syn_4th_fit] = cross_time.phase_integration(
                 ctime, cross_times_4th_1, cross_times_4th_1_mids, w_syn_4th_1, T_spins_4th_1,
                 cross_times_4th_2, cross_times_4th_2_mids, w_syn_4th_2, T_spins_4th_2,
                 cross_times_4th_3, w_syn_4th_3, T_spins_4th_3,
@@ -510,7 +557,7 @@ def step1(
                 """
                 # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
                 [
-                    phi_5th, cross_times_5th, w_syn_5th, T_spins_5th] = cross_time.phase_integration(
+                    phi_5th, cross_times_5th, w_syn_5th, T_spins_5th, cross_times_5th_fit, w_syn_5th_fit] = cross_time.phase_integration(
                     ctime, cross_times_5th_1, cross_times_5th_1_mids, w_syn_5th_1, T_spins_5th_1,
                     cross_times_5th_2, cross_times_5th_2_mids, w_syn_5th_2, T_spins_5th_2,
                     cross_times_5th_3, w_syn_5th_3, T_spins_5th_3,
