@@ -106,7 +106,7 @@ def step1(
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
             [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_after1stcali") 
-    breakpoint()
+
     #if parameter.makeplot == True :
     #    Bplot.B_ctime_plot(
     #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
@@ -174,7 +174,8 @@ def step1(
             cross_times_2nd_2_mids, w_syn_2nd_2, 
             cross_times_2nd,  w_syn_2nd, 
             cross_times_2nd_fit, w_syn_2nd_fit,
-            title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+            #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+            title="period_stage123", datestr = datestr, ylimt = [2.10, 2.15]
         ) 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
     #    Bplot.phase_plot(
@@ -309,6 +310,7 @@ def step1(
         """
             1.9 calib - phase angle integration
         """
+        breakpoint()
         # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
         [
             phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd, cross_times_3rd_fit, w_syn_3rd_fit] = cross_time.phase_integration(

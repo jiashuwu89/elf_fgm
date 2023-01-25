@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = 44 * np.pi / 180
+f = (180+44) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = True
@@ -96,7 +96,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 makeplot = True
 savepng = True
 output = False # if true output to txt file
-download_data = True
+download_data = False
 
 
 """specify time interval for some events

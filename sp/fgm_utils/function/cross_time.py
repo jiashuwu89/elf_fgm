@@ -524,9 +524,15 @@ def phase_integration(
                     cross_times,
                     *curve_fit(func, cross_times, w_syn_d)[0],
                 )
-        cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
-        if parameter.CrossTime_Update == True:
-            cross_times = cross_times_fit
+        w_fit = w_t0s
+        if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:
+            cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times_mids
+            if parameter.CrossTime_Update == True:
+                cross_times_mids = cross_times_fit
+        else:
+            cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
+            if parameter.CrossTime_Update == True:
+                cross_times = cross_times_fit
     else:
         # Use just one reference point for integration
         t0 = cross_times[0]
@@ -536,19 +542,46 @@ def phase_integration(
                 w_t0 = calibration.running_spline(
                     [t0], cross_times_mids, w_syn_d, T=30
                 )[0]
+                w_t0s = calibration.running_spline(
+                    cross_times,
+                    cross_times_mids,
+                    w_syn_d,
+                    T=30,
+                )
             else:
                 w_t0 = calibration.running_spline(
                     [t0], cross_times, w_syn_d, T=50
                 )[0]
+                w_t0s = calibration.running_spline(
+                    cross_times, cross_times, w_syn_d, T=50
+                )
         else:
             if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:
                 w_t0 = func(
                     t0, *curve_fit(func, cross_times_mids, w_syn_d)[0],
                 )
+                w_t0s = func(
+                    cross_times,
+                    *curve_fit(func, cross_times_mids, w_syn_d)[0],
+                )
             else:
                 w_t0 = func(
                     t0, *curve_fit(func, cross_times, w_syn_d)[0]
                 )
+                w_t0s = func(
+                    cross_times,
+                    *curve_fit(func, cross_times, w_syn_d)[0],
+                )
+        
+        w_fit = w_t0s
+        if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:
+            cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times_mids
+            if parameter.CrossTime_Update == True:
+                cross_times_mids = cross_times_fit
+        else:
+            cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
+            if parameter.CrossTime_Update == True:
+                cross_times = cross_times_fit
 
     phi = np.zeros(len(ctime))
     for i in range(len(phi)):
@@ -587,7 +620,7 @@ def phase_integration(
             0.5 * (w_t0 + w_syn[idx0]) * (t0 - ctime[idx0])
         )            
 
-    return [phi, cross_times, w_syn_d, T_spins_d, cross_times_fit, w_t0s]     
+    return [phi, cross_times, w_syn_d, T_spins_d, cross_times_fit, w_fit]     
 
 
 def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z): 

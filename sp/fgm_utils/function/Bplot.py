@@ -155,7 +155,6 @@ def omega_stage123(cross_times_1, w_syn_1,
     cross_times_3,  w_syn_3,
     cross_times_fit,  w_syn_fit,
     title = "omega_stage_fit", datestr = None, xlimt = None, ylimt = None):
-
     filename = datestr + "_" + title if datestr is not None else title
     fig, ax = plt.subplots(1, figsize=(15,7))
 

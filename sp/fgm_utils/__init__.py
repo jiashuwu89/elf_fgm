@@ -7,6 +7,8 @@ from pyspedas.cotrans import cotrans_lib
 from . import parameter
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
+import traceback
+import sys
 
 datestr = ""
 
@@ -115,6 +117,11 @@ def fgm_fsp_calib(
                 Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
             logger.error(e.__str__())
             return [ [] for _ in range(16) ]
+        except Exception as e:
+            logger.error(f"❌ funky fgm check failed. ")
+            logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+            print('\n'.join(traceback.format_exception(*sys.exc_info())))
+
     
     if parameter.del_time == True:
         del_time_idx = []
@@ -160,8 +167,11 @@ def fgm_fsp_calib(
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
-    except:
+        logger.error(traceback.format_exception(*sys.exc_info()))
+    except Exception as e:
         logger.error(f"❌ step 0 other error. Stop processing.")
+        logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+        print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(16) ]
  
     """
@@ -182,6 +192,8 @@ def fgm_fsp_calib(
             )
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")
+        logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+        print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(16) ]
         
     if parameter.output == True:
@@ -207,14 +219,14 @@ def fgm_fsp_calib(
         fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z] = cross_time.fsp_igrf(
             ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
     )
-    #[
-    #    fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
-    #        ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
-    #)
     [
-        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
+        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
             ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
     )
+    #[
+    #    fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
+    #        ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+    #)
 
     del_idx = np.where((fgs_fsp_ful_dmxl_x == 0) & (fgs_fsp_ful_dmxl_y == 0) & (fgs_fsp_ful_dmxl_z == 0))
     [
@@ -235,9 +247,9 @@ def fgm_fsp_calib(
         this step is swap with step 4, because in postporcess, ctime_idx needs to compare with average. if big trend exists, the spike is not prominent
     """
     if parameter.fsp_detrend == False:
-        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_gei_x)
-        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_gei_x)
+        fgs_fsp_res_dmxl_trend_x = [0] * len(fgs_fsp_res_dmxl_x)
+        fgs_fsp_res_dmxl_trend_y = [0] * len(fgs_fsp_res_dmxl_x)
+        fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_dmxl_x)
 
     if parameter.fsp_detrend == True:
         [
@@ -303,6 +315,9 @@ def fgm_fsp_calib(
     except error.fsp_spike_del_error as e:
         logger.error(e.__str__())
         return [ [] for _ in range(16) ]
+    except Exception as e:
+        logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+        print('\n'.join(traceback.format_exception(*sys.exc_info())))
 
     """
         # 5 : step 5 final data and plot

@@ -49,6 +49,7 @@ def step0(
     """
         0.3 IGRF coorindate transformation: gei -> dmxl -> smxl -> fgm
     """
+    #breakpoint()
     [
         DMXL_2_GEI, GEI_2_DMXL] = coordinate.dmxl_gei_matrix(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z
@@ -59,7 +60,9 @@ def step0(
         fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z] = coordinate.gei2dmxl(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, GEI_2_DMXL
     )
-
+    #Bplot.B_ctime_plot(ctime,fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, title="igrf_dmxl")
+    #Bplot.B_ctime_plot(ctime,fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, title="igrf_dmxl")
+    breakpoint()
     # B igrf rotate from dmxl to smxl
     [
         fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z] = coordinate.dmxl2smxl(
