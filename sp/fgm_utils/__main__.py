@@ -2,8 +2,10 @@ import datetime as dt
 import pandas as pd
 import logging.config
 from . import fgm_fsp_calib, parameter
-from .function import error, preprocess
+from .function import error, preprocess, fgm_fsp_calib_floop
 import requests
+import numpy as np
+from .function.Bplot import Gain_f
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -80,8 +82,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-04-01/15:26:20"] 
     #starttime_str = ["2021-03-23/03:39:52"] # another event with o larger than w
     #endtime_str = ["2021-03-23/03:46:04"] 
-    starttime_str = ["2021-03-23/06:44:45"] # another event with o larger than w
-    endtime_str = ["2021-03-23/06:50:57"] 
+    #starttime_str = ["2021-03-23/06:44:45"] # another event with o larger than w
+    #endtime_str = ["2021-03-23/06:50:57"] 
 
     #starttime_str = ["2021-03-26/03:14:37"] # same day, different orbit, bad fgm
     #endtime_str = ["2021-03-26/03:20:51"] 
@@ -91,6 +93,16 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-14/18:55:58"] 
     #starttime_str = ["2022-01-14/18:46:04"] # same day for ela and elb, opposite fgm elb
     #endtime_str = ["2022-01-14/18:52:18"] 
+
+    #starttime_str = ["2019-04-30/18:30:52"] # long collection 1h 30m
+    #endtime_str = ["2019-04-30/20:00:04"] # have to make funkyfgm = false
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
+    #endtime_str = ["2019-08-02/02:56:39"] 
+    #starttime_str = ["2019-08-06/07:39:26"] # long collection 55m
+    #endtime_str = ["2019-08-06/08:33:53"] 
+    starttime_str = ["2020-06-11/13:16:55"] # elb
+    endtime_str = ["2020-06-11/14:01:10"]
+
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
@@ -126,22 +138,59 @@ if __name__ == "__main__":
         except error.cdfError as e:
             logger.error(e.__str__())
         else:
-            [
-                FGM_timestamp,
-                fgs_fsp_res_dmxl_x,
-                fgs_fsp_res_dmxl_y,
-                fgs_fsp_res_dmxl_z,
-                fgs_fsp_igrf_dmxl_x,
-                fgs_fsp_igrf_dmxl_y,
-                fgs_fsp_igrf_dmxl_z,
-                fgs_fsp_res_dmxl_trend_x,
-                fgs_fsp_res_dmxl_trend_y,
-                fgs_fsp_res_dmxl_trend_z,
-                fgs_fsp_res_gei_x,
-                fgs_fsp_res_gei_y,
-                fgs_fsp_res_gei_z,
-                fgs_fsp_igrf_gei_x,
-                fgs_fsp_igrf_gei_y,
-                fgs_fsp_igrf_gei_z,
-            ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
-            logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
+            if parameter.f_loop == False:
+                [
+                    FGM_timestamp,
+                    fgs_fsp_res_dmxl_x,
+                    fgs_fsp_res_dmxl_y,
+                    fgs_fsp_res_dmxl_z,
+                    fgs_fsp_igrf_dmxl_x,
+                    fgs_fsp_igrf_dmxl_y,
+                    fgs_fsp_igrf_dmxl_z,
+                    fgs_fsp_res_dmxl_trend_x,
+                    fgs_fsp_res_dmxl_trend_y,
+                    fgs_fsp_res_dmxl_trend_z,
+                    fgs_fsp_res_gei_x,
+                    fgs_fsp_res_gei_y,
+                    fgs_fsp_res_gei_z,
+                    fgs_fsp_igrf_gei_x,
+                    fgs_fsp_igrf_gei_y,
+                    fgs_fsp_igrf_gei_z,
+                ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+                logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
+            else:
+                [
+                    ctime, ctimestamp,
+                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                    att_gei_x, att_gei_y, att_gei_z,
+                    pos_gei_x, pos_gei_y, pos_gei_z] = fgm_fsp_calib_floop.fgm_fsp_calib_prepos(
+                        mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+
+                # define a dataframe for restoring f loop result
+                columns = ['rotate_ang','res_dmxl_x', 'res_dmxl_y', 'res_dmxl_z', 
+                    'G11', 'G12', 'G13','O1',
+                    'G21','G22','G23','O2',
+                    'G31','G32','G33','O3']
+                floop_df = pd.DataFrame(columns=columns)
+                for floop_i in parameter.f_loop_value:
+                    [
+                        fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, B_parameter] = fgm_fsp_calib_floop.fgm_fsp_calib_floop(
+                            ctime, ctimestamp,
+                            fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                            att_gei_x, att_gei_y, att_gei_z,
+                            pos_gei_x, pos_gei_y, pos_gei_z,
+                            logger, floop_i)
+                    logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]} with rotation angle {floop_i}\n")
+
+                    """f loop output: get res std and B parameter to big 
+                    """     
+                    new_row = [floop_i*180/np.pi, np.std(fgs_fsp_res_dmxl_x), np.std(fgs_fsp_res_dmxl_y), np.std(fgs_fsp_res_dmxl_z), *B_parameter]
+                    new_row = [dict(zip(columns, new_row))]
+                    floop_df = pd.concat([floop_df] + [pd.DataFrame(new_row)])
+
+                filename = f"floop_{mission}.csv"
+                floop_df.to_csv(filename, index=False)
+                breakpoint()
+                #Gain_f(floop_df['rotate_ang'], floop_df['G11'], floop_df['G22'], floop_df['G33'])

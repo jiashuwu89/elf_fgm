@@ -6,7 +6,7 @@ def step0(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
     att_gei_x, att_gei_y, att_gei_z,
-    datestr, logger):
+    datestr, logger, f):
 
     """
         0. precalibration: time calibration
@@ -62,7 +62,7 @@ def step0(
     )
     #Bplot.B_ctime_plot(ctime,fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, title="igrf_dmxl")
     #Bplot.B_ctime_plot(ctime,fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, title="igrf_dmxl")
-    breakpoint()
+
     # B igrf rotate from dmxl to smxl
     [
         fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z] = coordinate.dmxl2smxl(
@@ -72,7 +72,7 @@ def step0(
     # B igrf rotate from smxl to fgm
     [
         fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z] = coordinate.smxl2fgm(
-            fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z
+            fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z, f
     )
 
     #if parameter.makeplot == True: 
@@ -115,4 +115,5 @@ def step0(
         #Bplot.B_ctime_plot(ctime, fgs_res_fgm_x, fgs_res_fgm_y, fgs_res_fgm_z, ctime_idx_time = ctime[ctime_idx], ctime_idx_flag = ctime_idx_flag)
         Bplot.ctimediff_plot(ctime, ctime_idx, ctime_idx_flag, datestr = datestr)
 
-    return [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff]
+    return [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+    ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, B_parameter]

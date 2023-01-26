@@ -175,7 +175,8 @@ def omega_stage123(cross_times_1, w_syn_1,
 def omega_fit(cross_times_org, w_syn_org, 
     cross_times_fit,  w_syn_fit, 
     title = "omega_fit", datestr = None, xlimt = None, ylimt = None):
-
+    """plot spin period in stage 1, 2, 3 and fitted
+    """
     filename = datestr + "_" + title if datestr is not None else title
     fig, ax = plt.subplots(1, figsize=(15,7))
 
@@ -190,4 +191,19 @@ def omega_fit(cross_times_org, w_syn_org,
     if ylimt is not None: ax.set_ylim(ylimt)
     if xlimt is not None: ax.set_xlim(xlimt)
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
+    plt.close()
+
+
+def Gain_f(f, Gain_x, Gain_y, Gain_z, mission = None):
+    """plot Gain x, y, z as a function of rotation angle
+    """
+    fig, ax = plt.subplots(1, figsize=(15,7))
+
+    ax.scatter(f, Gain_x, label='Gain x')
+    ax.scatter(f, Gain_y, label='Gain y')
+    ax.scatter(f, Gain_z, label='Gain z')
+    ax.set_xlabel('rotation angle (deg)')
+    ax.set_ylabel('Gain')
+    ax.legend() 
+    plt.savefig(f"fgm_utils/temp/Gain_f_{mission}") if mission is not None else plt.savefig(f"fgm_utils/temp/Gain_f")
     plt.close()

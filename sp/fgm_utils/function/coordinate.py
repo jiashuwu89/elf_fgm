@@ -140,30 +140,30 @@ def smxl2dmxl(fgs_smxl_x, fgs_smxl_y, fgs_smxl_z, phi):
     return [fgs_dmxl_x, fgs_dmxl_y, fgs_dmxl_z]
 
 
-def smxl2fgm(fgs_smxl_x, fgs_smxl_y, fgs_smxl_z):
+def smxl2fgm(fgs_smxl_x, fgs_smxl_y, fgs_smxl_z, f):
     """
         input: 
             fgs_smxl_x/y/z: time series of fgs data in fgm
         output:
             fgs_fgm_x/y/z: times series of fgs data in smxl
     """
-    fgs_fgm_x = np.cos(parameter.f) * fgs_smxl_x + np.sin(parameter.f) * fgs_smxl_z
-    fgs_fgm_y = np.sin(parameter.f) * fgs_smxl_x - np.cos(parameter.f) * fgs_smxl_z
+    fgs_fgm_x = np.cos(f) * fgs_smxl_x + np.sin(f) * fgs_smxl_z
+    fgs_fgm_y = np.sin(f) * fgs_smxl_x - np.cos(f) * fgs_smxl_z
     fgs_fgm_z = fgs_smxl_y  
 
     return [fgs_fgm_x, fgs_fgm_y, fgs_fgm_z] 
 
 
-def fgm2smxl(fgs_fgm_x, fgs_fgm_y, fgs_fgm_z):
+def fgm2smxl(fgs_fgm_x, fgs_fgm_y, fgs_fgm_z, f):
     """
         input: 
             fgs_fgm_x/y/z: time series of fgs data in smxl
         output:
             fgs_smxl_x/y/z: times series of fgs data in fgm
     """
-    fgs_smxl_x = np.cos(parameter.f) * fgs_fgm_x + np.sin(parameter.f) * fgs_fgm_y
+    fgs_smxl_x = np.cos(f) * fgs_fgm_x + np.sin(f) * fgs_fgm_y
     fgs_smxl_y = fgs_fgm_z
-    fgs_smxl_z = np.sin(parameter.f) * fgs_fgm_x - np.cos(parameter.f) * fgs_fgm_y
+    fgs_smxl_z = np.sin(f) * fgs_fgm_x - np.cos(f) * fgs_fgm_y
 
     return [fgs_smxl_x, fgs_smxl_y, fgs_smxl_z]     
 

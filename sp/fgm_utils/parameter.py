@@ -33,10 +33,10 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = (180+44) * np.pi / 180
+f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
-funkyfgm = True
+funkyfgm = False
 """ctime spike paramter
 """
 # in ctime_calib, criterion for finding ctime gaps difference between jumps and ctime median in seconds
@@ -96,7 +96,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 makeplot = True
 savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 
 """specify time interval for some events
@@ -116,3 +116,8 @@ CrossTime_Update = True
 """add boundary to least square fitting, in calibration
 """
 fit_bound = False
+
+"""loop f 
+"""
+f_loop = False
+f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 2)))
