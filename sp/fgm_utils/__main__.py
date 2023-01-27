@@ -30,7 +30,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -96,12 +96,12 @@ if __name__ == "__main__":
 
     #starttime_str = ["2019-04-30/18:30:52"] # long collection 1h 30m
     #endtime_str = ["2019-04-30/20:00:04"] # have to make funkyfgm = false
-    #starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
-    #endtime_str = ["2019-08-02/02:56:39"] 
+    starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
+    endtime_str = ["2019-08-02/02:56:39"] 
     #starttime_str = ["2019-08-06/07:39:26"] # long collection 55m
     #endtime_str = ["2019-08-06/08:33:53"] 
-    starttime_str = ["2020-06-11/13:16:55"] # elb
-    endtime_str = ["2020-06-11/14:01:10"]
+    #starttime_str = ["2020-06-11/13:16:55"] # elb
+    #endtime_str = ["2020-06-11/14:01:10"]
 
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))

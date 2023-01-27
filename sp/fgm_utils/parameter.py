@@ -93,7 +93,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
+makeplot = False
 savepng = True
 output = False # if true output to txt file
 download_data = True
@@ -119,5 +119,5 @@ fit_bound = False
 
 """loop f 
 """
-f_loop = False
+f_loop = True
 f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 2)))

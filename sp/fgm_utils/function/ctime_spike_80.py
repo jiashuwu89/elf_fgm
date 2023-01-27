@@ -134,8 +134,9 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
 
     #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
     if len(B_spike_idx) == 0:
-        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-            title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
 
     # B_spike_idx_chunk: index of chunk
@@ -181,8 +182,9 @@ def sepoch_sub_80_0(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, s
 
     #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
     if len(B_spike_idx) == 0:
-        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-            title="x1 = B_avg, x2 = B_spike", scatter = True)
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title="x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
     
     # B_spike_idx_chunk: index of chunk
