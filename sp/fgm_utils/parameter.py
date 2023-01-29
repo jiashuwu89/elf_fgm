@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = (180+44) * np.pi / 180
+f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = True

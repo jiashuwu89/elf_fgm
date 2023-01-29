@@ -80,8 +80,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-04-01/15:26:20"] 
     #starttime_str = ["2021-03-23/03:39:52"] # another event with o larger than w
     #endtime_str = ["2021-03-23/03:46:04"] 
-    starttime_str = ["2021-03-23/06:44:45"] # another event with o larger than w
-    endtime_str = ["2021-03-23/06:50:57"] 
+    #starttime_str = ["2021-03-23/06:44:45"] # another event with o larger than w
+    #endtime_str = ["2021-03-23/06:50:57"] 
 
     #starttime_str = ["2021-03-26/03:14:37"] # same day, different orbit, bad fgm
     #endtime_str = ["2021-03-26/03:20:51"] 
@@ -91,6 +91,10 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-14/18:55:58"] 
     #starttime_str = ["2022-01-14/18:46:04"] # same day for ela and elb, opposite fgm elb
     #endtime_str = ["2022-01-14/18:52:18"] 
+    #starttime_str = ["2022-01-14/20:21:46"]  # same day for ela and elb, similar fgm ela
+    #endtime_str = ["2022-01-14/20:27:58"] 
+    starttime_str = ["2022-01-14/20:18:08"] # same day for ela and elb, similar fgm elb
+    endtime_str = ["2022-01-14/20:24:21"] 
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))

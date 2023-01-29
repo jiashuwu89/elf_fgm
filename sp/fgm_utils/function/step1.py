@@ -82,9 +82,11 @@ def step1(
             ctime, cross_times_1st, T_spins_1st, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
     if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
-    
+        Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, 
+            fgs_fsp_igrf_fgm_z, plot3 = True, title="igrf_fgm_fsp_before1stcali") 
+        #Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
+        #    [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
+    breakpoint()
     # 1st calibration of B in dmxl 
     [
         fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare(

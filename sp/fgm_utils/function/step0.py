@@ -62,7 +62,6 @@ def step0(
     )
     #Bplot.B_ctime_plot(ctime,fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, title="igrf_dmxl")
     #Bplot.B_ctime_plot(ctime,fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, title="igrf_dmxl")
-    breakpoint()
     # B igrf rotate from dmxl to smxl
     [
         fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z] = coordinate.dmxl2smxl(
@@ -74,10 +73,6 @@ def step0(
         fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z] = coordinate.smxl2fgm(
             fgs_igrf_smxl_x, fgs_igrf_smxl_y, fgs_igrf_smxl_z
     )
-
-    #if parameter.makeplot == True: 
-    #    Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_y], 
-    #        [fgs_ful_fgm_1st_z, fgs_igrf_fgm_z], plot3 = True, title="ful_igrf_fgm_before1stcali")      
 
     logger.debug(f"[0.3] ctime spike correction is done.")
 
