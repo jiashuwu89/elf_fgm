@@ -96,13 +96,20 @@ if __name__ == "__main__":
 
     #starttime_str = ["2019-04-30/18:30:52"] # long collection 1h 30m
     #endtime_str = ["2019-04-30/20:00:04"] # have to make funkyfgm = false
-    starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
-    endtime_str = ["2019-08-02/02:56:39"] 
+    #starttime_str = ["2019-08-02/02:01:49"] # long collection 55m 
+    #endtime_str = ["2019-08-02/02:56:39"] 
     #starttime_str = ["2019-08-06/07:39:26"] # long collection 55m
     #endtime_str = ["2019-08-06/08:33:53"] 
-    #starttime_str = ["2020-06-11/13:16:55"] # elb
+    #starttime_str = ["2020-06-11/13:16:55"] # elb long collection 1
     #endtime_str = ["2020-06-11/14:01:10"]
-
+    #starttime_str = ["2022-01-14/18:46:04"] # elb opposite result
+    #endtime_str = ["2022-01-14/18:52:18"]
+    starttime_str = ["2022-01-14/18:49:45"] # ela opposite result
+    endtime_str = ["2022-01-14/18:55:58"]
+    #starttime_str = ["2022-01-14/20:18:08"] # elb similar result
+    #endtime_str = ["2022-01-14/20:24:21"]
+    #starttime_str = ["2022-01-14/20:21:46"] # elb similar result
+    #endtime_str = ["2022-01-14/20:27:58"]
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
@@ -190,7 +197,7 @@ if __name__ == "__main__":
                     new_row = [dict(zip(columns, new_row))]
                     floop_df = pd.concat([floop_df] + [pd.DataFrame(new_row)])
 
-                filename = f"floop_{mission}.csv"
+                filename = f"fgm_utils/rotation_angle/floop_{mission}.csv"
                 floop_df.to_csv(filename, index=False)
                 breakpoint()
                 #Gain_f(floop_df['rotate_ang'], floop_df['G11'], floop_df['G22'], floop_df['G33'])
