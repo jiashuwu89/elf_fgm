@@ -23,7 +23,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
-relative_integrate = True
+relative_integrate = False
 bidirectional_integrate = True
 
 eps_1 = 5
@@ -96,7 +96,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 makeplot = True
 savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 
 """specify time interval for some events
@@ -116,3 +116,7 @@ CrossTime_Update = True
 """add boundary to least square fitting, in calibration
 """
 fit_bound = False
+
+"""fit a (aX + b)*sin(wx + p) + k to fgm
+"""
+fgm_sine_fit = False

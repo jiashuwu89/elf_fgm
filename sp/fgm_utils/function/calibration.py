@@ -26,6 +26,9 @@ def cube_fit(x, a, b, c, d):
 def sine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.sin(w * x + p) + k
 
+def xsine_fit(x, A, b, c, w, p, k, o):
+    return (A*x + b + c*x**0.5) * np.sin(w * x + p) + k*x + o
+
 def cosine_fit(x, alpha, A, w, p, k):
     return alpha * A * np.cos(w * x + p) + k
 
@@ -168,5 +171,45 @@ def calib_leastsquare(
         + calib[2, 1] * (B_S2_corr - offsets[1])
         + calib[2, 2] * (B_S3_corr - offsets[2])
     ) 
+
+    return [B_S1_calib, B_S2_calib, B_S3_calib, x]   
+
+
+def calib_leastsquare2(
+    B_S1_corr, B_S2_corr, B_S3_corr, fgs_igrf_fgm_x, fgs_igrf_fgm_y, fgs_igrf_fgm_z, init = None
+):
+
+    """use B igrf to calibrate fgs data in fgm coordinate 
+       least sqaure fitting 
+    """
+    n = len(B_S1_corr)
+    b = np.concatenate((B_S1_corr, B_S2_corr, B_S3_corr))
+    A = np.zeros((3 * n, 6))
+    A[0:n, 0] = fgs_igrf_fgm_x
+    A[0:n, 1] = np.ones(n)
+    A[n : 2 * n, 2] = fgs_igrf_fgm_y
+    A[n : 2 * n, 3] = np.ones(n)
+    A[2 * n : 3 * n, 4] = fgs_igrf_fgm_z
+    A[2 * n : 3 * n, 5] = np.ones(n)
+    A = csc_matrix(A)
+   
+    if init is None:
+        #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+        LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+
+        x0 = [1, 0, 1, 0 ,114, 0]
+        res1 = least_squares(LS_func, x0)
+
+        x = res1.x
+    else:
+        x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
+        #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
+    
+    breakpoint()
+
+    B_S1_calib = (B_S1_corr - x[1]) / x[0]
+    B_S2_calib = (B_S2_corr - x[3]) / x[2]    
+    B_S3_calib = (B_S3_corr - x[5]) / x[4]
+    
 
     return [B_S1_calib, B_S2_calib, B_S3_calib, x]   

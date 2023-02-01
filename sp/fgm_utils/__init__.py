@@ -106,6 +106,10 @@ def fgm_fsp_calib(
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
     pos_gei_x, pos_gei_y, pos_gei_z = np.array(list(zip(*df["pos_gei"])))
 
+    fgs_ful_fgm_0th_x = fgs_ful_fgm_0th_x /100
+    fgs_ful_fgm_0th_y = fgs_ful_fgm_0th_y /100
+    fgs_ful_fgm_0th_z = fgs_ful_fgm_0th_z /100
+
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
     

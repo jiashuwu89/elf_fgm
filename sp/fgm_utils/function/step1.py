@@ -2,6 +2,7 @@ from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
 import numpy as np
+from scipy.optimize import curve_fit
 
 def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -69,10 +70,47 @@ def step1(
     """
         # 1.3 use igrf to calibrate fgs data
     """
+    if parameter.fgm_sine_fit == True:
+        fit_opt_x, fit_covar = curve_fit(
+            calibration.xsine_fit,
+            ctime,
+            fgs_ful_fgm_1st_x,
+            p0=[-10, 25000, -500, 2.2, 0, -40, 6000],
+            #bounds=((-50, 10000, -np.inf,-np.inf, -np.inf, -np.inf), (50, 50000, np.inf, np.inf, np.inf, np.inf)),
+            #method = "dogbox",
+        )
+        fgs_ful_fgm_1st_x_fit = calibration.xsine_fit(ctime, *fit_opt_x)
+        #fgs_ful_fgm_1st_x_fit = calibration.xsine_fit(ctime, *[-20, 25000, -500, 2.2, 0, -5, 1000])
+        fit_opt_y, fit_covar = curve_fit(
+            calibration.xsine_fit,
+            ctime,
+            fgs_ful_fgm_1st_y,
+            p0=[-10, 30000, 0, 2.2, 0, 40, 6000],
+            #bounds=((-50, 10000, -np.inf,-np.inf, -np.inf, -np.inf), (50, 50000, np.inf, np.inf, np.inf, np.inf)),
+            #method = "dogbox",
+        )
+        fgs_ful_fgm_1st_y_fit = calibration.xsine_fit(ctime, *fit_opt_y)
+        #fgs_ful_fgm_1st_y_fit = calibration.xsine_fit(ctime, *[-10, 25000, 0, 2.2, 0, 10, 1000])
+        fit_opt_z, fit_covar = curve_fit(
+            calibration.xsine_fit,
+            ctime,
+            fgs_ful_fgm_1st_z,
+            p0=[-20, 25000, 0, 2.2, 0, 0, 0],
+            #bounds=((-50, 10000, -np.inf,-np.inf, -np.inf, -np.inf), (50, 50000, np.inf, np.inf, np.inf, np.inf)),
+            #method = "dogbox",
+        )
+        fgs_ful_fgm_1st_z_fit = calibration.xsine_fit(ctime, *fit_opt_z)
+        #fgs_ful_fgm_1st_z_fit = calibration.xsine_fit(ctime, *[-20, 25000, 0, 2.2, 0, 0, 0])
     if parameter.makeplot == True: 
+        if parameter.fgm_sine_fit == True:
+            Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_x_fit], [fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_y_fit], 
+                [fgs_ful_fgm_1st_z, fgs_ful_fgm_1st_z_fit], plot3 = True, title="fulfit_fgm_before1stcali") 
+            [
+                fgs_fsp_ful_fgm_x_fit, fgs_fsp_ful_fgm_y_fit, fgs_fsp_ful_fgm_z_fit] = cross_time.fsp_ful(
+                    ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_1st_x_fit, fgs_ful_fgm_1st_y_fit, fgs_ful_fgm_1st_z_fit
+            ) 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
-          
     [
         fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
             ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z
@@ -81,15 +119,18 @@ def step1(
         fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z] = cross_time.fsp_ful(
             ctime, cross_times_1st, T_spins_1st, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
-    if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, 
-            fgs_fsp_igrf_fgm_z, plot3 = True, title="igrf_fgm_fsp_before1stcali") 
-        #Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-        #    [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
-    breakpoint()
+
+    if parameter.makeplot == True:
+        #Bplot.B_ctime_plot(ctime, fgs_ful_fgm_1st_x - fgs_ful_fgm_1st_x_fit, fgs_ful_fgm_1st_y - fgs_ful_fgm_1st_y_fit, 
+        #    fgs_ful_fgm_1st_z - fgs_ful_fgm_1st_z_fit, plot3 = True, title="res_fgm_before1stcali")  
+        #Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_ful_fgm_x - fgs_fsp_ful_fgm_x_fit, fgs_fsp_ful_fgm_y - fgs_fsp_ful_fgm_y_fit, 
+        #    fgs_fsp_ful_fgm_z - fgs_fsp_ful_fgm_z_fit, plot3 = True, title="res_fgm_fsp_before1stcali") 
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="fuligrf_fgm_fsp_before1stcali")     
+
     # 1st calibration of B in dmxl 
     [
-        fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare(
+        fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare2(
         fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
     [
@@ -107,7 +148,9 @@ def step1(
 
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_after1stcali") 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="fuligrf_fgm_fsp_after1stcali") 
+        Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_ful_fgm_x-fgs_fsp_igrf_fgm_x, fgs_fsp_ful_fgm_y-fgs_fsp_igrf_fgm_y, 
+            fgs_fsp_ful_fgm_z-fgs_fsp_igrf_fgm_z, plot3 = True, title="res_fgm_fsp_after1stcali") 
 
     #if parameter.makeplot == True :
     #    Bplot.B_ctime_plot(
@@ -200,8 +243,8 @@ def step1(
     )
     if parameter.makeplot == True :
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
-            [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after1stcali") 
-    if parameter.makeplot == True: 
+            [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
+
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
             [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
         [
