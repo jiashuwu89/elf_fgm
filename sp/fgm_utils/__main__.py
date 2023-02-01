@@ -93,8 +93,12 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-14/18:52:18"] 
     #starttime_str = ["2022-01-14/20:21:46"]  # same day for ela and elb, similar fgm ela
     #endtime_str = ["2022-01-14/20:27:58"] 
-    starttime_str = ["2022-01-14/20:18:08"] # same day for ela and elb, similar fgm elb
-    endtime_str = ["2022-01-14/20:24:21"] 
+    #starttime_str = ["2022-01-14/20:18:08"] # same day for ela and elb, similar fgm elb
+    #endtime_str = ["2022-01-14/20:24:21"] 
+    starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
+    endtime_str = ["2022-04-29/07:20:10"]
+    #starttime_str = ["2022-04-29/07:09:44"] # ela opposite result
+    #endtime_str = ["2022-04-29/07:16:13"]
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
