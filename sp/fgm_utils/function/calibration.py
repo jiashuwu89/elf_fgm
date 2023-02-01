@@ -144,7 +144,7 @@ def calib_leastsquare(
     else:
         x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
         #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
-    
+    breakpoint()
     #x = [ -1,  0,  0,  0,
     #   0, 1,  0, 0,
     #    0,  0,  1, 0]

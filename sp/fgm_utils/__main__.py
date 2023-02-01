@@ -104,12 +104,16 @@ if __name__ == "__main__":
     #endtime_str = ["2020-06-11/14:01:10"]
     #starttime_str = ["2022-01-14/18:46:04"] # elb opposite result
     #endtime_str = ["2022-01-14/18:52:18"]
-    starttime_str = ["2022-01-14/18:49:45"] # ela opposite result
-    endtime_str = ["2022-01-14/18:55:58"]
+    #starttime_str = ["2022-01-14/18:49:45"] # ela opposite result
+    #endtime_str = ["2022-01-14/18:55:58"]
     #starttime_str = ["2022-01-14/20:18:08"] # elb similar result
     #endtime_str = ["2022-01-14/20:24:21"]
     #starttime_str = ["2022-01-14/20:21:46"] # elb similar result
     #endtime_str = ["2022-01-14/20:27:58"]
+    #starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
+    #endtime_str = ["2022-04-29/07:20:10"]
+    starttime_str = ["2022-04-29/07:09:44"] # ela opposite result
+    endtime_str = ["2022-04-29/07:16:13"]
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
