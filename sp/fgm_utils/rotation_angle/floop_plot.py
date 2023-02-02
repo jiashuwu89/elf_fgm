@@ -36,8 +36,8 @@ def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
 
 if __name__ == "__main__":
     
-    mission = "elb"
-    date = "20220429_071357"
+    mission = "ela"
+    date = "20220607_112716"
     rotAng_df = pd.read_csv(f"rotAng_loop_{mission}_360_{date}.csv")
 
     Gain_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G22'], rotAng_df['G33'], mission = mission, filename = date)

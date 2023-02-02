@@ -120,4 +120,4 @@ fit_bound = False
 """loop f 
 """
 f_loop = True
-f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 2)))
+f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 3)))
