@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "elb"
+    mission = "ela"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -68,11 +68,11 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-14/15:52:02"]   
     #starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
     #endtime_str = ["2022-09-07/19:19:57"] 
-    #starttime_str = ["2022-09-10/23:42:55"] # jiang event ela
-    #endtime_str = ["2022-09-10/23:49:06"] 
-    #starttime_str = ["2022-03-13/19:33:28"]
+    starttime_str = ["2022-09-10/23:42:55"] # jiang event ela 
+    endtime_str = ["2022-09-10/23:49:06"] 
+    #starttime_str = ["2022-03-13/19:33:28"] # elb
     #endtime_str = ["2022-03-13/19:39:41"]
-    #starttime_str = ["2022-03-31/16:11:16"] # a good event
+    #starttime_str = ["2022-03-31/16:11:16"] # a good event ela
     #endtime_str = ["2022-03-31/16:17:27"] 
     #starttime_str = ["2022-04-01/13:48:32"] # a good event
     #endtime_str = ["2022-04-01/13:54:45"] 
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-01-14/20:27:58"] 
     #starttime_str = ["2022-01-14/20:18:08"] # same day for ela and elb, similar fgm elb
     #endtime_str = ["2022-01-14/20:24:21"] 
-    starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
-    endtime_str = ["2022-04-29/07:20:10"]
+    #starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
+    #endtime_str = ["2022-04-29/07:20:10"]
     #starttime_str = ["2022-04-29/07:09:44"] # ela opposite result
     #endtime_str = ["2022-04-29/07:16:13"]
 

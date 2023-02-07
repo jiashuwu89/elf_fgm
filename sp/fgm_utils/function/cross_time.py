@@ -492,10 +492,13 @@ def phase_integration(
                 ctime, *curve_fit(func, cross_times_mids, w_syn_d)[0]
             )
         else:
-            #breakpoint()
             w_syn = func(
                 ctime, *curve_fit(func, cross_times, w_syn_d)[0]
             )
+    if parameter.makeplot == True:
+        omega_fit(cross_times, w_syn_d,ctime, w_syn)
+        breakpoint()
+
     if parameter.relative_integrate == True:
         # Use multiple reference points for integration
         idx0s = np.array(
@@ -582,7 +585,6 @@ def phase_integration(
             cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
             if parameter.CrossTime_Update == True:
                 cross_times = cross_times_fit
-
     phi = np.zeros(len(ctime))
     for i in range(len(phi)):
         if parameter.relative_integrate == True:
@@ -644,6 +646,9 @@ def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
             fgs_fsp_x[i] = 0
             fgs_fsp_y[i] = 0
             fgs_fsp_z[i] = 0 
+        #if parameter.makeplot == True:
+        #    B_ctime_plot(ctime[idx], fgs_x[idx], fgs_y[idx], fgs_z[idx], title='fgs_slice_avg')
+        #    breakpoint()
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
 
@@ -662,7 +667,7 @@ def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         T_syn = T_spins_d[i]
         w_syn = 2 * np.pi / T_syn
         idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
-        
+
         if len(ctime[idx]) > 3:
             ctime_slice = ctime[idx]
 
@@ -670,11 +675,40 @@ def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
             fgs_y_slice = fgs_y[idx]
             fgs_z_slice = fgs_z[idx]
 
-            FAC_func = lambda x, A, k: calibration.sine_fit(x, 1, A, w_syn, -w_syn * t0, k)
-            
-            fgs_fsp_x[i] = curve_fit(FAC_func, ctime_slice, fgs_x_slice)[0][1]
-            fgs_fsp_y[i] = curve_fit(FAC_func, ctime_slice, fgs_y_slice)[0][1]
-            fgs_fsp_z[i] = curve_fit(FAC_func, ctime_slice, fgs_z_slice)[0][1]
+            FAC_func = lambda x, A, w, p, k: calibration.sine_fit(x, 1, A, w, p, k)
+            try:
+                fgs_fsp_x_para = curve_fit(FAC_func, ctime_slice, fgs_x_slice, p0=[300000, w_syn, -w_syn*t0, 0])[0]
+            except:
+                try:
+                    fgs_fsp_x_para = curve_fit(FAC_func, ctime_slice, fgs_x_slice, p0=[-300000, w_syn, -w_syn*t0, 0])[0]
+                except:
+                    fgs_fsp_x_para = [0]*4
+
+            try:
+                fgs_fsp_y_para = curve_fit(FAC_func, ctime_slice, fgs_y_slice, p0=[300000, w_syn, -w_syn*t0, 0])[0]
+            except:
+                try:
+                    fgs_fsp_y_para = curve_fit(FAC_func, ctime_slice, fgs_y_slice, p0=[-300000, w_syn, -w_syn*t0, 0])[0]
+                except:
+                    fgs_fsp_y_para = [0]*4
+
+            try:
+                fgs_fsp_z_para = curve_fit(FAC_func, ctime_slice, fgs_z_slice, p0=[-300000, w_syn, -w_syn*t0, 0])[0]
+            except:
+                try:
+                    fgs_fsp_z_para = curve_fit(FAC_func, ctime_slice, fgs_z_slice, p0=[300000, w_syn, -w_syn*t0, 0])[0]
+                except:
+                    fgs_fsp_z_para = [0]*4
+
+            fgs_fsp_x[i] = fgs_fsp_x_para[3]# k, or offset of the fit
+            fgs_fsp_y[i] = fgs_fsp_y_para[3]
+            fgs_fsp_z[i] = fgs_fsp_z_para[3]
+
+            #if parameter.makeplot == True:
+                #fgs_fsp_x_fit = FAC_func(ctime_slice, *fgs_fsp_x_para)
+                #fgs_fsp_y_fit = FAC_func(ctime_slice, *fgs_fsp_y_para)
+                #fgs_fsp_z_fit = FAC_func(ctime_slice, *fgs_fsp_z_para)
+                #B_ctime_plot(ctime_slice, [fgs_x_slice, fgs_fsp_x_fit], [fgs_y_slice, fgs_fsp_y_fit], [fgs_z_slice, fgs_fsp_z_fit], title='fgs_slice_fit')
         else:
             # when there is a big gap and no enough data for fitting
             fgs_fsp_x[i] = 0
@@ -700,3 +734,21 @@ def fsp_matrix(ctime, cross_times, T_spins_d, rotation_matrix):
         rotation_matrix_fsp[i, :, :] = m
 
     return rotation_matrix_fsp   
+
+
+def fsp_close(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z): 
+    """generate data in fsp resolu
+        use the most close data
+    """
+    fgs_fsp_x = np.zeros(len(cross_times))
+    fgs_fsp_y = np.zeros(len(cross_times))
+    fgs_fsp_z = np.zeros(len(cross_times))
+    for i in range(0, len(cross_times)):
+
+        idx = np.where(np.array(ctime) < cross_times[i])[0][-1]
+
+        fgs_fsp_x[i] = np.average(fgs_x[idx:idx+2])
+        fgs_fsp_y[i] = np.average(fgs_y[idx:idx+2])
+        fgs_fsp_z[i] = np.average(fgs_z[idx:idx+2])
+
+    return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]

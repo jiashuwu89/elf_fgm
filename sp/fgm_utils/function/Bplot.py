@@ -186,7 +186,6 @@ def omega_fit(cross_times_org, w_syn_org,
 
     #ax.set_ylim(2.217, 2.2225)
     ax.legend() 
-    breakpoint()
     if ylimt is not None: ax.set_ylim(ylimt)
     if xlimt is not None: ax.set_xlim(xlimt)
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
