@@ -78,11 +78,11 @@ def step1(
         Bplot.B_ctime_plot(ctime, fgs_igrf_fgm_1st_x,  fgs_igrf_fgm_1st_y, 
              fgs_igrf_fgm_1st_z, cross_times=cross_times_1st, xlimt = [20, 50], plot3 = True, title="igrf_fgm_before1stcali")        
     [
-        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_igrf(
+        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_close(
             ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z
     )
     [
-        fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z] = cross_time.fsp_igrf(
+        fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z] = cross_time.fsp_close(
             ctime, cross_times_1st, T_spins_1st, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
     if parameter.makeplot == True: 
@@ -96,7 +96,7 @@ def step1(
         fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
     [
-        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_igrf(
+        fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_close(
             ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z
     )
     for i in range(0, len(cross_times_1st)):
@@ -104,17 +104,13 @@ def step1(
         T_syn = T_spins_1st[i]
 
         idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
-        if int(ctime[idx][0]) == 39 :
-            idx_0 = idx
         if int(ctime[idx][0]) == 94:
-            breakpoint()
-            Bplot.B_ctime_plot(ctime[idx][:-1], fgs_ful_fgm_2nd_x[idx][:-1]-fgs_ful_fgm_2nd_x[idx_0], fgs_ful_fgm_2nd_y[idx][:-1]-fgs_ful_fgm_2nd_y[idx_0], fgs_ful_fgm_2nd_z[idx][:-1]-fgs_ful_fgm_2nd_z[idx_0], plot3 = True, title=f"diff_fgm_after1stcali_slice_{int(ctime[idx][0])}")
-            breakpoint()
-            Bplot.B_ctime_plot(ctime[idx][:-1], [fgs_ful_fgm_2nd_x[idx][:-1], fgs_ful_fgm_2nd_x[idx_0]], [fgs_ful_fgm_2nd_y[idx][:-1], fgs_ful_fgm_2nd_y[idx_0]], [fgs_ful_fgm_2nd_z[idx][:-1], fgs_ful_fgm_2nd_z[idx_0]], plot3 = True, title=f"fuligrf_fgm_after1stcali_slice_{int(ctime[idx][0])}") 
-        #Bplot.B_ctime_plot(ctime[idx], fgs_ful_fgm_2nd_x[idx]-fgs_igrf_fgm_1st_x[idx], fgs_ful_fgm_2nd_y[idx]-fgs_igrf_fgm_1st_y[idx], 
-        #    fgs_ful_fgm_2nd_z[idx]-fgs_igrf_fgm_1st_z[idx], plot3 = True, title=f"res_fgm_after1stcali_slice_{int(ctime[idx][0])}")
-        #Bplot.B_ctime_plot(ctime[idx], [fgs_ful_fgm_2nd_x[idx], fgs_igrf_fgm_1st_x[idx]], [fgs_ful_fgm_2nd_y[idx], fgs_igrf_fgm_1st_y[idx]], 
-        #    [fgs_ful_fgm_2nd_z[idx], fgs_igrf_fgm_1st_z[idx]], plot3 = True, title=f"fuligrf_fgm_after1stcali_slice_{int(ctime[idx][0])}") 
+            #breakpoint()
+            #Bplot.B_ctime_plot(ctime[idx][:-1], fgs_ful_fgm_2nd_x[idx][:-1]-fgs_ful_fgm_2nd_x[idx_0], fgs_ful_fgm_2nd_y[idx][:-1]-fgs_ful_fgm_2nd_y[idx_0], fgs_ful_fgm_2nd_z[idx][:-1]-fgs_ful_fgm_2nd_z[idx_0], plot3 = True, title=f"diff_fgm_after1stcali_slice_{int(ctime[idx][0])}")
+            Bplot.B_ctime_plot(ctime[idx], fgs_ful_fgm_2nd_x[idx]-fgs_igrf_fgm_1st_x[idx], fgs_ful_fgm_2nd_y[idx]-fgs_igrf_fgm_1st_y[idx], 
+                fgs_ful_fgm_2nd_z[idx]-fgs_igrf_fgm_1st_z[idx], plot3 = True, title=f"res_fgm_after1stcali_slice_{int(ctime[idx][0])}")
+            Bplot.B_ctime_plot(ctime[idx], [fgs_ful_fgm_2nd_x[idx], fgs_igrf_fgm_1st_x[idx]], [fgs_ful_fgm_2nd_y[idx], fgs_igrf_fgm_1st_y[idx]], 
+                [fgs_ful_fgm_2nd_z[idx], fgs_igrf_fgm_1st_z[idx]], plot3 = True, title=f"fuligrf_fgm_after1stcali_slice_{int(ctime[idx][0])}") 
         
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
@@ -218,18 +214,44 @@ def step1(
         fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z] = coordinate.smxl2dmxl(
             fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, phi_2nd
     )
+     # igrf rotate from fgm to smxl
+    [
+        fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z] = coordinate.fgm2smxl(
+            fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
+    )
+    # igrf rotate from smxl to dmxl
+    [
+        fgs_igrf_dmxl_2nd_x, fgs_igrf_dmxl_2nd_y, fgs_igrf_dmxl_2nd_z] = coordinate.smxl2dmxl(
+            fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z, phi_2nd
+    )
+    for i in range(0, len(cross_times_2nd)):
+        t0 = cross_times_2nd[i]
+        T_syn = T_spins_2nd[i]
+
+        idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
+        if int(ctime[idx][0]) == 94:
+            #breakpoint()
+            #Bplot.B_ctime_plot(ctime[idx][:-1], fgs_ful_fgm_2nd_x[idx][:-1]-fgs_ful_fgm_2nd_x[idx_0], fgs_ful_fgm_2nd_y[idx][:-1]-fgs_ful_fgm_2nd_y[idx_0], fgs_ful_fgm_2nd_z[idx][:-1]-fgs_ful_fgm_2nd_z[idx_0], plot3 = True, title=f"diff_fgm_after1stcali_slice_{int(ctime[idx][0])}")
+            Bplot.B_ctime_plot(ctime[idx], fgs_ful_smxl_2nd_x[idx]-fgs_igrf_smxl_2nd_x[idx], fgs_ful_smxl_2nd_y[idx]-fgs_igrf_smxl_2nd_y[idx], 
+                fgs_ful_smxl_2nd_z[idx]-fgs_igrf_smxl_2nd_z[idx], plot3 = True, title=f"res_smxl_after1stcali_slice_{int(ctime[idx][0])}")
+            Bplot.B_ctime_plot(ctime[idx], [fgs_ful_smxl_2nd_x[idx], fgs_igrf_smxl_2nd_x[idx]], [fgs_ful_smxl_2nd_y[idx], fgs_igrf_smxl_2nd_y[idx]], 
+                [fgs_ful_smxl_2nd_z[idx], fgs_igrf_smxl_2nd_z[idx]], plot3 = True, title=f"fuligrf_smxl_after1stcali_slice_{int(ctime[idx][0])}") 
+            Bplot.B_ctime_plot(ctime[idx], fgs_ful_dmxl_2nd_x[idx]-fgs_igrf_dmxl_2nd_x[idx], fgs_ful_dmxl_2nd_y[idx]-fgs_igrf_dmxl_2nd_y[idx], 
+                fgs_ful_dmxl_2nd_z[idx]-fgs_igrf_dmxl_2nd_z[idx], plot3 = True, title=f"res_dmxl_after1stcali_slice_{int(ctime[idx][0])}")
+            Bplot.B_ctime_plot(ctime[idx], [fgs_ful_dmxl_2nd_x[idx], fgs_igrf_dmxl_2nd_x[idx]], [fgs_ful_dmxl_2nd_y[idx], fgs_igrf_dmxl_2nd_y[idx]], 
+                [fgs_ful_dmxl_2nd_z[idx], fgs_igrf_dmxl_2nd_z[idx]], plot3 = True, title=f"fuligrf_dmxl_after1stcali_slice_{int(ctime[idx][0])}") 
+
     if parameter.makeplot == True :
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after1stcali") 
-    if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
             [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
         [
-            fgs_fsp_ful_smxl_2nd_x, fgs_fsp_ful_smxl_2nd_y, fgs_fsp_ful_smxl_2nd_z] = cross_time.fsp_igrf(
+            fgs_fsp_ful_smxl_2nd_x, fgs_fsp_ful_smxl_2nd_y, fgs_fsp_ful_smxl_2nd_z] = cross_time.fsp_close(
                 ctime, cross_times_1st, T_spins_1st, fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z
         )
         [
-            fgs_fsp_igrf_smxl_1st_x, fgs_fsp_igrf_smxl_1st_y, fgs_fsp_igrf_smxl_1st_z] = cross_time.fsp_igrf(
+            fgs_fsp_igrf_smxl_1st_x, fgs_fsp_igrf_smxl_1st_y, fgs_fsp_igrf_smxl_1st_z] = cross_time.fsp_close(
                 ctime, cross_times_1st, T_spins_1st, fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z
         )
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 

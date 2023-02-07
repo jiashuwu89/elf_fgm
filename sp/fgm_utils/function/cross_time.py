@@ -752,3 +752,29 @@ def fsp_close(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         fgs_fsp_z[i] = np.average(fgs_z[idx:idx+2])
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
+
+def fsp_close_avg(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z): 
+    """generate data in fsp resolu
+        dmxl x: use the closest value, because looks like dmxl_y is doesn't have measurment, if average dmxl_x will gives 0
+        dmxl y: average
+        dmxl z: average 
+    """
+    fgs_fsp_x = np.zeros(len(cross_times))
+    fgs_fsp_y = np.zeros(len(cross_times))
+    fgs_fsp_z = np.zeros(len(cross_times))
+    for i in range(0, len(cross_times)):
+        # dmxl x
+        idx = np.where(np.array(ctime) < cross_times[i])[0][-1]
+        fgs_fsp_x[i] = np.average(fgs_x[idx:idx+2])
+        # dmxl y z
+        t0 = cross_times[i]
+        T_syn = T_spins_d[i]
+        idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
+        if len(ctime[idx]) > 3:
+            fgs_fsp_y[i] = np.average(fgs_y[idx])
+            fgs_fsp_z[i] = np.average(fgs_z[idx])
+        else:
+            fgs_fsp_y[i] = 0
+            fgs_fsp_z[i] = 0 
+
+    return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
