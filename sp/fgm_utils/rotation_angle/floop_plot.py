@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 def Gain_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
     """plot Gain x, y, z as a function of rotation angle
@@ -52,6 +53,70 @@ def Allpara_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, missio
     plt.show()
     #plt.close()
 
+def Gthphi_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission = "", filename = None):
+    """plot Gain x, y, z as a function of rotation angle
+    """
+    f_len = len(f)
+    G1 = np.zeros(f_len)
+    G2 = np.zeros(f_len)
+    G3 = np.zeros(f_len)
+    th1 = np.zeros(f_len)
+    th2 = np.zeros(f_len)
+    th3 = np.zeros(f_len)
+    ph1 = np.zeros(f_len)
+    ph2 = np.zeros(f_len)
+    ph3 = np.zeros(f_len)
+    for i, _ in enumerate(f):
+
+        G1[i] = (G11[i]**2 + G12[i]**2 + G13[i]**2)**0.5 
+        G2[i] = (G21[i]**2 + G22[i]**2 + G23[i]**2)**0.5
+        G3[i] = (G31[i]**2 + G32[i]**2 + G33[i]**2)**0.5
+        
+        th1[i] = np.degrees(np.arccos(G13[i]/G1[i]))
+        th2[i] = np.degrees(np.arccos(G23[i]/G2[i]))
+        th3[i] = np.degrees(np.arccos(G33[i]/G3[i]))
+
+        ph1[i] = np.degrees(np.arctan(G12[i]/G11[i]))
+        ph2[i] = np.degrees(np.arctan(G22[i]/G21[i]))
+        ph3[i] = np.degrees(np.arctan(G32[i]/G31[i]))
+    
+    idx_0 = [i for i in range(len(f)-1) if ph2[i] > 0 and ph2[i+1] < 0][0] + 1
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(5,8))
+
+    ax1.plot(f, G1, label='G1')
+    ax1.plot(f, G2, label='G2')
+    ax1.plot(f, G3, label='G3')
+    ax1.set_xlabel('rotation angle (deg)')
+    ax1.set_ylabel('|G|')
+    ax1.legend() 
+    ax1.set_title(f'G1: {round(np.average(G1), 1)}, G2: {round(np.average(G2), 1)}, G3: {round(np.average(G3), 1)}', fontsize=10)
+
+    ax2.plot(f, th1, label='th1')
+    ax2.plot(f, th2, label='th2')
+    ax2.plot(f, th3, label='th3')
+    ax2.set_xlabel('rotation angle (deg)')
+    ax2.set_ylabel('elevation angle (deg)')
+    ax2.legend()
+    ax2.set_title(f'th1: {round(np.average(th1), 1)}, th2: {round(np.average(th2), 1)}, th3: {round(np.average(th3), 1)}', fontsize=10) 
+
+    ax3.plot(f, ph1, label='ph1')
+    ax3.plot(f, ph2, label='ph2')
+    ax3.plot(f, ph3, label='ph3')
+    ax3.set_xlabel('rotation angle (deg)')
+    ax3.set_ylabel('azimuthal angle (deg)')
+    ax3.legend(loc='upper right') 
+    ax3.axvline(x=f[idx_0], color='red', linestyle='--')
+    ax3.set_title(f'rotAng = {f[idx_0]} deg ph1 = {round(ph1[idx_0], 1)} deg when ph2 = 90 deg')
+
+    fig.subplots_adjust(hspace=0.4, wspace=0.4) # inch
+
+    filename = "Gthph_f" if filename is None else filename + "_Gthph_f"
+    plt.savefig(f"{filename}_{mission}") if mission != "" else plt.savefig(f"{filename}")
+    #plt.show()
+    #breakpoint()
+    plt.close()
+
+
 def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
     """plot STD x, y, z as a function of rotation angle
     """
@@ -72,14 +137,17 @@ def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
 if __name__ == "__main__":
     
     mission = "ela"
-    #date = "20190430_183052" # ela long collection
+    date = "20190430_183052" # ela long collection
     #date = "20190802_020149" # elb long collection
-    date = "20190806_073926" # elb long collection
+    #date = "20190806_073926" # elb long collection
     rotAng_df = pd.read_csv(f"rotAng_loop_{mission}_360_{date}.csv")
 
     #Gain_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G22'], rotAng_df['G33'], mission = mission, filename = date)
     #STD_f(rotAng_df['rotate_ang'], rotAng_df['res_dmxl_x'], rotAng_df['res_dmxl_y'], rotAng_df['res_dmxl_z'], mission = mission, filename = date)
-    Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+    #Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+    #    rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
+    #    rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
+    Gthphi_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
         rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
         rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
-    breakpoint()
+    #breakpoint()
