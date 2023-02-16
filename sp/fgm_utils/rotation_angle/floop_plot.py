@@ -49,9 +49,9 @@ def Allpara_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, missio
     ax3.legend() 
 
     filename = "AllPara_f" if filename is None else filename + "_AllPara_f"
-    #plt.savefig(f"{filename}_{mission}") if mission != "" else plt.savefig(f"{filename}")
-    plt.show()
-    #plt.close()
+    plt.savefig(f"{filename}_{mission}") if mission != "" else plt.savefig(f"{filename}")
+    #plt.show()
+    plt.close()
 
 def Gthphi_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission = "", filename = None):
     """plot Gain x, y, z as a function of rotation angle
@@ -106,7 +106,7 @@ def Gthphi_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission
     ax3.set_ylabel('azimuthal angle (deg)')
     ax3.legend(loc='upper right') 
     ax3.axvline(x=f[idx_0], color='red', linestyle='--')
-    ax3.set_title(f'rotAng = {f[idx_0]} deg ph1 = {round(ph1[idx_0], 1)} deg when ph2 = 90 deg')
+    ax3.set_title(f'rotAng = {f[idx_0]} deg ph1 = {round(ph1[idx_0], 1)} deg ph3 = {round(ph3[idx_0], 1)} when ph2 = 90 deg', fontsize=10)
 
     fig.subplots_adjust(hspace=0.4, wspace=0.4) # inch
 
@@ -137,16 +137,18 @@ def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
 if __name__ == "__main__":
     
     mission = "ela"
-    date = "20190430_183052" # ela long collection
-    #date = "20190802_020149" # elb long collection
-    #date = "20190806_073926" # elb long collection
+    #date = "20190430_183052" # ela long collection
+    #date = "20190802_020149" # ela long collection
+    #date = "20190806_073926" # ela long collection
+    #date = "20220330_195344"
+    date= "20220910_234255"
     rotAng_df = pd.read_csv(f"rotAng_loop_{mission}_360_{date}.csv")
 
     #Gain_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G22'], rotAng_df['G33'], mission = mission, filename = date)
     #STD_f(rotAng_df['rotate_ang'], rotAng_df['res_dmxl_x'], rotAng_df['res_dmxl_y'], rotAng_df['res_dmxl_z'], mission = mission, filename = date)
-    #Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
-    #    rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
-    #    rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
+    Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+        rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
+        rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
     Gthphi_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
         rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
         rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)

@@ -173,7 +173,7 @@ def fgm_fsp_calib(
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(16) ]
- 
+        
     """
         # 1. step 1, B calibration
     """
