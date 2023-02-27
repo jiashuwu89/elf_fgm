@@ -70,8 +70,8 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-14/15:52:02"]   
     #starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
     #endtime_str = ["2022-09-07/19:19:57"] 
-    #starttime_str = ["2022-09-10/23:42:55"] # jiang event ela
-    #endtime_str = ["2022-09-10/23:49:06"] 
+    starttime_str = ["2022-09-10/23:42:55"] # jiang event ela
+    endtime_str = ["2022-09-10/23:49:06"] 
     #starttime_str = ["2022-03-13/19:33:28"]
     #endtime_str = ["2022-03-13/19:39:41"]
     #starttime_str = ["2022-03-31/16:11:16"] # a good event
@@ -154,8 +154,10 @@ if __name__ == "__main__":
     #endtime_str = ["2020-08-19/05:49:25"]
     #starttime_str = ["2021-08-13/21:21:04"] # ela result in 2021 dec
     #endtime_str = ["2021-08-13/21:27:17"]
-    starttime_str = ["2022-06-07/11:27:16"] # ela result in 2021 dec
-    endtime_str = ["2022-06-07/11:33:27"]
+    #starttime_str = ["2022-06-07/11:27:16"] # ela result in 2021 dec
+    #endtime_str = ["2022-06-07/11:33:27"]
+    #starttime_str = ["2019-06-29/02:55:49"] # V first event in phase
+    #endtime_str = ["2019-06-29/03:00:03"]
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))

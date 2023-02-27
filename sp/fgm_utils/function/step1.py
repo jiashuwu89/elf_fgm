@@ -1,7 +1,8 @@
 from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
-from .ctime_spike_80 import spike_sinefit_80
+from .ctime_spike_80 import spike_sinefit_80, find_closest
 import numpy as np
+from .cross_time_phase import cross_times_phase
 
 def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -12,6 +13,7 @@ def step1(
     """
         # 1. first run
     """
+    # zero crossing for z
     [
         cross_times_1st_1, cross_times_1st_1_mids, 
         T_spins_1st_1, w_syn_1st_1] = cross_time.cross_time_stage_1(
@@ -27,7 +29,8 @@ def step1(
             ctime, fgs_ful_fgm_1st_z, cross_times_1st_2, T_spins_1st_2
     )
     logger.debug(f"[1.1] zero crossing is done. ")
-
+    if parameter.cz_phase_plot == True:
+        cross_times_phase(ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, cross_times_1st_3, T_spins_1st_3)
     """
         # 1.1 corr - phase angle integration
     """

@@ -76,7 +76,8 @@ def B_ctime_plot(
     else:
         print("B_ctime_plot: not same length!")
         return 
-
+ 
+    cross_times = [cross_times, cross_times, cross_times] if isinstance(cross_times, np.ndarray) else cross_times 
     ctime_idx_time = [ctime_idx_time] if isinstance(ctime_idx_time,np.float64) else ctime_idx_time
     ctime_idx_time = np.array(ctime_idx_time) if isinstance(ctime_idx_time,list) else ctime_idx_time
     if plot3 == True: # three subplots
@@ -97,7 +98,7 @@ def B_ctime_plot(
                 ax[j].set_xlim(xlimt) if xlimt is not None else None
                 ax[j].set_ylim(ylimt[j]) if ylimt is not None else None
                 if cross_times is not None:
-                    [ax[j].axvline(k, linestyle='--', color='black') for k in cross_times]
+                    [ax[j].axvline(k, linestyle='--', color='black') for k in cross_times[j]]
                 ax[j].set_xlabel('Relative Time (seconds)')
                 ax[j].set_ylabel(y_labels[j])
                 ax[j].legend()
@@ -120,9 +121,9 @@ def B_ctime_plot(
 def B_ctime_plot_single(
     ctime: List[float], B: List[float], scatter = False,
     title = "B_ctime_plot_single", xlimt = None, ylimt = None, 
-    cross_times = None, datestr = None
+    cross_times = None, datestr = None, legend = None, ylabel = None,
 ):
-
+    labels = ['X', 'Y', 'Z'] if legend is None else legend
     filename = datestr + "_" + title if datestr is not None else title
     dim = np.array(B).ndim
     fig, ax = plt.subplots(1, figsize=(12,7))
@@ -130,16 +131,17 @@ def B_ctime_plot_single(
         ax.plot(ctime, B, alpha=.5)
         ax.scatter(ctime, B, alpha=.5) if scatter == True else None
     else:
-        [ax.plot(ctime, B[i], alpha=.5, label = f"X_{i}") for i in range(len(B))]
+        [ax.plot(ctime, B[i], alpha=.5, label = labels[i]) for i in range(len(B))] if scatter == False else [ax.scatter(ctime, B[i], alpha=.5, label = labels[i]) for i in range(len(B))]
+        ax.legend()
     if cross_times is not None:
         [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_ylim(ylimt) if ylimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')
-    ax.set_ylabel('B (nT)')
-    #ax.legend()
+    ax.set_ylabel('B (nT)') if ylabel is None else ax.set_ylabel(ylabel) 
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
     plt.close()
+
 
 
 def B_3d(B_x: List[float],B_y: List[float], B_z: List[float]):
