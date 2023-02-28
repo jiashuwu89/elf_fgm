@@ -49,6 +49,8 @@ if __name__ == "__main__":
     #endtime_str = ["2019-08-02/02:56:39"]
     #starttime_str = ["2019-08-06/07:39:26"] # long collection
     #endtime_str = ["2019-08-06/08:33:53"]
+    #starttime_str = ["2022-01-16/22:53:11"] # o largerthan w
+    #endtime_str = ["2022-01-16/22:59:22"]
 
     #starttime_str = ["2021-03-21/08:27:09"] # Qi murong ela
     #endtime_str = ["2021-03-21/08:33:23"]    
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-14/15:52:02"]   
     #starttime_str = ["2022-09-07/19:13:44"] # yangyang gap event
     #endtime_str = ["2022-09-07/19:19:57"] 
-    starttime_str = ["2022-09-10/23:42:55"] # jiang event ela
+    starttime_str = ["2022-09-10/23:42:55"] # jiang event ela o larger than w
     endtime_str = ["2022-09-10/23:49:06"] 
     #starttime_str = ["2022-03-13/19:33:28"]
     #endtime_str = ["2022-03-13/19:39:41"]

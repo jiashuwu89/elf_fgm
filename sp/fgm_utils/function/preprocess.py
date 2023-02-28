@@ -58,13 +58,20 @@ def resample_data(
     """resample data
     """
     cur_data_np = np.array(cur_data.to_list())
-    dimens = cur_data_np.shape[1]  # x, y, z
-    interp_data = np.zeros((len(target_time), dimens))
-    x = (cur_time - target_time[0]).total_seconds()
-    x_interp = (target_time - target_time[0]).total_seconds()
-    for dimen in range(dimens):
-        f = interp1d(x, cur_data_np[:, dimen])
-        interp_data[:, dimen] = f(x_interp)
+    if len(cur_data_np.shape) == 1:
+        interp_data = np.zeros(len(target_time))
+        x = (cur_time - target_time[0]).total_seconds()
+        x_interp = (target_time - target_time[0]).total_seconds()
+        f = interp1d(x, cur_data_np, fill_value=parameter.f_changing_outside, bounds_error=False) 
+        interp_data = f(x_interp)
+    else:    
+        dimens = cur_data_np.shape[1]  # x, y, z
+        interp_data = np.zeros((len(target_time), dimens))
+        x = (cur_time - target_time[0]).total_seconds()
+        x_interp = (target_time - target_time[0]).total_seconds()
+        for dimen in range(dimens):
+            f = interp1d(x, cur_data_np[:, dimen])
+            interp_data[:, dimen] = f(x_interp)
 
     return pd.Series(interp_data.tolist())
 

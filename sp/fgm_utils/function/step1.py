@@ -3,6 +3,7 @@ from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80, find_closest
 import numpy as np
 from .cross_time_phase import cross_times_phase
+import pandas as pd
 
 def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 

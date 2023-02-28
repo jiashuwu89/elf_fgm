@@ -47,4 +47,3 @@ def cross_times_phase(ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1
         
     Bplot.B_ctime_plot_single(cross_times_1st_3_select, [cross_times_1st_3_xdiff, cross_times_1st_3_ydiff], scatter = True, 
         legend=[f'$\Delta$Cross Times XZ', '$\Delta$Cross Times YZ'], title = 'time_diff_xyz', ylabel='time(s)')
-    breakpoint()

@@ -45,6 +45,17 @@ def fgm_fsp_calib(
     df["time"] = fgm_cdfdata.index
     df["timestamp"] = df["time"].apply(lambda ts: pd.Timestamp(ts).timestamp())
 
+    # resample f
+    if parameter.f_changing == True:
+        f_df = pd.read_csv(parameter.f_changing_fname)
+        f_df['Time'] = f_df['Time'].apply(lambda ts: pd.Timestamp(datetime.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S')))
+        f_df.set_index('Time', inplace=True)
+        f_changing = preprocess.resample_data(f_df.index, f_df['MVAmin_x_deg'], fgm_cdfdata.index)
+        #f_changing.plot()
+        f = f_changing.to_list() 
+        f = [f_i * np.pi / 180 for f_i in f]
+    else:
+        f = parameter.f
 #    print(f"fgm data:{df['fgm_fgm']}")
 #    print(f"att_data:{df['att_gei']}")
 #    print(f"pos_data:{df['pos_gei']}")
@@ -167,7 +178,7 @@ def fgm_fsp_calib(
             ] = step0.step0(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z, datestr, logger, parameter.f,
+                att_gei_x, att_gei_y, att_gei_z, datestr, logger, f,
             )
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
@@ -178,7 +189,7 @@ def fgm_fsp_calib(
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(16) ]
- 
+        
     """
         # 1. step 1, B calibration
     """
@@ -194,7 +205,7 @@ def fgm_fsp_calib(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
-                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, parameter.f,
+                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f,
             )
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")

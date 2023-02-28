@@ -23,7 +23,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
-relative_integrate = True
+relative_integrate = False
 bidirectional_integrate = True
 
 eps_1 = 5
@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = 44 * np.pi / 180
+f = 17.7 * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -124,5 +124,14 @@ f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 3)))
 
 """cross zero difference between xz and yz
 """
-cz_phase_plot = True
-cz_phase_shift = False
+cz_phase_plot = True # make plots of x y zero crossing difference
+cz_phase_shift = False # add 1 point shift to x y fgm data so that they are exactly 90 degree phase shift with z
+
+"""using f determined by MVA
+"""
+f_changing = False
+#f_changing_fname = "fgm_utils/rotation_angle/20190806_f.csv"
+f_changing_fname = "fgm_utils/rotation_angle/20190802_f.csv"
+# angle used during extrapolation 
+#f_changing_outside = 39.3 # 20190806
+f_changing_outside = 37.6 # 20190802
