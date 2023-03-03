@@ -3,7 +3,7 @@ from pickle import FALSE
 import numpy as np
 import os
 from typing import Literal
-
+from .function import cross_time
 
 def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
     """Get the path to the CDF corresponding to the given mission and date.
@@ -111,8 +111,12 @@ gei2obw = True
 
 """change zero crossing location according to omege, in phase inter  
 """
-CrossTime_Update = True
+CrossTime_Update = False
 
 """add boundary to least square fitting, in calibration
 """
 fit_bound = False
+
+"""use close value in fsp
+"""
+fsp_func = cross_time.fsp_close
