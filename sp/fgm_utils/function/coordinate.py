@@ -165,6 +165,34 @@ def fgm2smxl(fgs_fgm_x, fgs_fgm_y, fgs_fgm_z, f):
     fgs_smxl_y = fgs_fgm_z
     fgs_smxl_z = np.sin(f) * fgs_fgm_x - np.cos(f) * fgs_fgm_y
 
+    return [fgs_smxl_x, fgs_smxl_y, fgs_smxl_z]    
+
+# not just rotate with rotation angle f, but also angle of spin axis to spin plane
+def smxl2fgm_mvarot(fgs_smxl_x, fgs_smxl_y, fgs_smxl_z, f, alpha):
+    """
+        input: 
+            fgs_smxl_x/y/z: time series of fgs data in fgm
+        output:
+            fgs_fgm_x/y/z: times series of fgs data in smxl
+    """
+    fgs_fgm_x = np.cos(f)*fgs_smxl_x - np.sin(alpha)*np.sin(f)*fgs_smxl_y + np.cos(alpha)*np.sin(f)*fgs_smxl_z
+    fgs_fgm_y = np.sin(f)*fgs_smxl_x + np.sin(alpha)*np.cos(f)*fgs_smxl_y - np.cos(alpha)*np.cos(f)*fgs_smxl_z
+    fgs_fgm_z = np.cos(alpha)*fgs_smxl_y + np.sin(alpha)*fgs_smxl_z
+
+    return [fgs_fgm_x, fgs_fgm_y, fgs_fgm_z] 
+
+# not just rotate with rotation angle f, but also angle of spin axis to spin plane
+def fgm2smxl_mvarot(fgs_fgm_x, fgs_fgm_y, fgs_fgm_z, f, alpha):
+    """
+        input: 
+            fgs_fgm_x/y/z: time series of fgs data in smxl
+        output:
+            fgs_smxl_x/y/z: times series of fgs data in fgm
+    """
+    fgs_smxl_x = np.cos(f)*fgs_fgm_x + np.sin(f)*fgs_fgm_y
+    fgs_smxl_y = -np.sin(alpha)*np.sin(f)*fgs_fgm_x + np.sin(alpha)*np.cos(f)*fgs_fgm_y + np.cos(alpha)*fgs_fgm_z
+    fgs_smxl_z = np.cos(alpha)*np.sin(f)*fgs_fgm_x - np.cos(alpha)*np.cos(f)*fgs_fgm_y + np.sin(alpha)*fgs_fgm_z
+
     return [fgs_smxl_x, fgs_smxl_y, fgs_smxl_z]     
 
 

@@ -9,6 +9,8 @@ from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, o
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
 import traceback
 import sys
+from .mva_spinaxis import mva_spinaxis
+import matplotlib.pyplot as plt
 
 datestr = ""
 
@@ -56,6 +58,26 @@ def fgm_fsp_calib(
         f = [f_i * np.pi / 180 for f_i in f]
     else:
         f = parameter.f
+
+    if parameter.mva_spinaxis == True:
+        mvamin_df = pd.read_csv(parameter.mvamin_fname)
+        mvamin_df['time'] = mvamin_df['time'].apply(lambda ts: pd.Timestamp(datetime.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S')))
+        mvamin_df.set_index('time', inplace=True)
+        mvamin_x = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_x'], fgm_cdfdata.index)
+        mvamin_y = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_y'], fgm_cdfdata.index)
+        mvamin_z = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_z'], fgm_cdfdata.index)
+        mva_angle = list(map(mva_spinaxis.mva_spinaxis_angdiff, mvamin_x, mvamin_y, mvamin_z))
+        alpha = list(map(mva_spinaxis.mva_spinaxis_ang, mvamin_x, mvamin_y, mvamin_z))
+        breakpoint()
+        #f_changing.plot()
+        #mvamin_x.plot()
+        plt.plot(mva_angle)
+        plt.ylabel('deg')
+        plt.title(f'{parameter.mvamin_fname[33:43]} mva_minvar and spin axis')
+        plt.show()
+        #mva_spinaxis(*parameter.mvamin_fgm)
+        breakpoint()
+
 #    print(f"fgm data:{df['fgm_fgm']}")
 #    print(f"att_data:{df['att_gei']}")
 #    print(f"pos_data:{df['pos_gei']}")

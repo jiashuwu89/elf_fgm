@@ -53,7 +53,25 @@ def Allpara_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, missio
     plt.show()
     #plt.close()
 
-def Gthphi_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission = "", filename = None):
+
+def Gthphi_f(G11, G12, G13, G21, G22, G23, G31, G32, G33):
+
+    G1 = (G11**2 + G12**2 + G13**2)**0.5 
+    G2 = (G21**2 + G22**2 + G23**2)**0.5
+    G3 = (G31**2 + G32**2 + G33**2)**0.5
+    
+    th1 = np.degrees(np.arccos(G13/G1))
+    th2 = np.degrees(np.arccos(G23/G2))
+    th3 = np.degrees(np.arccos(G33/G3))
+
+    ph1 = np.degrees(np.arctan(G12/G11))
+    ph2 = np.degrees(np.arctan(G22/G21))
+    ph3 = np.degrees(np.arctan(G32/G31))
+
+    return G1, G2, G3, th1, th2, th3, ph1, ph2, ph3
+
+
+def Gthphi_f_plot(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission = "", filename = None):
     """plot Gain x, y, z as a function of rotation angle
     """
     f_len = len(f)
@@ -66,19 +84,10 @@ def Gthphi_f(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mission
     ph1 = np.zeros(f_len)
     ph2 = np.zeros(f_len)
     ph3 = np.zeros(f_len)
+    
     for i, _ in enumerate(f):
-
-        G1[i] = (G11[i]**2 + G12[i]**2 + G13[i]**2)**0.5 
-        G2[i] = (G21[i]**2 + G22[i]**2 + G23[i]**2)**0.5
-        G3[i] = (G31[i]**2 + G32[i]**2 + G33[i]**2)**0.5
-        
-        th1[i] = np.degrees(np.arccos(G13[i]/G1[i]))
-        th2[i] = np.degrees(np.arccos(G23[i]/G2[i]))
-        th3[i] = np.degrees(np.arccos(G33[i]/G3[i]))
-
-        ph1[i] = np.degrees(np.arctan(G12[i]/G11[i]))
-        ph2[i] = np.degrees(np.arctan(G22[i]/G21[i]))
-        ph3[i] = np.degrees(np.arctan(G32[i]/G31[i]))
+        G1[i], G2[i], G3[i], th1[i], th2[i], th3[i], ph1[i], ph2[i], ph3[i] =  Gthphi_f(
+            G11[i], G12[i], G13[i], G21[i], G22[i], G23[i], G31[i], G32[i], G33[i])
     
     idx_0 = [i for i in range(len(f)-1) if ph2[i] > 0 and ph2[i+1] < 0][0] + 1
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(5,8))
@@ -144,10 +153,11 @@ if __name__ == "__main__":
 
     #Gain_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G22'], rotAng_df['G33'], mission = mission, filename = date)
     #STD_f(rotAng_df['rotate_ang'], rotAng_df['res_dmxl_x'], rotAng_df['res_dmxl_y'], rotAng_df['res_dmxl_z'], mission = mission, filename = date)
-    #Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
-    #    rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
-    #    rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
-    Gthphi_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+    Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+        rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
+        rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
+        
+    Gthphi_f_plot(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
         rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
         rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
     #breakpoint()

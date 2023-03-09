@@ -1,6 +1,7 @@
 from .. import parameter
 from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80, find_closest
+from ..rotation_angle.floop_plot import Gthphi_f
 import numpy as np
 from .cross_time_phase import cross_times_phase
 import pandas as pd
@@ -62,12 +63,18 @@ def step1(
         fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z] = coordinate.dmxl2smxl(
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_1st
     )
-
-    # B igrf rotate from smxl to fgm
-    [
-        fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm(
-            fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z, f
-    )
+    if parameter.mva_spinaxis_rot == True:
+        # B igrf rotate from smxl to fgm with f and alpha
+        [
+            fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm_mvarot(
+                fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z, f, parameter.mva_alpha
+        )
+    else:
+        # B igrf rotate from smxl to fgm
+        [
+            fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm(
+                fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z, f
+        )
     logger.debug(f"[1.2] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
     """
@@ -101,7 +108,17 @@ def step1(
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
-
+    
+    # convert Bparamters to angles in degree
+    G1, G2, G3, th1, th2, th3, ph1, ph2, ph3 = Gthphi_f(
+        B_parameter[0], B_parameter[1], B_parameter[2], 
+        B_parameter[4], B_parameter[5], B_parameter[6], 
+        B_parameter[8], B_parameter[9], B_parameter[10])
+    print(f"G1, G2, G3 = {G1}, {G2}, {G3}")
+    print(f"th1, th2, th3 = {th1}, {th2}, {th3}")
+    print(f"ph1, ph2, ph3 = {ph1}, {ph2}, {ph3}")
+    print(f"off1, off2, off3 = {B_parameter[3]}, {B_parameter[7]}, {B_parameter[11]}")
+    breakpoint()
     #[
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, fgs_fsp_igrf_fgm_z
@@ -314,7 +331,6 @@ def step1(
         """
             1.9 calib - phase angle integration
         """
-        breakpoint()
         # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
         [
             phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd, cross_times_3rd_fit, w_syn_3rd_fit] = cross_time.phase_integration(

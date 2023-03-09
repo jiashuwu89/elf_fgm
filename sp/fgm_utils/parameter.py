@@ -23,7 +23,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
-relative_integrate = False
+relative_integrate = True
 bidirectional_integrate = True
 
 eps_1 = 5
@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = 17.7 * np.pi / 180
+f = (90-9.3) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -135,3 +135,19 @@ f_changing_fname = "fgm_utils/rotation_angle/20190802_f.csv"
 # angle used during extrapolation 
 #f_changing_outside = 39.3 # 20190806
 f_changing_outside = 37.6 # 20190802
+
+"""check the angle between mva min and spin axis
+"""
+mva_spinaxis = False
+#mvamin_fgm = [0.997, 0.065, 0.018] # jiang
+#mvamin_fgm = [0.82, -0.566, 0.0169] # 2019-06-29/02:55:45
+#mvamin_fgm = [0.76, -0.647, 0.013] # 2019-08-06/07:40:30 long
+#mvamin_fname = "fgm_utils/mva_spinaxis/minvarvec_2019-08-02.csv"
+#mvamin_fname = "fgm_utils/mva_spinaxis/minvarvec_2022-09-10.csv" #jiang
+#mvamin_fname = "fgm_utils/mva_spinaxis/minvarvec_2022-03-11.csv" 
+mvamin_fname = "fgm_utils/mva_spinaxis/minvarvec_2022-03-05.csv"
+
+"""the angle between sxml_z and mva_spin axis
+"""
+mva_spinaxis_rot = True
+mva_alpha = -0.7 * np.pi / 180

@@ -62,7 +62,7 @@ def resample_data(
         interp_data = np.zeros(len(target_time))
         x = (cur_time - target_time[0]).total_seconds()
         x_interp = (target_time - target_time[0]).total_seconds()
-        f = interp1d(x, cur_data_np, fill_value=parameter.f_changing_outside, bounds_error=False) 
+        f = interp1d(x, cur_data_np, fill_value=np.median(cur_data), bounds_error=False) 
         interp_data = f(x_interp)
     else:    
         dimens = cur_data_np.shape[1]  # x, y, z

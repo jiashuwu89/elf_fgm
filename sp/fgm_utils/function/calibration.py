@@ -148,7 +148,7 @@ def calib_leastsquare(
     #x = [ -1,  0,  0,  0,
     #   0, 1,  0, 0,
     #    0,  0,  1, 0]
-    breakpoint()
+    #breakpoint()
     orth = np.array([[x[0], x[1], x[2]], [x[4], x[5], x[6]], [x[8], x[9], x[10]]])
     offsets = np.array([x[3], x[7], x[11]])
     calib = np.linalg.inv(orth)
