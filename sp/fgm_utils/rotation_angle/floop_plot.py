@@ -126,6 +126,51 @@ def Gthphi_f_plot(f, G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3, mi
     plt.close()
 
 
+def Gthphi_p_plot(f, G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1, O2, O3, mission = "", filename = None):
+    """plot Gain x, y, z as a function of rotation angle
+    """
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(5,8))
+    ax1.plot(f, G1, label='G1')
+    ax1.plot(f, G2, label='G2')
+    ax1.plot(f, G3, label='G3')
+    ax1.set_xlabel('phase shift (point)')
+    ax1.set_ylabel('|G|')
+    ax1.legend() 
+    ax1.set_title(f'G1: {round(np.average(G1), 1)}, G2: {round(np.average(G2), 1)}, G3: {round(np.average(G3), 1)}', fontsize=10)
+
+    ax2.plot(f, th1, label='th1')
+    ax2.plot(f, th2, label='th2')
+    ax2.plot(f, th3, label='th3')
+    ax2.set_xlabel('phase shift (point)')
+    ax2.set_ylabel('elevation angle (deg)')
+    ax2.legend()
+    ax2.set_title(f'th1: {round(np.average(th1), 1)}, th2: {round(np.average(th2), 1)}, th3: {round(np.average(th3), 1)}', fontsize=10) 
+
+    ax3.plot(f, ph1, label='ph1')
+    ax3.plot(f, ph2, label='ph2')
+    ax3.plot(f, ph3, label='ph3')
+    ax3.set_xlabel('phase shift (point)')
+    ax3.set_ylabel('azimuthal angle (deg)')
+    ax3.legend(loc='upper right') 
+    ax3.set_title(f'ph1: {round(np.average(ph1), 1)}, ph2: {round(np.average(ph2), 1)}, ph3: {round(np.average(ph3), 1)}', fontsize=10)
+
+    ax4.plot(f, O1, label='O1')
+    ax4.plot(f, O2, label='O2')
+    ax4.plot(f, O3, label='O3')
+    ax4.set_xlabel('phase shift (point)')
+    ax4.set_ylabel('azimuthal angle (deg)')
+    ax4.legend(loc='upper right') 
+    ax4.set_title(f'O1: {round(np.average(O1), 1)}, O2: {round(np.average(O2), 1)}, O3: {round(np.average(O3), 1)}', fontsize=10) 
+
+    fig.subplots_adjust(hspace=0.7, wspace=0.6) # inch
+
+    filename = "Gthph_p" if filename is None else filename + "_Gthph_p"
+    plt.savefig(f"{filename}_{mission}") if mission != "" else plt.savefig(f"{filename}")
+    #plt.show()
+    #breakpoint()
+    plt.close()
+
+
 def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
     """plot STD x, y, z as a function of rotation angle
     """
@@ -146,18 +191,28 @@ def STD_f(f, Gain_x, Gain_y, Gain_z, mission = "", filename = None):
 if __name__ == "__main__":
     
     mission = "ela"
-    date = "20190430_183052" # ela long collection
+    #date = "20190430_183052" # ela long collection
     #date = "20190802_020149" # elb long collection
-    #date = "20190806_073926" # elb long collection
+    date = "20190806_073926" # elb long collection
     rotAng_df = pd.read_csv(f"rotAng_loop_{mission}_360_{date}.csv")
 
     #Gain_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G22'], rotAng_df['G33'], mission = mission, filename = date)
     #STD_f(rotAng_df['rotate_ang'], rotAng_df['res_dmxl_x'], rotAng_df['res_dmxl_y'], rotAng_df['res_dmxl_z'], mission = mission, filename = date)
-    Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
-        rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
-        rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
-        
-    Gthphi_f_plot(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
-        rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
-        rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
-    #breakpoint()
+    """plot the original parameter
+    """
+    #Allpara_f(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+    #    rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
+    #    rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
+
+    """plot the th phi G paramter
+    """    
+    #Gthphi_f_plot(rotAng_df['rotate_ang'], rotAng_df['G11'], rotAng_df['G12'], rotAng_df['G13'], rotAng_df['O1'], 
+    #    rotAng_df['G21'], rotAng_df['G22'], rotAng_df['G23'], rotAng_df['O2'],
+    #    rotAng_df['G31'], rotAng_df['G32'], rotAng_df['G33'], rotAng_df['O3'], mission = mission, filename = date)
+
+    """plot the th phi G paramter for a phase loop
+    """ 
+    phaAng_df = pd.read_csv(f"ploop_{mission}_{date}.csv")
+    Gthphi_p_plot(phaAng_df['rotate_ang'], phaAng_df['G1'], phaAng_df['G2'], phaAng_df['G3'], phaAng_df['th1'], 
+        phaAng_df['th2'], phaAng_df['th3'], phaAng_df['ph1'], phaAng_df['ph2'],
+        phaAng_df['ph3'], phaAng_df['O1/G1'], phaAng_df['O2/G2'], phaAng_df['O3/G3'], mission = mission, filename = date)

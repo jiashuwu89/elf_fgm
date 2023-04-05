@@ -2,7 +2,7 @@ import datetime as dt
 import pandas as pd
 import logging.config
 from . import fgm_fsp_calib, parameter
-from .function import error, preprocess, fgm_fsp_calib_floop
+from .function import error, preprocess, fgm_fsp_calib_floop, fgm_fsp_calib_ploop
 import requests
 import numpy as np
 from .function.Bplot import Gain_f
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("sp")
     logger.setLevel(logging.INFO)
 
-    mission = "ela"
+    mission = "elb"
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
     
@@ -74,6 +74,57 @@ if __name__ == "__main__":
     #endtime_str = ["2022-09-07/19:19:57"] 
     #starttime_str = ["2022-09-10/23:42:55"] # jiang event ela o larger than w
     #endtime_str = ["2022-09-10/23:49:06"] 
+    #starttime_str = ["2020-06-02/03:59:54"] 
+    #endtime_str = ["2020-06-02/04:14:31"] 
+    #starttime_str = ["2020-06-21/08:30:17"]
+    #endtime_str = ["2020-06-21/08:37:29"]
+    #starttime_str = ["2021-06-03/04:12:37"]
+    #endtime_str = ["2021-06-03/04:18:50"]
+    #starttime_str = ["2021-06-13/02:02:37"]
+    #endtime_str = ["2021-06-13/02:08:49"]
+    #starttime_str = ["2021-11-16/01:00:50"]
+    #endtime_str = ["2021-11-16/01:07:02"]
+    #starttime_str = ["2021-12-09/00:49:58"]
+    #endtime_str = ["2021-12-09/00:56:10"]
+    #starttime_str = ["2022-01-01/18:14:17"]
+    #endtime_str = ["2022-01-01/18:20:32"]
+    #starttime_str = ["2022-03-01/05:33:18"] # cannnot run
+    #endtime_str = ["2022-03-01/05:39:32"]
+    #starttime_str = ["2022-03-05/05:22:38"] 
+    #endtime_str = ["2022-03-05/05:28:48"]
+    #starttime_str = ["2022-06-07/11:27:16"] 
+    #endtime_str = ["2022-06-07/11:33:27"]
+    #starttime_str = ["2022-06-16/11:21:24"] 
+    #endtime_str = ["2022-06-16/11:27:38"]
+    #elb
+    #starttime_str = ["2019-08-01/05:49:48"]
+    #endtime_str = ["2019-08-01/05:54:01"]
+    #starttime_str = ["2020-05-16/09:28:07"] 
+    #endtime_str = ["2020-05-16/09:37:11"]
+    #starttime_str = ["2020-06-15/04:33:48"] 
+    #endtime_str = ["2020-06-15/04:41:00"] 
+    #starttime_str = ["2020-09-15/01:33:25"] 
+    #endtime_str = ["2020-09-15/01:40:36"] 
+    #starttime_str = ["2021-03-02/07:06:15"]
+    #endtime_str = ["2021-03-02/07:12:27"]
+    #starttime_str = ["2021-07-06/14:43:38"]
+    #endtime_str = ["2021-07-06/14:49:51"]
+    #starttime_str = ["2021-11-16/09:33:21"]
+    #endtime_str = ["2021-11-16/09:39:32"]
+    #starttime_str = ["2022-03-01/17:07:00"]
+    #endtime_str = ["2022-03-01/17:13:12"]
+    #starttime_str = ["2022-09-03/03:22:13"]
+    #endtime_str = ["2022-09-03/03:28:25"]
+
+    #starttime_str = ["2021-03-03/05:24:55"]
+    #endtime_str = ["2021-03-03/05:30:59"]
+    #starttime_str = ["2020-09-27/20:02:49"]
+    #endtime_str = ["2020-09-27/20:09:08"]
+    #starttime_str = ["2020-09-28/00:46:15"]
+    #endtime_str = ["2020-09-28/00:52:37"]
+    #starttime_str = ["2020-10-24/06:13:37"]
+    #endtime_str = ["2020-10-24/06:19:57"]
+
     #starttime_str = ["2022-03-12/21:23:12"]
     #endtime_str = ["2022-03-12/21:29:24"]
     #starttime_str = ["2022-03-11/20:40:10"]
@@ -82,8 +133,8 @@ if __name__ == "__main__":
     #endtime_str = ["2022-03-05/10:20:53"]
     #starttime_str = ["2022-03-13/19:33:28"]
     #endtime_str = ["2022-03-13/19:39:41"]
-    starttime_str = ["2022-03-31/16:11:16"] # a good event
-    endtime_str = ["2022-03-31/16:17:27"] 
+    #starttime_str = ["2022-03-31/16:11:16"] # a good event
+    #endtime_str = ["2022-03-31/16:17:27"] 
     #starttime_str = ["2022-04-01/13:48:32"] # a good event
     #endtime_str = ["2022-04-01/13:54:45"] 
     #starttime_str = ["2022-04-01/15:20:07"] # a good event
@@ -168,6 +219,16 @@ if __name__ == "__main__":
     #endtime_str = ["2019-06-29/03:00:03"]
     #starttime_str = ["2019-04-14/18:35:51"]
     #endtime_str = ["2019-04-14/18:40:04"]
+    starttime_str = ["2020-04-30/06:16:29"] # long collection for elb
+    endtime_str = ["2020-04-30/07:16:44"]
+    #starttime_str = ["2020-04-30/04:53:05"] # long collection for elb
+    #endtime_str = ["2020-04-30/05:43:40"]
+    #starttime_str = ["2020-06-11/13:16:55"] # long collection for elb
+    #endtime_str = ["2020-06-11/14:01:10"]
+    #starttime_str = ["2020-06-02/12:00:01"] # long collection for elb
+    #endtime_str = ["2020-06-02/12:44:09"]
+    #starttime_str = ["2020-05-31/12:00:01"] # long collection for elb
+    #endtime_str = ["2020-05-31/12:40:24"]
 
     start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
     end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
@@ -203,27 +264,9 @@ if __name__ == "__main__":
         except error.cdfError as e:
             logger.error(e.__str__())
         else:
-            if parameter.f_loop == False:
-                [
-                    FGM_timestamp,
-                    fgs_fsp_res_dmxl_x,
-                    fgs_fsp_res_dmxl_y,
-                    fgs_fsp_res_dmxl_z,
-                    fgs_fsp_igrf_dmxl_x,
-                    fgs_fsp_igrf_dmxl_y,
-                    fgs_fsp_igrf_dmxl_z,
-                    fgs_fsp_res_dmxl_trend_x,
-                    fgs_fsp_res_dmxl_trend_y,
-                    fgs_fsp_res_dmxl_trend_z,
-                    fgs_fsp_res_gei_x,
-                    fgs_fsp_res_gei_y,
-                    fgs_fsp_res_gei_z,
-                    fgs_fsp_igrf_gei_x,
-                    fgs_fsp_igrf_gei_y,
-                    fgs_fsp_igrf_gei_z,
-                ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
-                logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
-            else:
+            """loop over rotation angle
+            """
+            if parameter.f_loop == True:
                 [
                     ctime, ctimestamp,
                     fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
@@ -258,4 +301,67 @@ if __name__ == "__main__":
                 filename = f"fgm_utils/rotation_angle/floop_{mission}.csv"
                 floop_df.to_csv(filename, index=False)
                 breakpoint()
-                #Gain_f(floop_df['rotate_ang'], floop_df['G11'], floop_df['G22'], floop_df['G33'])
+
+            elif parameter.p_loop == True:
+                """loop over phase shift angle
+                """
+                [
+                    ctime, ctimestamp,
+                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                    att_gei_x, att_gei_y, att_gei_z,
+                    pos_gei_x, pos_gei_y, pos_gei_z] = fgm_fsp_calib_ploop.fgm_fsp_calib_prepos(
+                        mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+
+                # define a dataframe for restoring f loop result
+                columns = ['rotate_ang','res_dmxl_x', 'res_dmxl_y', 'res_dmxl_z', 
+                    'G11', 'G12', 'G13','O1',
+                    'G21','G22','G23','O2',
+                    'G31','G32','G33','O3',
+                    'G1', 'G2', 'G3',
+                    'th1', 'th2', 'th3',
+                    'ph1', 'ph2', 'ph3',
+                    'O1/G1', 'O2/G2', 'O3/G3']
+                ploop_df = pd.DataFrame(columns=columns)
+                for ploop_i,_ in enumerate(parameter.p_loop_xvalue):
+                    [
+                        fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, B_parameter, B_parameter_ang] = fgm_fsp_calib_ploop.fgm_fsp_calib_ploop(
+                            ctime, ctimestamp,
+                            fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                            att_gei_x, att_gei_y, att_gei_z,
+                            pos_gei_x, pos_gei_y, pos_gei_z,
+                            logger, ploop_i)
+                    logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]} with rotation angle {ploop_i}\n")
+
+                    """f loop output: get res std and B parameter to big 
+                    """     
+                    new_row = [ploop_i, np.std(fgs_fsp_res_dmxl_x), np.std(fgs_fsp_res_dmxl_y), np.std(fgs_fsp_res_dmxl_z), *B_parameter, *B_parameter_ang]
+                    new_row = [dict(zip(columns, new_row))]
+                    ploop_df = pd.concat([ploop_df] + [pd.DataFrame(new_row)])
+
+                filename = f"fgm_utils/rotation_angle/ploop_{sta_datestr}_{mission}.csv"
+                ploop_df.to_csv(filename, index=False)
+                breakpoint()
+            else:
+                [
+                    FGM_timestamp,
+                    fgs_fsp_res_dmxl_x,
+                    fgs_fsp_res_dmxl_y,
+                    fgs_fsp_res_dmxl_z,
+                    fgs_fsp_igrf_dmxl_x,
+                    fgs_fsp_igrf_dmxl_y,
+                    fgs_fsp_igrf_dmxl_z,
+                    fgs_fsp_res_dmxl_trend_x,
+                    fgs_fsp_res_dmxl_trend_y,
+                    fgs_fsp_res_dmxl_trend_z,
+                    fgs_fsp_res_gei_x,
+                    fgs_fsp_res_gei_y,
+                    fgs_fsp_res_gei_z,
+                    fgs_fsp_igrf_gei_x,
+                    fgs_fsp_igrf_gei_y,
+                    fgs_fsp_igrf_gei_z,
+                ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+                logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
+
+            

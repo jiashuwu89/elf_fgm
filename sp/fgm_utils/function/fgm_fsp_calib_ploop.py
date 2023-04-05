@@ -4,17 +4,16 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
-from . import parameter
-from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
-from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
+from .. import parameter
+from . import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
+from .coordinate import dmxl2gei, gei2obw, gei_obw_matrix
 import traceback
 import sys
-from .mva_spinaxis import mva_spinaxis
-import matplotlib.pyplot as plt
+from ..rotation_angle.floop_plot import Gthphi_f
 
 datestr = ""
 
-def fgm_fsp_calib(
+def fgm_fsp_calib_prepos(
     mission: Literal["ela", "elb"],
     starttime: datetime.datetime,
     endtime: datetime.datetime,
@@ -22,7 +21,7 @@ def fgm_fsp_calib(
     att_cdfdata: pd.DataFrame,
     pos_cdfdata: pd.DataFrame,
     logger: Log,
-):
+    ):
     """
     Note that starttime, endtime refer to the start and end of the science zone collection
     """
@@ -47,47 +46,6 @@ def fgm_fsp_calib(
     df["time"] = fgm_cdfdata.index
     df["timestamp"] = df["time"].apply(lambda ts: pd.Timestamp(ts).timestamp())
 
-    # resample f
-    if parameter.f_changing == True:
-        f_df = pd.read_csv(parameter.f_changing_fname)
-        f_df['Time'] = f_df['Time'].apply(lambda ts: pd.Timestamp(datetime.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S')))
-        f_df.set_index('Time', inplace=True)
-        f_changing = preprocess.resample_data(f_df.index, f_df['MVAmin_x_deg'], fgm_cdfdata.index)
-        #f_changing.plot()
-        f = f_changing.to_list() 
-        f = [f_i * np.pi / 180 for f_i in f]
-    else:
-        f = parameter.f
-
-    if parameter.mva_spinaxis == True:
-        mvamin_df = pd.read_csv(parameter.mvamin_fname)
-        mvamin_df['time'] = mvamin_df['time'].apply(lambda ts: pd.Timestamp(datetime.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S')))
-        mvamin_df.set_index('time', inplace=True)
-        mvamin_x = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_x'], fgm_cdfdata.index)
-        mvamin_y = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_y'], fgm_cdfdata.index)
-        mvamin_z = preprocess.resample_data(mvamin_df.index, mvamin_df['minvar_z'], fgm_cdfdata.index)
-        mva_angle = list(map(mva_spinaxis.mva_spinaxis_angdiff, mvamin_x, mvamin_y, mvamin_z))
-        alpha = list(map(mva_spinaxis.mva_spinaxis_ang, mvamin_x, mvamin_y, mvamin_z))
-        breakpoint()
-        #f_changing.plot()
-        #mvamin_x.plot()
-        plt.plot(mva_angle)
-        plt.ylabel('deg')
-        plt.title(f'{parameter.mvamin_fname[33:43]} mva_minvar and spin axis')
-        plt.show()
-        #mva_spinaxis(*parameter.mvamin_fgm)
-        breakpoint()
-
-#    print(f"fgm data:{df['fgm_fgm']}")
-#    print(f"att_data:{df['att_gei']}")
-#    print(f"pos_data:{df['pos_gei']}")
-
-    # df.set_index('time', inplace = True)
-    # pprint(df.head())
-
-    # iyear, idoy, ih, im, isec = cotrans_lib.get_time_parts(df['timestamp'])
-    # print(f"year:{iyear}, doy:{idoy}, h:{ih}, m:{im}, sec:{isec}")
-
     # coordinate transformation of pos: gei -> gse -> gsm
     df["pos_gse"] = pd.Series(
         cotrans_lib.subgei2gse(
@@ -107,12 +65,6 @@ def fgm_fsp_calib(
         )
         for i in range(len(df["timestamp"]))
     ]
-    # tstart = datetime.datetime(2022, 1, 12, 15, 45, 59)
-    # xgsm = -2431.1245629621699
-    # ygsm = 3822.9186030446831
-    # zgsm = 5059.6970615621403
-    # bxgsm, bygsm, bzgsm = get_igrf(tstart, xgsm, ygsm, zgsm)
-    # print(bxgsm, bygsm, bzgsm)
 
     # coordinate transformation of B: gsm -> gse -> gei
     df["igrf_gse"] = pd.Series(
@@ -138,6 +90,85 @@ def fgm_fsp_calib(
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
     pos_gei_x, pos_gei_y, pos_gei_z = np.array(list(zip(*df["pos_gei"])))
+    
+    ctimestamp = df["timestamp"][0]
+    return [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+        att_gei_x, att_gei_y, att_gei_z,
+        pos_gei_x, pos_gei_y, pos_gei_z]
+
+
+
+def fgm_fsp_calib_ploop(
+    ctime: list,
+    ctimestamp: float,
+    fgs_ful_fgm_0th_x: list, 
+    fgs_ful_fgm_0th_y: list,
+    fgs_ful_fgm_0th_z: list,
+    fgs_igrf_gei_x: list,
+    fgs_igrf_gei_y: list,
+    fgs_igrf_gei_z: list,
+    att_gei_x: list,
+    att_gei_y: list,
+    att_gei_z: list,
+    pos_gei_x: list,
+    pos_gei_y: list,
+    pos_gei_z: list,
+    logger: Log,
+    ploop_i: int,
+):
+
+    """phase shift fgm x
+    """
+    if parameter.p_loop_xvalue[ploop_i] != 0:
+        if parameter.p_loop_xvalue[ploop_i] > 0:
+            fgs_ful_fgm_0th_x[parameter.p_loop_xvalue[ploop_i]:] = fgs_ful_fgm_0th_x[:-parameter.p_loop_xvalue[ploop_i]] # shift forward
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+                range(parameter.p_loop_xvalue[ploop_i]), ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z)
+        else:
+            fgs_ful_fgm_0th_x[:parameter.p_loop_xvalue[ploop_i]] = fgs_ful_fgm_0th_x[-parameter.p_loop_xvalue[ploop_i]:] # shift backward
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+                range(parameter.p_loop_xvalue[ploop_i],0), ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z)
+    """phase shift fgm y
+    """
+    if parameter.p_loop_yvalue[ploop_i] != 0:
+        if parameter.p_loop_yvalue[ploop_i] > 0:
+            fgs_ful_fgm_0th_y[parameter.p_loop_yvalue[ploop_i]:] = fgs_ful_fgm_0th_y[:-parameter.p_loop_yvalue[ploop_i]] # shift forward
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+                range(parameter.p_loop_yvalue[ploop_i]), ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z)
+        else:
+            fgs_ful_fgm_0th_x[:parameter.p_loop_yvalue[ploop_i]] = fgs_ful_fgm_0th_x[-parameter.p_loop_yvalue[ploop_i]:] # shift backward
+            [
+                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+                range(parameter.p_loop_yvalue[ploop_i],0), ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z)
+
+    [
+        ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+        att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+        range(ploop_i), ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
+        pos_gei_x, pos_gei_y, pos_gei_z)
+
 
     logger.info(f"Step 0 preprocess starts ... ")
     # check data sanity
@@ -168,7 +199,7 @@ def fgm_fsp_calib(
             del_time_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
             pos_gei_x, pos_gei_y, pos_gei_z)
-    
+
 
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
@@ -177,11 +208,13 @@ def fgm_fsp_calib(
             [
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
+                att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
                     ctime_idx_repeat, ctime, 
                     fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                    att_gei_x, att_gei_y, att_gei_z)
+                    att_gei_x, att_gei_y, att_gei_z,
+                    pos_gei_x, pos_gei_y, pos_gei_z)
             logger.info("[PREPROCESS] repeat ctime found and delete!")
 
     """
@@ -191,11 +224,12 @@ def fgm_fsp_calib(
     try:
         [
             fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
-            ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, B_parameter0
+            ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff,
+            B_parameter0,
             ] = step0.step0(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z, datestr, logger, f,
+                att_gei_x, att_gei_y, att_gei_z, datestr, logger, parameter.f,
             )
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
@@ -206,7 +240,7 @@ def fgm_fsp_calib(
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(16) ]
-        
+
     """
         # 1. step 1, B calibration
     """
@@ -222,7 +256,7 @@ def fgm_fsp_calib(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
-                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f,
+                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, parameter.f, ploop_i = ploop_i
             )
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")
@@ -236,7 +270,7 @@ def fgm_fsp_calib(
         fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
         fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z
 
-        FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
+        FGM_datetime = list(map(lambda ts: (ctimestamp + 
                         datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
         output.output_txt(FGM_datetime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, title='ela_fgs_res_dmxl')  
 
@@ -376,7 +410,7 @@ def fgm_fsp_calib(
     #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
     #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
     #breakpoint()
-    FGM_timestamp = df["timestamp"][0] + cross_times_calib     
+    FGM_timestamp = ctimestamp + cross_times_calib     
     
     if parameter.gei2obw == True:
         [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)
@@ -386,23 +420,11 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title="res_obw_fsp", 
             ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
 
-    
+    # convert Bparamters to angles in degree
+    G1, G2, G3, th1, th2, th3, ph1, ph2, ph3 = Gthphi_f(
+        B_parameter1[0], B_parameter1[1], B_parameter1[2], 
+        B_parameter1[4], B_parameter1[5], B_parameter1[6], 
+        B_parameter1[8], B_parameter1[9], B_parameter1[10])
+    B_parameter1_ang = [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, B_parameter1[3]/G1, B_parameter1[7]/G2, B_parameter1[11]/G3]
 
-    return [
-        FGM_timestamp,
-        fgs_fsp_res_dmxl_x,
-        fgs_fsp_res_dmxl_y,
-        fgs_fsp_res_dmxl_z,
-        fgs_fsp_igrf_dmxl_x,
-        fgs_fsp_igrf_dmxl_y,
-        fgs_fsp_igrf_dmxl_z,
-        fgs_fsp_res_dmxl_trend_x,
-        fgs_fsp_res_dmxl_trend_y,
-        fgs_fsp_res_dmxl_trend_z,
-        fgs_fsp_res_gei_x,
-        fgs_fsp_res_gei_y,
-        fgs_fsp_res_gei_z,
-        fgs_fsp_igrf_gei_x,
-        fgs_fsp_igrf_gei_y,
-        fgs_fsp_igrf_gei_z,
-    ]
+    return [fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, B_parameter1, B_parameter1_ang]

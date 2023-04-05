@@ -10,7 +10,7 @@ def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
     att_gei_x, att_gei_y, att_gei_z,
-    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f):   
+    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f, ploop_i = None):   
 
     """
         # 1. first run
@@ -81,8 +81,8 @@ def step1(
         # 1.3 use igrf to calibrate fgs data
     """
     if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x/100, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y/100, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_1st_z/100, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
           
     [
         fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
@@ -107,17 +107,13 @@ def step1(
     )
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
-    
-    # convert Bparamters to angles in degree
-    G1, G2, G3, th1, th2, th3, ph1, ph2, ph3 = Gthphi_f(
-        B_parameter[0], B_parameter[1], B_parameter[2], 
-        B_parameter[4], B_parameter[5], B_parameter[6], 
-        B_parameter[8], B_parameter[9], B_parameter[10])
-    print(f"G1, G2, G3 = {G1}, {G2}, {G3}")
-    print(f"th1, th2, th3 = {th1}, {th2}, {th3}")
-    print(f"ph1, ph2, ph3 = {ph1}, {ph2}, {ph3}")
-    print(f"off1, off2, off3 = {B_parameter[3]}, {B_parameter[7]}, {B_parameter[11]}")
+            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")
+
+    if ploop_i is not None:
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x/100, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y/100, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_1st_z/100, fgs_igrf_fgm_1st_z], plot3 = True, title=f"fuligrf_fgm_before1stcali_{ploop_i}", xlimt = [115, 130], scatter=True)
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
+            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title=f"fuligrf_fgm_after1stcali_{ploop_i}", xlimt = [115, 130], scatter=True)  
     breakpoint()
     #[
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(

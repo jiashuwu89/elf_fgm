@@ -636,14 +636,17 @@ def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
         T_syn = T_spins_d[i]
 
         idx = ((ctime - t0) >= -0.5 * T_syn) & ((ctime - t0) <= 0.5 * T_syn)
-        if len(ctime[idx]) > 3:
-            fgs_fsp_x[i] = np.average(fgs_x[idx])
-            fgs_fsp_y[i] = np.average(fgs_y[idx])
-            fgs_fsp_z[i] = np.average(fgs_z[idx])
-        else:
-            fgs_fsp_x[i] = 0
-            fgs_fsp_y[i] = 0
-            fgs_fsp_z[i] = 0 
+        try:
+            if len(ctime[idx]) > 3:
+                fgs_fsp_x[i] = np.average(fgs_x[idx])
+                fgs_fsp_y[i] = np.average(fgs_y[idx])
+                fgs_fsp_z[i] = np.average(fgs_z[idx])
+            else:
+                fgs_fsp_x[i] = 0
+                fgs_fsp_y[i] = 0
+                fgs_fsp_z[i] = 0 
+        except:
+            breakpoint()
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
 

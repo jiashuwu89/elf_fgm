@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = (90-9.3) * np.pi / 180
+f = (180+55.3) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -124,8 +124,15 @@ f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 3)))
 
 """cross zero difference between xz and yz
 """
-cz_phase_plot = True # make plots of x y zero crossing difference
-cz_phase_shift = False # add 1 point shift to x y fgm data so that they are exactly 90 degree phase shift with z
+cz_phase_plot = False # make plots of x y zero crossing difference
+
+"""phase shift between x, y
+"""
+p_loop = True # add 1 point shift to x y fgm data so that they are exactly 90 degree phase shift with z
+#p_loop_value = [*list(range(-15, 0)), *list(range(1, 15))]
+#p_loop_value = [*list(range(-3, 1)), *list(range(1,3))]
+p_loop_xvalue = [0]
+p_loop_yvalue = [0]
 
 """using f determined by MVA
 """
@@ -150,4 +157,4 @@ mvamin_fname = "fgm_utils/mva_spinaxis/minvarvec_2022-03-05.csv"
 """the angle between sxml_z and mva_spin axis
 """
 mva_spinaxis_rot = True
-mva_alpha = -0.7 * np.pi / 180
+mva_alpha = 1.5 * np.pi / 180
