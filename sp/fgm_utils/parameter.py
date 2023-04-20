@@ -86,7 +86,7 @@ cali_4th = False  # add a third calibration
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-fsp_detrend = True # detrend in dmxl if true
+fsp_detrend = False # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 #del_spike_fsp = False  # delete spike in fsp resolution
@@ -130,3 +130,9 @@ runthree = True
 """output Bparameter to csv
 """
 Bparameter_csv = True
+
+"""att rot 
+"""
+att_rot = False
+att_rot_ang = 0.5
+att_rot_axis = 'z'

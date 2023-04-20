@@ -6,6 +6,7 @@ from .function import error, preprocess, fgm_fsp_calib_floop
 import requests
 import numpy as np
 from .function.Bplot import Gain_f
+from .function.attitude import att_rot
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -721,12 +722,15 @@ if __name__ == "__main__":
             fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
             logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]}")
             att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time[i], end_time[i])
-            logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]}")
-            breakpoint()
+            logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]}")      
+
+            if parameter.att_rot == True:
+                att_cdfdata = att_rot(att_cdfdata, parameter.att_rot_ang, parameter.att_rot_axis)    
+
             fgm_cdfdata_3 = pd.concat([fgm_cdfdata_3, fgm_cdfdata])
             att_cdfdata_3 = pd.concat([att_cdfdata_3, att_cdfdata])
             pos_cdfdata_3 = pd.concat([pos_cdfdata_3, pos_cdfdata])
-
+                    
             [
                 ctime_0, ctimestamp_0,
                 fgs_ful_fgm_0th_x_0, fgs_ful_fgm_0th_y_0, fgs_ful_fgm_0th_z_0, 
@@ -764,6 +768,7 @@ if __name__ == "__main__":
                 pos_gei_y = np.concatenate((pos_gei_y, pos_gei_y_0))
                 pos_gei_z = np.concatenate((pos_gei_z, pos_gei_z_0))
                 f_3 = np.concatenate([f_3, f_3_0])
+
 
         [
             FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
