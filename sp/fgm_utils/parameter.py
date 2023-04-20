@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = 44 * np.pi / 180
+f = (180+55) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -120,8 +120,13 @@ fit_bound = False
 """loop f 
 """
 f_loop = False
-f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 3)))
+#f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 3)))
+f_loop_value = (180+55) * np.pi / 180
 
 """run three long time collection together
 """
 runthree = True
+
+"""output Bparameter to csv
+"""
+Bparameter_csv = True
