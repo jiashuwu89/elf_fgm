@@ -1,9 +1,11 @@
 import datetime as dt
 import pandas as pd
 import logging.config
-from . import fgm_fsp_calib, parameter
+from . import fgm_fsp_calib_prepos, fgm_fsp_calib, parameter
 from .function import error, preprocess
 import requests
+import numpy as np
+from .function.Bplot import Gain_f
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -135,21 +137,54 @@ if __name__ == "__main__":
             logger.error(e.__str__())
         else:
             [
-                FGM_timestamp,
-                fgs_fsp_res_dmxl_x,
-                fgs_fsp_res_dmxl_y,
-                fgs_fsp_res_dmxl_z,
-                fgs_fsp_igrf_dmxl_x,
-                fgs_fsp_igrf_dmxl_y,
-                fgs_fsp_igrf_dmxl_z,
-                fgs_fsp_res_dmxl_trend_x,
-                fgs_fsp_res_dmxl_trend_y,
-                fgs_fsp_res_dmxl_trend_z,
-                fgs_fsp_res_gei_x,
-                fgs_fsp_res_gei_y,
-                fgs_fsp_res_gei_z,
-                fgs_fsp_igrf_gei_x,
-                fgs_fsp_igrf_gei_y,
-                fgs_fsp_igrf_gei_z,
-            ] = fgm_fsp_calib(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z] = fgm_fsp_calib_prepos(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
+            
+            [
+                FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
+                fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, B_parameter,] = fgm_fsp_calib(
+                    ctime, ctimestamp,
+                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                    att_gei_x, att_gei_y, att_gei_z,
+                    pos_gei_x, pos_gei_y, pos_gei_z,
+                    logger)
+            
             logger.info(f"⏹️ End of fsp calibration for {mission} from {start_time[i]} to {end_time[i]}\n")
+
+            [G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3] = [*B_parameter]   
+            G1 = (G11**2 + G12**2 + G13**2)**0.5 
+            G2 = (G21**2 + G22**2 + G23**2)**0.5
+            G3 = (G31**2 + G32**2 + G33**2)**0.5
+            
+            th1 = np.degrees(np.arccos(G13/G1))
+            th2 = np.degrees(np.arccos(G23/G2))
+            th3 = np.degrees(np.arccos(G33/G3))
+
+            ph1 = np.degrees(np.arctan(G12/G11))
+            ph2 = np.degrees(np.arctan(G22/G21))
+            ph3 = np.degrees(np.arctan(G32/G31))
+
+            print(f'G1: {G1} G2:{G2} G3:{G3}\n')
+            print(f'th1: {th1} th2:{th2} th3:{th3}\n')
+            print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
+            print(f'O1/G1: {O1/G1} O2/G2:{O2/G2} O3/G3:{O3/G3}\n')
+
+
+            if parameter.Bparameter_csv == True:
+                columns = [ 
+                    'G1', 'G2', 'G3',
+                    'th1','th2','th3',
+                    'ph1','ph2','ph3',
+                    'O1/G1','O2/G2','O3/G3']
+                floop_df = pd.DataFrame(columns=columns)
+                new_row = [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1/G1, O2/G2, O3/G3]
+                new_row = [dict(zip(columns, new_row))]
+                floop_df = pd.concat([floop_df] + [pd.DataFrame(new_row)])
+                filename = f"fgm_utils/{starttime_str[0][0:4]}{starttime_str[0][5:7]}{starttime_str[0][8:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}{starttime_str[0][17:19]}_{mission}.csv"
+                floop_df.to_csv(filename, index=False)

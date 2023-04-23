@@ -7,7 +7,7 @@ def step1(
     ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
     att_gei_x, att_gei_y, att_gei_z,
-    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff):   
+    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f):   
 
     """
         # 1. first run
@@ -62,7 +62,7 @@ def step1(
     # B igrf rotate from smxl to fgm
     [
         fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm(
-            fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z
+            fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z, f
     )
     logger.debug(f"[1.2] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
@@ -86,7 +86,7 @@ def step1(
             fgs_fsp_igrf_fgm_z, plot3 = True, title="igrf_fgm_fsp_before1stcali") 
         #Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
         #    [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
-    breakpoint()
+
     # 1st calibration of B in dmxl 
     [
         fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, B_parameter] = calibration.calib_leastsquare(
@@ -99,6 +99,8 @@ def step1(
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
+        Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x-fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y-fgs_igrf_fgm_1st_y, 
+            fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, ylimt = [[-3000, 3000], [-3000, 3000], [-5000, 5000]], title="res_fgm_after1stcali")  
 
     #[
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
@@ -191,7 +193,7 @@ def step1(
     # B full rotate from fgm to smxl
     [
         fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z] = coordinate.fgm2smxl(
-            fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z
+            fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z, f
     )
     # B full rotate from smxl to dmxl
     [
@@ -200,7 +202,10 @@ def step1(
     )
     if parameter.makeplot == True :
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
-            [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after1stcali") 
+            [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
+        Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
+            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, ylimt = [[-3000, 3000],[-3000, 3000], [-1000, 800]], title="res_dmxl_after1stcali") 
+        
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
             [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
@@ -239,7 +244,7 @@ def step1(
         # B igrf rotate from smxl to fgm
         [
             fgs_igrf_fgm_2nd_x, fgs_igrf_fgm_2nd_y, fgs_igrf_fgm_2nd_z] = coordinate.smxl2fgm(
-                fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z
+                fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z, f
         )
         logger.debug(f"[1.6] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
@@ -328,7 +333,7 @@ def step1(
         # B full rotate from fgm to smxl
         [
             fgs_ful_smxl_3rd_x, fgs_ful_smxl_3rd_y, fgs_ful_smxl_3rd_z] = coordinate.fgm2smxl(
-                fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z
+                fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z, f
         )
         # B full rotate from smxl to dmxl
         [
@@ -363,7 +368,7 @@ def step1(
             # B igrf rotate from smxl to fgm
             [
                 fgs_igrf_fgm_3rd_x, fgs_igrf_fgm_3rd_y, fgs_igrf_fgm_3rd_z] = coordinate.smxl2fgm(
-                    fgs_igrf_smxl_3rd_x, fgs_igrf_smxl_3rd_y, fgs_igrf_smxl_3rd_z
+                    fgs_igrf_smxl_3rd_x, fgs_igrf_smxl_3rd_y, fgs_igrf_smxl_3rd_z, f
             )
             logger.debug(f"[1.10] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
@@ -451,7 +456,7 @@ def step1(
             # B full rotate from fgm to smxl
             [
                 fgs_ful_smxl_4th_x, fgs_ful_smxl_4th_y, fgs_ful_smxl_4th_z] = coordinate.fgm2smxl(
-                    fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z
+                    fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z, f
             )
             # B full rotate from smxl to dmxl
             [
@@ -486,7 +491,7 @@ def step1(
                 # B igrf rotate from smxl to fgm
                 [
                     fgs_igrf_fgm_4th_x, fgs_igrf_fgm_4th_y, fgs_igrf_fgm_4th_z] = coordinate.smxl2fgm(
-                        fgs_igrf_smxl_4th_x, fgs_igrf_smxl_4th_y, fgs_igrf_smxl_4th_z
+                        fgs_igrf_smxl_4th_x, fgs_igrf_smxl_4th_y, fgs_igrf_smxl_4th_z, f
                 )
                 logger.debug(f"[1.14] igrf rotate gei -> dmxl -> smxl -> fgm. ")
 
@@ -574,7 +579,7 @@ def step1(
                 # B full rotate from fgm to smxl
                 [
                     fgs_ful_smxl_5th_x, fgs_ful_smxl_5th_y, fgs_ful_smxl_5th_z] = coordinate.fgm2smxl(
-                        fgs_ful_fgm_5th_x, fgs_ful_fgm_5th_y, fgs_ful_fgm_5th_z
+                        fgs_ful_fgm_5th_x, fgs_ful_fgm_5th_y, fgs_ful_fgm_5th_z, f
                 )
                 # B full rotate from smxl to dmxl
                 [
@@ -649,4 +654,5 @@ def step1(
         cross_times, w_syn, T_spins, DMXL_2_GEI_fsp,
         fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
         fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+        B_parameter,
         ]

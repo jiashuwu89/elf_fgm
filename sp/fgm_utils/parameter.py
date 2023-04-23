@@ -36,17 +36,17 @@ zero_crossing_method = 3
 f = 44 * np.pi / 180
 init_secs = 0 # seconds
 
-funkyfgm = True
+funkyfgm = False
 """ctime spike paramter
 """
 # in ctime_calib, criterion for finding ctime gaps difference between jumps and ctime median in seconds
 ctime_thrhld = 0.003
 
 # in ctime_calib, degap unipolar gap 1/80s if true
-ctime_correct_80 = True  # degap unipolar gap 1/80s if true
+ctime_correct_80 = False  # degap unipolar gap 1/80s if true
 
 # in ctime_calib, some events has 1/80s spike doesn't need calibration starttime_str = ["2022-03-28/03:08:11"] 
-ctime_correct_80_skip = True 
+ctime_correct_80_skip = False 
 
 # in ctime_spike_80, num of spins in which to find [t1, t2] for 2.5 s spike
 spike_find_spin_num = 4 
@@ -96,7 +96,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 makeplot = True
 savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 
 """specify time interval for some events
@@ -107,7 +107,7 @@ del_time_idxend = [306]
 
 """gei to obw
 """
-gei2obw = True
+gei2obw = False
 
 """change zero crossing location according to omege, in phase inter  
 """
@@ -116,3 +116,7 @@ CrossTime_Update = True
 """add boundary to least square fitting, in calibration
 """
 fit_bound = False
+
+"""output Bparameter to csv
+"""
+Bparameter_csv = True

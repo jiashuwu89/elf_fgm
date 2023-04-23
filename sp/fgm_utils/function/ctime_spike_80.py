@@ -134,8 +134,9 @@ def sepoch_sub_80(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, spi
 
     #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
     if len(B_spike_idx) == 0:
-        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-            title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title=f"{ctime_idx}_x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
 
     # B_spike_idx_chunk: index of chunk
@@ -181,8 +182,9 @@ def sepoch_sub_80_0(ctime, ctime_idx, spike_ctime_idx, avg_Bx, avg_By, avg_Bz, s
 
     #Bplot.B_ctime_plot_single(ctime[spike_ctime_idx], diff_B2, scatter=True)
     if len(B_spike_idx) == 0:
-        Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
-            title="x1 = B_avg, x2 = B_spike", scatter = True)
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(ctime[spike_ctime_idx], [avg_Bx, spike_Bx], [avg_By, spike_By], [avg_Bz, spike_Bz], 
+                title="x1 = B_avg, x2 = B_spike", scatter = True)
         raise error.spikeError80_t1t2(ctime[ctime_idx])
     
     # B_spike_idx_chunk: index of chunk
@@ -235,39 +237,41 @@ def spike_sinefit_80(ctime, Bx, By, Bz, spike_ctime_idxs):
     spike_idx1s = [spike_ctime_idx - 0 for spike_ctime_idx in spike_ctime_idxs] 
     spike_idx2s = [spike_ctime_idx + 2 for spike_ctime_idx in spike_ctime_idxs]
     for idx in range(len(spike_ctime_idxs)): 
+        try:
+            spike_idx1 = spike_idx1s[idx]
+            spike_idx2 = spike_idx2s[idx]
+            fit_opt, fit_covar = curve_fit(
+                sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
+                Bx[spike_idx1-parameter.spike_fit_len_80:spike_idx2+parameter.spike_fit_len_80],
+                p0=[np.max(np.abs(Bx - np.mean(Bx))), 2.2, 0, 0]
+            )
+            B_S1_corr_del = sine_fit2(ctime, *fit_opt)
+            Bx_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+            Bx[spike_idx1:spike_idx2] = Bx_del
 
-        spike_idx1 = spike_idx1s[idx]
-        spike_idx2 = spike_idx2s[idx]
-        fit_opt, fit_covar = curve_fit(
-            sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
-            Bx[spike_idx1-parameter.spike_fit_len_80:spike_idx2+parameter.spike_fit_len_80],
-            p0=[np.max(np.abs(Bx - np.mean(Bx))), 2.2, 0, 0]
-        )
-        B_S1_corr_del = sine_fit2(ctime, *fit_opt)
-        Bx_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
-        Bx[spike_idx1:spike_idx2] = Bx_del
+            fit_opt, fit_covar = curve_fit(
+                sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
+                By[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80],
+                p0=[np.max(np.abs(By - np.mean(By))), 2.2, 0, 0]
+            )
+            B_S2_corr_del = sine_fit2(ctime, *fit_opt)
+            By_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+            By[spike_idx1:spike_idx2] = By_del
 
-        fit_opt, fit_covar = curve_fit(
-            sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
-            By[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80],
-            p0=[np.max(np.abs(By - np.mean(By))), 2.2, 0, 0]
-        )
-        B_S2_corr_del = sine_fit2(ctime, *fit_opt)
-        By_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
-        By[spike_idx1:spike_idx2] = By_del
+            fit_opt, fit_covar = curve_fit(
+                sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
+                Bz[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80],
+                p0=[np.max(np.abs(Bz - np.mean(Bz))), 2.2, 0, 0]
+            )
+            B_S3_corr_del = sine_fit2(ctime, *fit_opt)
+            Bz_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
+            Bz[spike_idx1:spike_idx2] = Bz_del
 
-        fit_opt, fit_covar = curve_fit(
-            sine_fit2, ctime[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80], 
-            Bz[spike_idx1 - parameter.spike_fit_len_80:spike_idx2 + parameter.spike_fit_len_80],
-            p0=[np.max(np.abs(Bz - np.mean(Bz))), 2.2, 0, 0]
-        )
-        B_S3_corr_del = sine_fit2(ctime, *fit_opt)
-        Bz_del = sine_fit2(ctime[spike_idx1:spike_idx2], *fit_opt)
-        Bz[spike_idx1:spike_idx2] = Bz_del
-
-        """
-        if parameter.makeplot == True: 
-            Bplot.B_ctime_plot(
-                ctime, [Bx, B_S1_corr_del], [By, B_S2_corr_del], [Bz, B_S3_corr_del], xlimt = [(spike_idx1-28)/10, (spike_idx2+28)/10], scatter=True, title=f"del_rogue_10hz_{idx}")
-        """
+            """
+            if parameter.makeplot == True: 
+                Bplot.B_ctime_plot(
+                    ctime, [Bx, B_S1_corr_del], [By, B_S2_corr_del], [Bz, B_S3_corr_del], xlimt = [(spike_idx1-28)/10, (spike_idx2+28)/10], scatter=True, title=f"del_rogue_10hz_{idx}")
+            """
+        except:
+            pass
     return Bx, By, Bz
