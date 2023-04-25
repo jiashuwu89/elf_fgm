@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = 44 * np.pi / 180
+f = (180+54) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -107,7 +107,7 @@ del_time_idxend = [306]
 
 """gei to obw
 """
-gei2obw = False
+gei2obw = True
 
 """change zero crossing location according to omege, in phase inter  
 """
@@ -120,3 +120,7 @@ fit_bound = False
 """output Bparameter to csv
 """
 Bparameter_csv = True
+
+"""fgm data /100 before calib, so that gain is close to 1
+"""
+fgm_scale  = False

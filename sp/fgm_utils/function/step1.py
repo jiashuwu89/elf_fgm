@@ -71,8 +71,7 @@ def step1(
     """
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
-          
+            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")         
     [
         fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
             ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z
@@ -84,8 +83,8 @@ def step1(
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_igrf_fgm_x, fgs_fsp_igrf_fgm_y, 
             fgs_fsp_igrf_fgm_z, plot3 = True, title="igrf_fgm_fsp_before1stcali") 
-        #Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-        #    [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
 
     # 1st calibration of B in dmxl 
     [
@@ -100,7 +99,7 @@ def step1(
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
         Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x-fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y-fgs_igrf_fgm_1st_y, 
-            fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, ylimt = [[-3000, 3000], [-3000, 3000], [-5000, 5000]], title="res_fgm_after1stcali")  
+            fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, title="res_fgm_after1stcali")  
 
     #[
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(

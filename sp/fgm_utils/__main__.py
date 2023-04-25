@@ -91,14 +91,18 @@ if __name__ == "__main__":
     #endtime_str = ["2021-03-26/02:34:44"] 
     #starttime_str = ["2022-01-14/18:49:45"]  # same day for ela and elb, opposite fgm ela
     #endtime_str = ["2022-01-14/18:55:58"] 
-    #starttime_str = ["2022-01-14/18:46:04"] # same day for ela and elb, opposite fgm elb
-    #endtime_str = ["2022-01-14/18:52:18"] 
+    starttime_str = ["2022-01-14/18:46:04"] # same day for ela and elb, opposite fgm elb
+    endtime_str = ["2022-01-14/18:52:18"] 
+    #starttime_str = ["2022-01-14/19:02:18"] # same day for ela and elb, similar fgm ela
+    #endtime_str = ["2022-01-14/19:08:32"]
+    #starttime_str = ["2022-01-14/18:58:38"] # same day for ela and elb, similar fgm elb
+    #endtime_str = ["2022-01-14/19:04:52"]
     #starttime_str = ["2022-01-14/20:21:46"]  # same day for ela and elb, similar fgm ela
     #endtime_str = ["2022-01-14/20:27:58"] 
     #starttime_str = ["2022-01-14/20:18:08"] # same day for ela and elb, similar fgm elb
     #endtime_str = ["2022-01-14/20:24:21"] 
-    starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
-    endtime_str = ["2022-04-29/07:20:10"]
+    #starttime_str = ["2022-04-29/07:13:57"] # elb opposite result
+    #endtime_str = ["2022-04-29/07:20:10"]
     #starttime_str = ["2022-04-29/07:09:44"] # ela opposite result
     #endtime_str = ["2022-04-29/07:16:13"]
 
@@ -142,6 +146,11 @@ if __name__ == "__main__":
                 att_gei_x, att_gei_y, att_gei_z,
                 pos_gei_x, pos_gei_y, pos_gei_z] = fgm_fsp_calib_prepos(mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata, logger)
             
+            if parameter.fgm_scale == True:
+                fgs_ful_fgm_0th_x /= 10
+                fgs_ful_fgm_0th_y /= 10
+                fgs_ful_fgm_0th_z /= 10
+
             [
                 FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
@@ -170,10 +179,17 @@ if __name__ == "__main__":
             ph2 = np.degrees(np.arctan(G22/G21))
             ph3 = np.degrees(np.arctan(G32/G31))
 
-            print(f'G1: {G1} G2:{G2} G3:{G3}\n')
-            print(f'th1: {th1} th2:{th2} th3:{th3}\n')
-            print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
-            print(f'O1/G1: {O1/G1} O2/G2:{O2/G2} O3/G3:{O3/G3}\n')
+            print('----------------parameter------------------')
+            print('G11: {:.3f} G12:{:.3f} G13:{:.3f}\n'.format(G11,G12,G13))
+            print('G21: {:.3f} G22:{:.3f} G23:{:.3f}\n'.format(G21,G22,G23))
+            print('G31: {:.3f} G32:{:.3f} G33:{:.3f}\n'.format(G31,G32,G33))
+            print('O1: {:.3f} O2:{:.3f} O3:{:.3f}\n'.format(O1,O2,O3))
+
+            print('G1: {:.3f} G2:{:.3f} G3:{:.3f}\n'.format(G1,G2,G3))
+            print('th1: {:.3f} th2:{:.3f} th3:{:.3f}\n'.format(th1,th2,th3))
+            print('ph1: {:.3f} ph2:{:.3f} ph3:{:.3f}\n'.format(ph1,ph2,ph3))
+            print('O1/G1: {:.3f} O2/G2:{:.3f} O3/G3:{:.3f}'.format(O1/G1, O2/G2, O3/G3))
+            print('-------------------------------------------')
 
 
             if parameter.Bparameter_csv == True:
