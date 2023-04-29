@@ -1,6 +1,6 @@
 import datetime
-from distutils.log import Log
-from typing import Literal
+from logging import Logger
+from typing import Literal, List
 import numpy as np
 import pandas as pd
 from pyspedas.cotrans import cotrans_lib
@@ -12,15 +12,14 @@ import sys
 
 datestr = ""
 
-def fgm_fsp_calib(
+def fgm_fsp_calib_prepos(
     mission: Literal["ela", "elb"],
     starttime: datetime.datetime,
     endtime: datetime.datetime,
     fgm_cdfdata: pd.DataFrame,
     att_cdfdata: pd.DataFrame,
     pos_cdfdata: pd.DataFrame,
-    logger: Log,
-):
+    ):
     """
     Note that starttime, endtime refer to the start and end of the science zone collection
     """
@@ -45,16 +44,6 @@ def fgm_fsp_calib(
     df["time"] = fgm_cdfdata.index
     df["timestamp"] = df["time"].apply(lambda ts: pd.Timestamp(ts).timestamp())
 
-#    print(f"fgm data:{df['fgm_fgm']}")
-#    print(f"att_data:{df['att_gei']}")
-#    print(f"pos_data:{df['pos_gei']}")
-
-    # df.set_index('time', inplace = True)
-    # pprint(df.head())
-
-    # iyear, idoy, ih, im, isec = cotrans_lib.get_time_parts(df['timestamp'])
-    # print(f"year:{iyear}, doy:{idoy}, h:{ih}, m:{im}, sec:{isec}")
-
     # coordinate transformation of pos: gei -> gse -> gsm
     df["pos_gse"] = pd.Series(
         cotrans_lib.subgei2gse(
@@ -74,12 +63,6 @@ def fgm_fsp_calib(
         )
         for i in range(len(df["timestamp"]))
     ]
-    # tstart = datetime.datetime(2022, 1, 12, 15, 45, 59)
-    # xgsm = -2431.1245629621699
-    # ygsm = 3822.9186030446831
-    # zgsm = 5059.6970615621403
-    # bxgsm, bygsm, bzgsm = get_igrf(tstart, xgsm, ygsm, zgsm)
-    # print(bxgsm, bygsm, bzgsm)
 
     # coordinate transformation of B: gsm -> gse -> gei
     df["igrf_gse"] = pd.Series(
@@ -105,10 +88,33 @@ def fgm_fsp_calib(
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z = np.array(list(zip(*df["igrf_gei"])))
     att_gei_x, att_gei_y, att_gei_z = np.array(list(zip(*df["att_gei"])))
     pos_gei_x, pos_gei_y, pos_gei_z = np.array(list(zip(*df["pos_gei"])))
-
-    logger.info(f"Step 0 preprocess starts ... ")
-    # check data sanity
     
+    ctimestamp = df["timestamp"][0]
+    return [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+        att_gei_x, att_gei_y, att_gei_z,
+        pos_gei_x, pos_gei_y, pos_gei_z]
+
+
+def fgm_fsp_calib(
+    ctime: List[float],
+    ctimestamp: float,
+    f_all: List[float],
+    fgs_ful_fgm_0th_x: List[float], 
+    fgs_ful_fgm_0th_y: List[float],
+    fgs_ful_fgm_0th_z: List[float],
+    fgs_igrf_gei_x: List[float],
+    fgs_igrf_gei_y: List[float],
+    fgs_igrf_gei_z: List[float],
+    att_gei_x: List[float],
+    att_gei_y: List[float],
+    att_gei_z: List[float],
+    pos_gei_x: List[float],
+    pos_gei_y: List[float],
+    pos_gei_z: List[float],
+    logger: Logger,
+):
+
     if parameter.funkyfgm == True:
         try:
             preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
@@ -116,7 +122,7 @@ def fgm_fsp_calib(
             if parameter.makeplot == True:
                 Bplot.B_ctime_plot(ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, datestr = datestr, title = "funkyFGM")
             logger.error(e.__str__())
-            return [ [] for _ in range(16) ]
+            return [ [] for _ in range(17) ]
         except Exception as e:
             logger.error(f"❌ funky fgm check failed. ")
             logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
@@ -131,24 +137,28 @@ def fgm_fsp_calib(
         [
             ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-            att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z] = detrend.delete_data(
+            att_gei_x, att_gei_y, att_gei_z, pos_gei_x, pos_gei_y, pos_gei_z, f_all] = detrend.delete_data(
             del_time_idx, ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z,
-            pos_gei_x, pos_gei_y, pos_gei_z)
+            pos_gei_x, pos_gei_y, pos_gei_z, f_all)
+        logger.info("[PREPROCESS] delete user specify data!")
     
 
     # check repeated ctime
     if parameter.ctime_repeat_check == True:
         ctime_idx_repeat = preprocess.ctime_check(ctime)
         if ctime_idx_repeat is not None:
-            [
-                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
-                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z] = detrend.delete_data(
-                    ctime_idx_repeat, ctime, 
-                    fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            try:
+                [
+                    ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                    att_gei_x, att_gei_y, att_gei_z)
+                    att_gei_x, att_gei_y, att_gei_z, f_all] = detrend.delete_data(
+                        ctime_idx_repeat, ctime, 
+                        fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                        att_gei_x, att_gei_y, att_gei_z, f_all)
+            except:
+                breakpoint()
             logger.info("[PREPROCESS] repeat ctime found and delete!")
 
     """
@@ -162,18 +172,18 @@ def fgm_fsp_calib(
             ] = step0.step0(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z, datestr, logger, parameter.f,
+                att_gei_x, att_gei_y, att_gei_z, datestr, logger, f_all,
             )
     except error.CrossTime1Error as e:
         logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
+        return [ [] for _ in range(17) ]
         logger.error(traceback.format_exception(*sys.exc_info()))
     except Exception as e:
         logger.error(f"❌ step 0 other error. Stop processing.")
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
-        return [ [] for _ in range(16) ]
-        
+        return [ [] for _ in range(17) ]
+       
     """
         # 1. step 1, B calibration
     """
@@ -189,13 +199,14 @@ def fgm_fsp_calib(
                 ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
-                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, parameter.f,
+                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,
             )
+
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
-        return [ [] for _ in range(16) ]
+        return [ [] for _ in range(17) ]
         
     if parameter.output == True:
         # full res
@@ -203,7 +214,7 @@ def fgm_fsp_calib(
         fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
         fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z
 
-        FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
+        FGM_datetime = list(map(lambda ts: (ctimestamp.to_pydatetime() + 
                         datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
         output.output_txt(FGM_datetime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, title='ela_fgs_res_dmxl')  
 
@@ -315,7 +326,7 @@ def fgm_fsp_calib(
         )
     except error.fsp_spike_del_error as e:
         logger.error(e.__str__())
-        return [ [] for _ in range(16) ]
+        return [ [] for _ in range(17) ]
     except Exception as e:
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
@@ -343,7 +354,7 @@ def fgm_fsp_calib(
     #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
     #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
     #breakpoint()
-    FGM_timestamp = df["timestamp"][0] + cross_times_calib     
+    FGM_timestamp = ctimestamp + cross_times_calib     
     
     if parameter.gei2obw == True:
         [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)
@@ -354,7 +365,6 @@ def fgm_fsp_calib(
             ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
 
     
-
     return [
         FGM_timestamp,
         fgs_fsp_res_dmxl_x,
@@ -372,4 +382,5 @@ def fgm_fsp_calib(
         fgs_fsp_igrf_gei_x,
         fgs_fsp_igrf_gei_y,
         fgs_fsp_igrf_gei_z,
+        B_parameter1,
     ]

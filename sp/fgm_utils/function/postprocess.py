@@ -3,6 +3,7 @@ from .ctime_spike_80 import find_closest
 from .error import fsp_spike_del_error
 from .detrend import del_rogue, delete_data
 import numpy as np
+from typing import List, Tuple
 
 def fsp_spike_del(
     ctime, ctime_idx, ctime_idx_flag, ctime_idx_timediff, 
@@ -320,3 +321,26 @@ def fsp_spike_del(
         fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
     ]
 
+def Bpara2Gthphi(B_parameter: List[float]) -> Tuple[float]:
+
+    [G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3] = [*B_parameter]   
+    G1 = (G11**2 + G12**2 + G13**2)**0.5 
+    G2 = (G21**2 + G22**2 + G23**2)**0.5
+    G3 = (G31**2 + G32**2 + G33**2)**0.5
+    
+    th1 = np.degrees(np.arccos(G13/G1))
+    th2 = np.degrees(np.arccos(G23/G2))
+    th3 = np.degrees(np.arccos(G33/G3))
+
+    ph1 = np.degrees(np.arctan(G12/G11))
+    ph2 = np.degrees(np.arctan(G22/G21))
+    ph3 = np.degrees(np.arctan(G32/G31))
+
+    print('==================================\n')
+    print(f'G1: {G1} G2:{G2} G3:{G3}\n')
+    print(f'th1: {th1} th2:{th2} th3:{th3}\n')
+    print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
+    print(f'O1/G1: {O1/G1} O2/G2:{O2/G2} O3/G3:{O3/G3}\n')
+    print('==================================\n')
+          
+    return [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1/G1, O2/G2, O3/G3]
