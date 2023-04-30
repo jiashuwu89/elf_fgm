@@ -43,7 +43,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 32
+    eventnum = 7
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             att_gei_x_0, att_gei_y_0, att_gei_z_0,
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
                 mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)
-        f_all_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
+        f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
 
         if i == 0: # first collection 
             [
@@ -109,12 +109,12 @@ if __name__ == "__main__":
                 fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
-                pos_gei_x, pos_gei_y, pos_gei_z, f_all] = [
+                pos_gei_x, pos_gei_y, pos_gei_z, f_all_arry] = [
                     ctime_0, ctimestamp_0, 
                     fgs_ful_fgm_0th_x_0, fgs_ful_fgm_0th_y_0, fgs_ful_fgm_0th_z_0, 
                     fgs_igrf_gei_x_0, fgs_igrf_gei_y_0, fgs_igrf_gei_z_0, 
                     att_gei_x_0, att_gei_y_0, att_gei_z_0, 
-                    pos_gei_x_0, pos_gei_y_0, pos_gei_z_0, f_all_0]
+                    pos_gei_x_0, pos_gei_y_0, pos_gei_z_0, f_all_arry_0]
             clip_start_idx = [0]
             clip_end_idx = [len(ctime)-1]
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
             pos_gei_x = np.concatenate((pos_gei_x, pos_gei_x_0))
             pos_gei_y = np.concatenate((pos_gei_y, pos_gei_y_0))
             pos_gei_z = np.concatenate((pos_gei_z, pos_gei_z_0))
-            f_all = np.concatenate([f_all, f_all_0])
+            f_all_arry = np.concatenate([f_all_arry, f_all_arry_0])
             clip_start_idx.append(clip_end_idx[-1]+1) # start index of each sci zone
             clip_end_idx.append(len(ctime)-1) # end index of each sci zone
 
@@ -144,14 +144,21 @@ if __name__ == "__main__":
     Bpara_out = []
     Gthphi_out = []
     f_out = []
-    att_out = [] 
+    att_rot_out = [] 
     if parameter.att_loop == True:
         # att loop
-        att_out = list(range(0, 360, parameter.att_loop_step))
-        rot_len = len(att_out)
+        att_rot_out = list(range(0, 360, parameter.att_loop_step))
+        att_rot_out.insert(0, -1)
+        rot_len = len(att_rot_out)
         att_gei_x_rot = np.random.rand(len(ctime), rot_len)
         att_gei_y_rot = np.random.rand(len(ctime), rot_len)
         att_gei_z_rot = np.random.rand(len(ctime), rot_len)
+
+        # run att_gei no rotate as the first one
+        att_gei_x_rot[:, 0] = att_gei_x
+        att_gei_y_rot[:, 0] = att_gei_y
+        att_gei_z_rot[:, 0] = att_gei_z
+        
         # get attitude for all rot angle and concat sci zone
         for iclip_start_idx, iclip_end_idx in zip(clip_start_idx, clip_end_idx):         # loop over sci zone
             # rotate attitude vector for the start and end of each sci zone
@@ -173,7 +180,7 @@ if __name__ == "__main__":
                 fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
                 fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
                 fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, B_parameter]=fgm_fsp_calib(
-                ctime, ctimestamp, f_all,
+                ctime, ctimestamp, f_all_arry,
                 fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
                 att_gei_x_rot[:,idx], att_gei_y_rot[:,idx], att_gei_z_rot[:,idx],
@@ -182,7 +189,7 @@ if __name__ == "__main__":
             )
             Bpara_out.append(B_parameter)
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
-            f_out.append(f_all[0]/ (np.pi / 180))
+            f_out.append(f_all_arry[0]/ (np.pi / 180))
 
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Bpara.csv"
@@ -190,14 +197,14 @@ if __name__ == "__main__":
     elif parameter.f_loop == True:
         # f loop
         for if_loop in parameter.f_loop_value:
-            f_all = [if_loop] * len(fgs_ful_fgm_0th_x) 
+            f_all_arry = [if_loop] * len(fgs_ful_fgm_0th_x) 
             [
                 FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
                 fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
                 fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
                 fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
                 fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, B_parameter]=fgm_fsp_calib(
-                ctime, ctimestamp, f_all,
+                ctime, ctimestamp, f_all_arry,
                 fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
                 att_gei_x, att_gei_y, att_gei_z,
@@ -207,7 +214,8 @@ if __name__ == "__main__":
             Bpara_out.append(B_parameter)
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
             f_out.append(if_loop/ (np.pi / 180))
-            att_out.append(0) # 0 means no rotation of att
+            att_rot_out.append(-1) # -1 means no rotation of att
+
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_floop_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_floop_Bpara.csv"
         
@@ -219,7 +227,7 @@ if __name__ == "__main__":
             fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
             fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
             fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, B_parameter]=fgm_fsp_calib(
-            ctime, ctimestamp, f_all,
+            ctime, ctimestamp, f_all_arry,
             fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
             att_gei_x, att_gei_y, att_gei_z,
@@ -229,7 +237,7 @@ if __name__ == "__main__":
         Bpara_out = [B_parameter]
         Gthphi_out = [Bpara2Gthphi(B_parameter)]
         f_out = [parameter.f/ (np.pi / 180)]
-        att_out = [0]
+        att_rot_out = [-1]
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara.csv"
 
@@ -240,23 +248,23 @@ if __name__ == "__main__":
     """
 
     Gthphi_columns = [ 
-        'f', 'att'
+        'f', 'att_rot',
         'G1', 'G2', 'G3',
         'th1','th2','th3',
         'ph1','ph2','ph3',
         'O1/G1','O2/G2','O3/G3']
     Bpara_columns = [ 
-        'f', 'att'
+        'f', 'att_rot',
         'G11', 'G12', 'G13',
         'G21','G22','G23',
         'G31','G32','G33',
         'O1','O2','O3']
     Gthphi_df = pd.DataFrame(columns = Gthphi_columns)
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
-    breakpoint()
+  
     for iline in range(len(Bpara_out)):
-        Gthphi_row = [f_out[iline], att_out[iline], *Gthphi_out[iline]]
-        Bpara_row = [f_out[iline], att_out[iline], *Bpara_out[iline]]
+        Gthphi_row = [f_out[iline], att_rot_out[iline], *Gthphi_out[iline]]
+        Bpara_row = [f_out[iline], att_rot_out[iline], *Bpara_out[iline]]
         Gthphi_row = [dict(zip(Gthphi_columns, Gthphi_row))]
         Bpara_row = [dict(zip(Bpara_columns, Bpara_row))]
 

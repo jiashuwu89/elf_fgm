@@ -119,7 +119,7 @@ fit_bound = False
 
 """loop f 
 """
-f_loop = True
+f_loop = False
 f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 100)))
 
 """run three long time collection together
@@ -140,4 +140,4 @@ att_rot_axis = 'z'
 """
 att_loop = True
 att_loop_ang = 2 # deg
-att_loop_step = 100 # step when rotate from 0 to 360
+att_loop_step = 1 # step when rotate from 0 to 360
