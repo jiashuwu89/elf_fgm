@@ -122,14 +122,6 @@ fit_bound = False
 f_loop = False
 f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 100)))
 
-"""run three long time collection together
-"""
-runAll = True
-
-"""output Bparameter to csv
-"""
-Bparameter_csv = True
-
 """att rotation by a angle around one axis
 """
 att_rot = False
@@ -138,6 +130,6 @@ att_rot_axis = 'z'
 
 """loop of attitude around the original attitude by an angle
 """
-att_loop = True
+att_loop = False
 att_loop_ang = 2 # deg
 att_loop_step = 1 # step when rotate from 0 to 360
