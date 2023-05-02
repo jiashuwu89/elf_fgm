@@ -90,6 +90,7 @@ def fgm_fsp_calib_prepos(
     pos_gei_x, pos_gei_y, pos_gei_z = np.array(list(zip(*df["pos_gei"])))
     
     ctimestamp = df["timestamp"][0]
+
     return [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
         att_gei_x, att_gei_y, att_gei_z,
@@ -214,9 +215,13 @@ def fgm_fsp_calib(
         fgs_res_dmxl_y = fgs_ful_dmxl_y - fgs_igrf_dmxl_y
         fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_igrf_dmxl_z
 
-        FGM_datetime = list(map(lambda ts: (ctimestamp.to_pydatetime() + 
+        FGM_datetime = list(map(lambda ts: (datetime.datetime.fromtimestamp(ctimestamp, tz=datetime.timezone.utc) + 
                         datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
-        output.output_txt(FGM_datetime, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z, title='ela_fgs_res_dmxl')  
+        output.output_txt(
+            FGM_datetime, 
+            [fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z], 
+            ['Timestamp','fsp_gei_x','fsp_gei_y','fsp_gei_z'], 
+            title='ela_fgs_res_dmxl')  
 
         print(f"std res_x: {np.std(fgs_res_dmxl_x)}") 
         print(f"std res_y: {np.std(fgs_res_dmxl_y)}") 

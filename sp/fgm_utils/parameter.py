@@ -93,10 +93,10 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
-savepng = True
+makeplot = False
+savepng = False
 output = False # if true output to txt file
-download_data = True
+download_data = False
 
 
 """specify time interval for some events
@@ -130,6 +130,11 @@ att_rot_axis = 'z'
 
 """loop of attitude around the original attitude by an angle
 """
-att_loop = False
+att_loop = True
 att_loop_ang = 2 # deg
-att_loop_step = 1 # step when rotate from 0 to 360
+att_loop_step = 3 # step when rotate from 0 to 360
+
+"""use att in txt file. this usually require output att to txt first
+"""
+att_csv = False
+att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"

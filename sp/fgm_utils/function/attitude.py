@@ -59,8 +59,7 @@ def att_loop(
     v = np.array([att_x, att_y, att_z]) # Your original vector
     v = v / np.linalg.norm(v) # Normalize the vector
 
-    angle_delta = np.radians(10) # 2 degrees in radians
-    num_points = 36 # Number of points on the circle
+    angle_delta = np.radians(angle) # 2 degrees in radians
 
     # Find an orthogonal vector to the original vector v
     ortho = np.array([-v[1], v[0], 0])

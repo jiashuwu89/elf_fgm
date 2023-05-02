@@ -10,6 +10,7 @@ from scipy.interpolate import interp1d
 from .function.Bplot import Gain_f
 from .function.attitude import att_rot, att_loop
 from .eventlist import eventlist
+from .function.output import output_txt
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 8
+    eventnum = 11
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -136,6 +137,18 @@ if __name__ == "__main__":
             clip_start_idx.append(clip_end_idx[-1]+1) # start index of each sci zone
             clip_end_idx.append(len(ctime)-1) # end index of each sci zone
 
+    if parameter.att_csv == True:
+        """
+        ====================
+        att from txt: if true, replace the att with data in txt
+        ====================
+        """
+        df = pd.read_csv(parameter.att_csv_filename) 
+        if len(df) == len(att_gei_x):
+            att_gei_x = df["att_gei_x"]
+            att_gei_y = df["att_gei_y"]
+            att_gei_z = df["att_gei_z"]
+
     """
     ====================
     start processing
@@ -145,6 +158,7 @@ if __name__ == "__main__":
     Gthphi_out = []
     f_out = []
     att_rot_out = [] 
+    res_rot_out = []
     if parameter.att_loop == True:
         # att loop
         att_rot_out = list(range(0, 360, parameter.att_loop_step))
@@ -168,9 +182,21 @@ if __name__ == "__main__":
             for idx, (istart_rotate_vector, iend_rotate_vector) in enumerate(zip(start_rotate_vector, end_rotate_vector)):
                 interp_func = interp1d([ctime[iclip_start_idx], ctime[iclip_end_idx]], [istart_rotate_vector, iend_rotate_vector], axis = 0)
                 interp_point = interp_func(ctime[iclip_start_idx:iclip_end_idx+1]) 
-                att_gei_x_rot[iclip_start_idx:iclip_end_idx+1, idx] = interp_point[:, 0]
-                att_gei_y_rot[iclip_start_idx:iclip_end_idx+1, idx] = interp_point[:, 1]
-                att_gei_z_rot[iclip_start_idx:iclip_end_idx+1, idx] = interp_point[:, 2]
+                att_gei_x_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 0]
+                att_gei_y_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 1]
+                att_gei_z_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 2]
+
+        if parameter.output == True:
+            # output att for future run, you have to speicfy the number of the att to output.
+            FGM_datetime = list(map(lambda ts: (
+                dt.datetime.fromtimestamp(ctimestamp, tz=dt.timezone.utc) + dt.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
+            output_txt(
+                FGM_datetime, 
+                [att_gei_x_rot[:, 83], att_gei_y_rot[:, 83], att_gei_z_rot[:, 83]], 
+                ['Timestamp','att_gei_x','att_gei_y','att_gei_z'], 
+                title='att_gei')
+            breakpoint()
+ 
         
         # run calib with rotate att
         for idx in range(rot_len):
@@ -190,6 +216,8 @@ if __name__ == "__main__":
             Bpara_out.append(B_parameter)
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
             f_out.append(f_all_arry[0]/ (np.pi / 180))
+            res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+            res_rot_out.append(np.median(res_rot))
 
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Bpara.csv"
@@ -215,6 +243,8 @@ if __name__ == "__main__":
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
             f_out.append(if_loop/ (np.pi / 180))
             att_rot_out.append(-1) # -1 means no rotation of att
+            res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+            res_rot_out.append(np.median(res_rot))
 
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_floop_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_floop_Bpara.csv"
@@ -238,6 +268,8 @@ if __name__ == "__main__":
         Gthphi_out = [Bpara2Gthphi(B_parameter)]
         f_out = [parameter.f/ (np.pi / 180)]
         att_rot_out = [-1]
+        res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+        res_rot_out.append(np.median(res_rot))
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara.csv"
 
@@ -248,13 +280,13 @@ if __name__ == "__main__":
     """
 
     Gthphi_columns = [ 
-        'f', 'att_rot',
+        'f', 'att_rot', 'res_med',
         'G1', 'G2', 'G3',
         'th1','th2','th3',
         'ph1','ph2','ph3',
         'O1/G1','O2/G2','O3/G3']
     Bpara_columns = [ 
-        'f', 'att_rot',
+        'f', 'att_rot', 'res_med',
         'G11', 'G12', 'G13',
         'G21','G22','G23',
         'G31','G32','G33',
@@ -263,8 +295,8 @@ if __name__ == "__main__":
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
   
     for iline in range(len(Bpara_out)):
-        Gthphi_row = [f_out[iline], att_rot_out[iline], *Gthphi_out[iline]]
-        Bpara_row = [f_out[iline], att_rot_out[iline], *Bpara_out[iline]]
+        Gthphi_row = [f_out[iline], att_rot_out[iline], res_rot_out[iline], *Gthphi_out[iline]]
+        Bpara_row = [f_out[iline], att_rot_out[iline], res_rot_out[iline], *Bpara_out[iline]]
         Gthphi_row = [dict(zip(Gthphi_columns, Gthphi_row))]
         Bpara_row = [dict(zip(Bpara_columns, Bpara_row))]
 
