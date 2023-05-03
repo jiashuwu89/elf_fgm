@@ -8,7 +8,7 @@ import requests
 import numpy as np
 from scipy.interpolate import interp1d
 from .function.Bplot import Gain_f
-from .function.attitude import att_rot, att_loop
+from .function.attitude import att_rot, att_loop, att_plot
 from .eventlist import eventlist
 from .function.output import output_txt
 
@@ -172,12 +172,12 @@ if __name__ == "__main__":
         att_gei_x_rot[:, 0] = att_gei_x
         att_gei_y_rot[:, 0] = att_gei_y
         att_gei_z_rot[:, 0] = att_gei_z
-        
+
         # get attitude for all rot angle and concat sci zone
         for iclip_start_idx, iclip_end_idx in zip(clip_start_idx, clip_end_idx):         # loop over sci zone
             # rotate attitude vector for the start and end of each sci zone
-            start_rotate_vector = att_loop(att_gei_x[iclip_start_idx], att_gei_y[iclip_start_idx], att_gei_z[iclip_start_idx], parameter.att_loop_ang, step = parameter.att_loop_step)
-            end_rotate_vector = att_loop(att_gei_x[iclip_end_idx], att_gei_y[iclip_end_idx], att_gei_z[iclip_end_idx], parameter.att_loop_ang, step = parameter.att_loop_step)
+            start_rotate_vector = att_loop(att_gei_x[iclip_start_idx], att_gei_y[iclip_start_idx], att_gei_z[iclip_start_idx], parameter.att_loop_width, parameter.att_loop_step)
+            end_rotate_vector = att_loop(att_gei_x[iclip_end_idx], att_gei_y[iclip_end_idx], att_gei_z[iclip_end_idx], parameter.att_loop_width, parameter.att_loop_step)
             # loop over all rotate vectors 
             for idx, (istart_rotate_vector, iend_rotate_vector) in enumerate(zip(start_rotate_vector, end_rotate_vector)):
                 interp_func = interp1d([ctime[iclip_start_idx], ctime[iclip_end_idx]], [istart_rotate_vector, iend_rotate_vector], axis = 0)
@@ -185,6 +185,9 @@ if __name__ == "__main__":
                 att_gei_x_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 0]
                 att_gei_y_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 1]
                 att_gei_z_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 2]
+        
+        if parameter.att_loop_figure == True:
+            att_plot([att_gei_x, att_gei_y, att_gei_z], )
 
         if parameter.output == True:
             # output att for future run, you have to speicfy the number of the att to output.

@@ -131,8 +131,9 @@ att_rot_axis = 'z'
 """loop of attitude around the original attitude by an angle
 """
 att_loop = True
-att_loop_ang = 2 # deg
-att_loop_step = 3 # step when rotate from 0 to 360
+att_loop_width = 10 # deg
+att_loop_step = 1 # step when rotate from 0 to 360
+att_loop_figure = True
 
 """use att in txt file. this usually require output att to txt first
 """
