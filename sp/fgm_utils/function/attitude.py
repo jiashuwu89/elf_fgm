@@ -1,12 +1,9 @@
 import numpy as np
 import pandas as pd
 from typing import List, Iterable
-import math
 import matplotlib.pyplot as plt
 
-def rotate_vector(vector, angle_degrees, axis='x'):
-
-    angle_radians = np.radians(angle_degrees)
+def rotate_vector(vector, angle_radians, axis='x'):
 
     if axis == 'x':
         rotation_matrix = np.array([[1, 0, 0],
@@ -40,19 +37,20 @@ def rodrigues_rotation(v, k, theta):
 
 def cart2sphere(x, y, z):
     
-    r = math.sqrt(x**2 + y**2 + z**2)
-    theta = math.acos(z / x) # polar angle in radians
-    phi = math.atan2(y, x) # azimuthal angle, in radians
+    r = np.sqrt(x**2 + y**2 + z**2)
+    theta = np.arccos(z / r) # polar angle in radians
+    phi = np.arctan2(y, x) # azimuthal angle, in radians
 
     return r, theta, phi
 
 def sphere2cart(r, theta, phi):
 
-    x = r * math.sin(theta) * math.cos(phi)
-    y = r * math.sin(theta) * math.sin(phi)
-    z = r * math.cos(theta)
+    x = r * np.sin(theta) * np.cos(phi)
+    y = r * np.sin(theta) * np.sin(phi)
+    z = r * np.cos(theta)
 
     return x, y, z
+
 
 def att_loop(
         att_x: float, 
@@ -76,12 +74,22 @@ def att_loop(
     """
     v = np.array([att_x, att_y, att_z]) # Your original vector
     v = v / np.linalg.norm(v) # Normalize the vector
-
     [r_0, theta_0, phi_0] = cart2sphere(*v)
 
-    rotated_points = [sphere2cart(r_0, theta_0 + np.deg2rad(i), phi_0 + np.deg2rad(j)) 
-                      for i in np.arange(-width/2, width/2, step)
-                      for j in np.arange(-width/2, width/2, step)]   
+    # rotate attitude to lat = 0 lon = 0 
+    #rot_vector1 = rotate_vector(v, -phi_0, axis='z')
+    #rot_vector2 = rotate_vector(rot_vector1, np.pi/2 - theta_0, axis='y')
+    
+    rotated_points = []
+    for i in np.arange(-width, width, step):
+        for j in np.arange(-width, width, step):
+            # in lat/lon = 0 grid
+            vec_latlon = sphere2cart(1, np.pi/2 + np.deg2rad(i), 0 + np.deg2rad(j)) 
+            # rot vector to gei
+            rot_vector1 = rotate_vector(vec_latlon,  theta_0 - np.pi/2, axis='y')
+            rot_vector2 = rotate_vector(rot_vector1, phi_0, axis='z')
+            rotated_points.append(list(rot_vector2))
+            #rotated_points.append(list(vec_latlon))
     
     return rotated_points
 

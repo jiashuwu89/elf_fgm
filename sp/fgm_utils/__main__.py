@@ -161,12 +161,17 @@ if __name__ == "__main__":
     res_rot_out = []
     if parameter.att_loop == True:
         # att loop
-        att_rot_out = list(range(0, 360, parameter.att_loop_step))
-        att_rot_out.insert(0, -1)
-        rot_len = len(att_rot_out)
+        rot_len = len(np.arange(-parameter.att_loop_width, parameter.att_loop_width, parameter.att_loop_step))**2 + 1
+        att_rot_out =  []
         att_gei_x_rot = np.random.rand(len(ctime), rot_len)
         att_gei_y_rot = np.random.rand(len(ctime), rot_len)
         att_gei_z_rot = np.random.rand(len(ctime), rot_len)
+
+        """test
+        """
+        #att_gei_x =  np.ones_like(att_gei_x)
+        #att_gei_y =  np.zeros_like(att_gei_y)
+        #att_gei_z =  np.zeros_like(att_gei_z)
 
         # run att_gei no rotate as the first one
         att_gei_x_rot[:, 0] = att_gei_x
@@ -187,7 +192,8 @@ if __name__ == "__main__":
                 att_gei_z_rot[iclip_start_idx:iclip_end_idx+1, idx+1] = interp_point[:, 2]
         
         if parameter.att_loop_figure == True:
-            att_plot([att_gei_x, att_gei_y, att_gei_z], )
+            att_plot([att_gei_x[0], att_gei_y[0], att_gei_z[0]], list(zip(att_gei_x_rot[0,:], att_gei_y_rot[0,:], att_gei_z_rot[0,:])))
+            breakpoint()
 
         if parameter.output == True:
             # output att for future run, you have to speicfy the number of the att to output.
@@ -221,6 +227,7 @@ if __name__ == "__main__":
             f_out.append(f_all_arry[0]/ (np.pi / 180))
             res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
             res_rot_out.append(np.median(res_rot))
+            att_rot_out.append([att_gei_x_rot[0,idx], att_gei_y_rot[0,idx], att_gei_z_rot[0,idx]])
 
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Bpara.csv"
@@ -245,7 +252,7 @@ if __name__ == "__main__":
             Bpara_out.append(B_parameter)
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
             f_out.append(if_loop/ (np.pi / 180))
-            att_rot_out.append(-1) # -1 means no rotation of att
+            att_rot_out.append([att_gei_x[0], att_gei_y[0], att_gei_z[0]])
             res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
             res_rot_out.append(np.median(res_rot))
 
@@ -273,6 +280,7 @@ if __name__ == "__main__":
         att_rot_out = [-1]
         res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
         res_rot_out.append(np.median(res_rot))
+        att_rot_out.append([att_gei_x[0], att_gei_y[0], att_gei_z[0]])
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara.csv"
 
