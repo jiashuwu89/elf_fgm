@@ -44,7 +44,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 11
+    eventnum = 9
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -281,8 +281,8 @@ if __name__ == "__main__":
         res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
         res_rot_out.append(np.median(res_rot))
         att_rot_out.append([att_gei_x[0], att_gei_y[0], att_gei_z[0]])
-        Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi.csv"
-        Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara.csv"
+        Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
+        Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
 
     """
     ====================

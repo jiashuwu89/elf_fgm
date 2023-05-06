@@ -132,8 +132,8 @@ att_rot_axis = 'z'
 """
 att_loop = True
 att_loop_width = 10 # deg
-att_loop_step = 1 # step when rotate from 0 to 360
-att_loop_figure = True
+att_loop_step = 2 # step when rotate from 0 to 360
+att_loop_figure = False
 
 """use att in txt file. this usually require output att to txt first
 """
