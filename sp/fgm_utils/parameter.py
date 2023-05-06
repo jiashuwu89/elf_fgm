@@ -124,3 +124,10 @@ Bparameter_csv = True
 """fgm data /100 before calib, so that gain is close to 1
 """
 fgm_scale  = False
+
+"""B_para input, do not perform least square fitting, use this set of parameters 
+"""
+Bpara_input = True
+Bpara_input_value = [7.86648598e+01,  6.93164861e+01, -1.23331960e+00, -6.38712796e+04,
+        1.76013528e+01,  7.76924161e+01,  2.27372968e+00, -4.44416766e+04,
+       -8.19797575e-01,  5.78686673e-01,  9.49773286e+01, -5.52999116e+04]

@@ -121,33 +121,36 @@ def calib_leastsquare(
     A[2 * n : 3 * n, 10] = fgs_igrf_fgm_z
     A[2 * n : 3 * n, 11] = np.ones(n)
     A = csc_matrix(A)
-   
-    if init is None:
-        #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
-        LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+    
+    if parameter.Bpara_input == False:
+        if init is None:
+            #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+            LS_func = lambda x: IGRF_fgm_fit(x, A, b)
 
-        if parameter.fgm_scale == True:
-            x0 = [1, 0, 0, 0, 0, 1, 0 , 0, 0, 0, 1, 0]
+            if parameter.fgm_scale == True:
+                x0 = [1, 0, 0, 0, 0, 1, 0 , 0, 0, 0, 1, 0]
+            else:
+                x0 = [100, 0, 0, 0, 0, 100, 0 , 0, 0, 0, 114, 0]
+
+            if parameter.fit_bound == True:
+                bounds = ([60, -np.inf, -np.inf, -np.inf, -np.inf, 60, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf], 
+                    [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+                #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
+                #        -0.01, -np.inf, -0.01, -np.inf,
+                #        -np.inf, -np.inf, -np.inf, -np.inf], 
+                #        [np.inf, 0.01, 0.01, np.inf,  # upper
+                #        0.01, np.inf, 0.01, np.inf, 
+                #        np.inf, np.inf, np.inf, np.inf])
+                res1 = least_squares(LS_func, x0, bounds = bounds)
+            else:
+                res1 = least_squares(LS_func, x0)
+
+            x = res1.x
         else:
-            x0 = [100, 0, 0, 0, 0, 100, 0 , 0, 0, 0, 114, 0]
-
-        if parameter.fit_bound == True:
-            bounds = ([60, -np.inf, -np.inf, -np.inf, -np.inf, 60, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf], 
-                [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
-            #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
-            #        -0.01, -np.inf, -0.01, -np.inf,
-            #        -np.inf, -np.inf, -np.inf, -np.inf], 
-            #        [np.inf, 0.01, 0.01, np.inf,  # upper
-            #        0.01, np.inf, 0.01, np.inf, 
-            #        np.inf, np.inf, np.inf, np.inf])
-            res1 = least_squares(LS_func, x0, bounds = bounds)
-        else:
-            res1 = least_squares(LS_func, x0)
-
-        x = res1.x
+            x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
+            #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
     else:
-        x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
-        #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
+        x = parameter.Bpara_input_value
 
     #x = [ -1,  0,  0,  0,
     #   0, 1,  0, 0,
