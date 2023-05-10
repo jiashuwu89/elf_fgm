@@ -83,7 +83,7 @@ def step1(
     )
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_before1stcali")     
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="fuligrf_fgm_fsp_before1stcali")     
     
     # 1st calibration of B in dmxl 
     [
@@ -98,7 +98,7 @@ def step1(
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
         Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x-fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y-fgs_igrf_fgm_1st_y, 
-            fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, ylimt = [[-3000, 3000], [-3000, 3000], [-5000, 5000]], title="res_fgm_after1stcali")  
+            fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, title="res_fgm_after1stcali")  
 
     #[
     #    fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z, B_parameter] = calibration.calib_leastsquare(
@@ -107,7 +107,9 @@ def step1(
 
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="ful_fgm_fsp_after1stcali") 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="fuligrf_fgm_fsp_after1stcali") 
+        Bplot.B_ctime_plot(cross_times_1st, fgs_fsp_ful_fgm_x - fgs_fsp_igrf_fgm_x, fgs_fsp_ful_fgm_y - fgs_fsp_igrf_fgm_y, 
+            fgs_fsp_ful_fgm_z - fgs_fsp_igrf_fgm_z, title="res_fgm_fsp_after1stcali")
 
     #if parameter.makeplot == True :
     #    Bplot.B_ctime_plot(
@@ -170,15 +172,15 @@ def step1(
         cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3,
     )
     logger.debug(f"[1.5] phi angle calib is done. ")
-    if parameter.makeplot == True:
-        Bplot.omega_stage123(
-            cross_times_2nd_1_mids, w_syn_2nd_1, 
-            cross_times_2nd_2_mids, w_syn_2nd_2, 
-            cross_times_2nd,  w_syn_2nd, 
-            cross_times_2nd_fit, w_syn_2nd_fit,
-            #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
-            title="period_stage123", datestr = datestr, ylimt = [2.10, 2.15]
-        ) 
+    # if parameter.makeplot == True:
+    #     Bplot.omega_stage123(
+    #         cross_times_2nd_1_mids, w_syn_2nd_1, 
+    #         cross_times_2nd_2_mids, w_syn_2nd_2, 
+    #         cross_times_2nd,  w_syn_2nd, 
+    #         cross_times_2nd_fit, w_syn_2nd_fit,
+    #         #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+    #         title="period_stage123", datestr = datestr, ylimt = [2.10, 2.15]
+    #     ) 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
     #    Bplot.phase_plot(
     #        ctime, phi_calib, cross_times_calib, datestr = datestr, 
@@ -202,7 +204,7 @@ def step1(
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
         Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
-            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, ylimt = [[-3000, 3000],[-3000, 3000], [-1000, 800]], title="res_dmxl_after1stcali") 
+            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali") 
         
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
@@ -216,7 +218,7 @@ def step1(
                 ctime, cross_times_1st, T_spins_1st, fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z
         )
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
-            [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fsp_sxml_after1stcali")
+            [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
 
     if parameter.cali_2nd == True:
         """
