@@ -130,7 +130,7 @@ def fgm_fsp_calib(
             logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
 
-    
+
     if parameter.del_time == True:
         del_time_idx = []
         for i in range(len(parameter.del_time_idxend)):
@@ -172,7 +172,7 @@ def fgm_fsp_calib(
             fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
             ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, B_parameter0
             ] = step0.step0(
-                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, datestr, logger, f_all,
             )
@@ -198,7 +198,7 @@ def fgm_fsp_calib(
             B_parameter1,
             ] = step1.step1(
                 #ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
-                ctime, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z,
                 datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,

@@ -139,3 +139,7 @@ att_loop_figure = False
 """
 att_csv = False
 att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"
+
+"""mva
+"""
+mva_fgm = True

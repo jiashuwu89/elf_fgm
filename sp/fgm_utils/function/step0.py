@@ -3,7 +3,7 @@ from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
 
 def step0(
-    ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+    ctime, ctimestamp, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
     att_gei_x, att_gei_y, att_gei_z,
     datestr, logger, f):

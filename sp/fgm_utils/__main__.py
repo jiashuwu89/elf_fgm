@@ -11,6 +11,7 @@ from .function.Bplot import Gain_f
 from .function.attitude import att_rot, att_loop, att_plot
 from .eventlist import eventlist
 from .function.output import output_txt
+from .function.mva import mva
 
 def getCSV(csvpath: str, startdate: str, enddate: str):
     try:
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 8
+    eventnum = 13
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -205,7 +206,9 @@ if __name__ == "__main__":
                 ['Timestamp','att_gei_x','att_gei_y','att_gei_z'], 
                 title='att_gei')
             breakpoint()
- 
+        
+        if parameter.mva_fgm == True:
+            mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z)
         
         # run calib with rotate att
         for idx in range(rot_len):
@@ -228,6 +231,7 @@ if __name__ == "__main__":
             res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
             res_rot_out.append(np.median(res_rot))
             att_rot_out.append([att_gei_x_rot[0,idx], att_gei_y_rot[0,idx], att_gei_z_rot[0,idx]])
+
             
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Gthphi_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Bpara_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
