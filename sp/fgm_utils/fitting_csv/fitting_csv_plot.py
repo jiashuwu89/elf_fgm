@@ -117,8 +117,8 @@ def get_csv(path: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    date = "2021-03-06_15"
-    path = f"fgm_utils/fitting_csv/{date}_elb_attloop_Gthphi_10_2.csv"
+    date = "2020-04-30_04"
+    path = f"fgm_utils/fitting_csv/{date}_elb_attloop_Gthphi_5_1.csv"
     #path = "2021-03-06_15_elb_attloop_Gthphi.csv"
     #path = "2021-03-17_18_elb_attloop_Gthphi.csv"
 
@@ -132,5 +132,5 @@ if __name__ == "__main__":
     df["O1/G1"] = df["O1/G1"] - O1_lab
     df["O2/G2"] = df["O2/G2"] - O2_lab
     df["O3/G3"] = df["O3/G3"] - O3_lab
-    parameter_plot_2d(df, f"{date}_elb", ["O1/G1","O2/G2","O3/G3"])
-    #parameter_plot_2d(df, f"{date}_elb", "res_med")
+    #arameter_plot_2d(df, f"{date}_elb", ["O1/G1","O2/G2","O3/G3"])
+    parameter_plot_2d(df, f"{date}_elb", "res_med")

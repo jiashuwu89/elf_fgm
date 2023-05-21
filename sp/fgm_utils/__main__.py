@@ -45,7 +45,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 13
+    eventnum = 1
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -225,13 +225,13 @@ if __name__ == "__main__":
                 pos_gei_x, pos_gei_y, pos_gei_z,
                 logger, att_loop_idx = idx
             )
-            Bpara_out.append(B_parameter)
-            Gthphi_out.append(Bpara2Gthphi(B_parameter))
-            f_out.append(f_all_arry[0]/ (np.pi / 180))
-            res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
-            res_rot_out.append(np.median(res_rot))
-            att_rot_out.append([att_gei_x_rot[0,idx], att_gei_y_rot[0,idx], att_gei_z_rot[0,idx]])
-
+            if B_parameter != []:
+                Bpara_out.append(B_parameter)
+                Gthphi_out.append(Bpara2Gthphi(B_parameter))
+                f_out.append(f_all_arry[0]/ (np.pi / 180))
+                res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+                res_rot_out.append(np.median(res_rot))
+                att_rot_out.append([att_gei_x_rot[0,idx], att_gei_y_rot[0,idx], att_gei_z_rot[0,idx]])
             
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Gthphi_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_attloop_Bpara_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"

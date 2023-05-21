@@ -3,6 +3,7 @@ from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
 import numpy as np
 from .mva import mva
+from .postprocess import Bpara2Gthphi
 
 def step1(
     ctime, ctimestamp, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -59,7 +60,6 @@ def step1(
         fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z] = coordinate.dmxl2smxl(
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_1st
     )
-
     # B igrf rotate from smxl to fgm
     [
         fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm(
@@ -95,6 +95,12 @@ def step1(
         fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
             ctime, cross_times_1st, T_spins_1st, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z
     )
+    if parameter.Bpara_out == True:
+        print("after 1st calib:")
+        Gthphi_out = [Bpara2Gthphi(B_parameter)]
+        if parameter.mva_fgm == True:
+            mva(ctime, ctimestamp, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z)
+
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
             [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
@@ -221,9 +227,6 @@ def step1(
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
             [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
 
-        if parameter.mva_fgm == True:
-                mva(ctime, ctimestamp, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z)
-
     if parameter.cali_2nd == True:
         """
             1.6 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 2nd calibration
@@ -268,6 +271,12 @@ def step1(
         if parameter.makeplot == True: 
             Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
                 [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], title="ful_igrf_fgm_after2ndcali") 
+        
+        if parameter.Bpara_out == True:
+            print("after 2nd calib:")
+            Gthphi_out = [Bpara2Gthphi(B_parameter)]
+            if parameter.mva_fgm == True:
+                mva(ctime, ctimestamp, fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z)
 
         #if parameter.makeplot == True :
         #    Bplot.B_ctime_plot(
@@ -321,7 +330,6 @@ def step1(
         """
             1.9 calib - phase angle integration
         """
-        breakpoint()
         # Remember that the stage 1 and 2 sample angular velocities at mid points of zero-crossings
         [
             phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd, cross_times_3rd_fit, w_syn_3rd_fit] = cross_time.phase_integration(
@@ -392,7 +400,12 @@ def step1(
             if parameter.makeplot == True: 
                 Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_4th_x, fgs_igrf_fgm_3rd_x], [fgs_ful_fgm_4th_y, fgs_igrf_fgm_3rd_y], 
                     [fgs_ful_fgm_4th_z, fgs_igrf_fgm_3rd_z], title="ful_igrf_fgm_after3rdcali") 
-        
+
+            if parameter.Bpara_out == True:
+                print("after 3rd calib:")
+                Gthphi_out = [Bpara2Gthphi(B_parameter)]
+                if parameter.mva_fgm == True:
+                    mva(ctime, ctimestamp, fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z)
             #if parameter.makeplot == True :
             #    Bplot.B_ctime_plot(
             #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
@@ -515,7 +528,13 @@ def step1(
                 if parameter.makeplot == True: 
                     Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_5th_x, fgs_igrf_fgm_4th_x], [fgs_ful_fgm_5th_y, fgs_igrf_fgm_4th_y], 
                         [fgs_ful_fgm_5th_x, fgs_igrf_fgm_4th_z], title="ful_igrf_fgm_after4thcali") 
-            
+
+                if parameter.Bpara_out == True:
+                    print("4th calib:")
+                    Gthphi_out = [Bpara2Gthphi(B_parameter)]
+                    if parameter.mva_fgm == True:
+                        mva(ctime, ctimestamp, fgs_ful_fgm_5th_x, fgs_ful_fgm_5th_y, fgs_ful_fgm_5th_z)
+
                 #if parameter.makeplot == True :
                 #    Bplot.B_ctime_plot(
                 #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 

@@ -80,7 +80,7 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = False  # add a second calibration in dmxl coordinate to solve the trend
+cali_2nd = False  # add a second calibration 
 cali_3rd = False  # add a third calibration 
 cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
@@ -93,11 +93,10 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
-savepng = True
+makeplot = False
+savepng = False
 output = False # if true output to txt file
 download_data = False
-
 
 """specify time interval for some events
 """
@@ -131,9 +130,9 @@ att_rot_axis = 'z'
 """loop of attitude around the original attitude by an angle
 """
 att_loop = True
-att_loop_width = 10 # deg
-att_loop_step = 2 # step when rotate from 0 to 360
-att_loop_figure = False
+att_loop_width = 5 # deg
+att_loop_step = 1 # step when rotate from 0 to 360
+att_loop_figure = False # plot attitude vector and rotated vectors in 3d plot
 
 """use att in txt file. this usually require output att to txt first
 """
@@ -142,4 +141,8 @@ att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"
 
 """mva
 """
-mva_fgm = True
+mva_fgm = False
+
+"""print out B parameter in each run
+"""
+Bpara_out = False
