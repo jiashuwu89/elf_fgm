@@ -104,7 +104,7 @@ if __name__ == "__main__":
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
                 mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)
         f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
-
+        
         if i == 0: # first collection 
             [
                 ctime, ctimestamp, 
@@ -137,6 +137,23 @@ if __name__ == "__main__":
             f_all_arry = np.concatenate([f_all_arry, f_all_arry_0])
             clip_start_idx.append(clip_end_idx[-1]+1) # start index of each sci zone
             clip_end_idx.append(len(ctime)-1) # end index of each sci zone
+    
+    # att_gei_refine_x = []
+    # att_gei_refine_y = []
+    # att_gei_refine_z = []
+    # from .function.attitude import cart2sphere, sphere2cart
+    # for x, y, z in zip(att_gei_x, att_gei_y, att_gei_z):
+    #     r_i, th_i, ph_i = cart2sphere(x, y, z)
+    #     th_i = th_i + 0.0071104294142434465
+    #     ph_i = ph_i - 0.01574264354500421
+    #     x_refine, y_refine, z_refine = sphere2cart(1, th_i, ph_i)
+    #     att_gei_refine_x.append(x_refine)
+    #     att_gei_refine_y.append(y_refine)
+    #     att_gei_refine_z.append(z_refine)
+    # att_gei_x = att_gei_refine_x
+    # att_gei_y = att_gei_refine_y
+    # att_gei_z = att_gei_refine_z
+    # breakpoint()
 
     if parameter.att_csv == True:
         """
@@ -207,9 +224,6 @@ if __name__ == "__main__":
                 title='att_gei')
             breakpoint()
         
-        if parameter.mva_fgm == True:
-            mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z)
-        
         # run calib with rotate att
         for idx in range(rot_len):
             [
@@ -264,7 +278,7 @@ if __name__ == "__main__":
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_floop_Bpara.csv"
         
     else:
-        # no att loop, no floop, just a single run       
+        # no att loop, no floop, just a single run      
         [
             FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
@@ -288,6 +302,8 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}_{mission}_Bpara.csv"
 
+        res_out = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+        print(f"median of residual: {np.median(res_out)}")
     """
     ====================
     output

@@ -336,11 +336,11 @@ def Bpara2Gthphi(B_parameter: List[float]) -> Tuple[float]:
     ph2 = np.degrees(np.arctan(G22/G21))
     ph3 = np.degrees(np.arctan(G32/G31))
 
-    print('==================================\n')
+    print('===============calib para================')
     print(f'G1: {G1} G2:{G2} G3:{G3}\n')
     print(f'th1: {th1} th2:{th2} th3:{th3}\n')
     print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
     print(f'O1/G1: {O1/G1} O2/G2:{O2/G2} O3/G3:{O3/G3}\n')
-    print('==================================\n')
+    print('=============calib para end==============')
           
     return [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1/G1, O2/G2, O3/G3]

@@ -346,16 +346,28 @@ def fgm_fsp_calib(
         #    fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title="res_dmxl_fsp", scatter = True, 
         #    ctime_idx_time = ctime[ctime_idx[0]], datestr = datestr, xlimt = [ctime[ctime_idx[0]]-10, ctime[ctime_idx[0]]+10]
         #)
-        Bplot.B_ctime_plot(
-            cross_times_calib, fgs_fsp_res_dmxl_x, 
-            fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title=f"res_dmxl_fsp{att_loop_idx}", scatter = True, 
-            ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag,
-        )
-        Bplot.B_ctime_plot(
-            cross_times_calib, fgs_fsp_res_gei_x, 
-            fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title=f"res_gei_fsp{att_loop_idx}", scatter = True, 
-            ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
-        )
+        if parameter.att_loop == True:
+            Bplot.B_ctime_plot(
+                cross_times_calib, fgs_fsp_res_dmxl_x, 
+                fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title=f"res_dmxl_fsp{att_loop_idx}", scatter = True, 
+                ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag,
+            )
+            Bplot.B_ctime_plot(
+                cross_times_calib, fgs_fsp_res_gei_x, 
+                fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title=f"res_gei_fsp{att_loop_idx}", scatter = True, 
+                ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
+            )
+        else:
+            Bplot.B_ctime_plot(
+                cross_times_calib, fgs_fsp_res_dmxl_x, 
+                fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title=f"res_dmxl_fsp", scatter = True, 
+                ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag,
+            )
+            Bplot.B_ctime_plot(
+                cross_times_calib, fgs_fsp_res_gei_x, 
+                fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title=f"res_gei_fsp", scatter = True, 
+                ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
+            )
     
     #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
     #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))

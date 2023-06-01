@@ -33,7 +33,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = (180+55) * np.pi / 180
+f = (90-55) * np.pi / 180
 init_secs = 0 # seconds
 
 funkyfgm = False
@@ -80,9 +80,9 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = False  # add a second calibration 
-cali_3rd = False  # add a third calibration 
-cali_4th = False  # add a third calibration 
+cali_2nd = True  # add a second calibration 
+cali_3rd = True  # add a third calibration 
+cali_4th = True  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
@@ -93,10 +93,10 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
-download_data = False
+download_data = True
 
 """specify time interval for some events
 """
@@ -129,7 +129,7 @@ att_rot_axis = 'z'
 
 """loop of attitude around the original attitude by an angle
 """
-att_loop = True
+att_loop = False
 att_loop_width = 5 # deg
 att_loop_step = 1 # step when rotate from 0 to 360
 att_loop_figure = False # plot attitude vector and rotated vectors in 3d plot
@@ -139,10 +139,23 @@ att_loop_figure = False # plot attitude vector and rotated vectors in 3d plot
 att_csv = False
 att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"
 
-"""mva
+"""run mva during each run
 """
-mva_fgm = False
+mva_fgm = True
 
-"""print out B parameter in each run
+"""use angle from mva as rotation angle, works only when mva_fgm is true
 """
-Bpara_out = False
+mvaang_rotang = False
+
+"""print out B parameter in each calibration
+"""
+Bpara_out = True
+
+"""attitude determination
+"""
+att_determine = True
+
+"""attitude splite
+"""
+att_split = True
+att_split_num = 4

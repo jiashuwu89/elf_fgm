@@ -4,6 +4,7 @@ from .ctime_spike_80 import spike_sinefit_80
 import numpy as np
 from .mva import mva
 from .postprocess import Bpara2Gthphi
+from .attitude import att_determine
 
 def step1(
     ctime, ctimestamp, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -60,7 +61,13 @@ def step1(
         fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z] = coordinate.dmxl2smxl(
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_1st
     )
-    # B igrf rotate from smxl to fgm
+    
+    # use mva angle as rotation angle
+    if parameter.mva_fgm == True:
+        mva_ang = mva(ctime, ctimestamp, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z)
+        if parameter.mvaang_rotang == True:
+            f = [(90-mva_ang) * np.pi / 180] * len(f)
+   
     [
         fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z] = coordinate.smxl2fgm(
             fgs_igrf_smxl_1st_x, fgs_igrf_smxl_1st_y, fgs_igrf_smxl_1st_z, f
@@ -98,8 +105,6 @@ def step1(
     if parameter.Bpara_out == True:
         print("after 1st calib:")
         Gthphi_out = [Bpara2Gthphi(B_parameter)]
-        if parameter.mva_fgm == True:
-            mva(ctime, ctimestamp, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z)
 
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
@@ -227,6 +232,13 @@ def step1(
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
             [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
 
+    # att determine 
+    if parameter.att_determine == True:
+        att_gei_x, att_gei_y, att_gei_z = att_determine(
+            fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+            att_gei_x, att_gei_y, att_gei_z, datestr)
+    
     if parameter.cali_2nd == True:
         """
             1.6 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 2nd calibration
@@ -247,6 +259,12 @@ def step1(
             fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z] = coordinate.dmxl2smxl(
                 fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_2nd
         )
+
+        # use mva angle as rotation angle
+        if parameter.mva_fgm == True:
+            mva_ang = mva(ctime, ctimestamp, fgs_ful_fgm_2nd_x, fgs_ful_fgm_2nd_y, fgs_ful_fgm_2nd_z)
+            if parameter.mvaang_rotang == True:
+                f = [(90-mva_ang) * np.pi / 180] * len(f)
 
         # B igrf rotate from smxl to fgm
         [
@@ -275,8 +293,6 @@ def step1(
         if parameter.Bpara_out == True:
             print("after 2nd calib:")
             Gthphi_out = [Bpara2Gthphi(B_parameter)]
-            if parameter.mva_fgm == True:
-                mva(ctime, ctimestamp, fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z)
 
         #if parameter.makeplot == True :
         #    Bplot.B_ctime_plot(
@@ -356,6 +372,13 @@ def step1(
             Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
                 [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after2ndcali") 
         
+        # att determine 
+        if parameter.att_determine == True:
+            att_gei_x, att_gei_y, att_gei_z = att_determine(
+                fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, datestr)
+        
         if parameter.cali_3rd == True:
             """
                 1.10 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 3nd calibration
@@ -376,6 +399,12 @@ def step1(
                 fgs_igrf_smxl_3rd_x, fgs_igrf_smxl_3rd_y, fgs_igrf_smxl_3rd_z] = coordinate.dmxl2smxl(
                     fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_3rd
             )
+
+            # use mva angle as rotation angle
+            if parameter.mva_fgm == True:
+                mva_ang = mva(ctime, ctimestamp, fgs_ful_fgm_3rd_x, fgs_ful_fgm_3rd_y, fgs_ful_fgm_3rd_z)
+                if parameter.mvaang_rotang == True:
+                    f = [(90-mva_ang) * np.pi / 180] * len(f)
 
             # B igrf rotate from smxl to fgm
             [
@@ -404,8 +433,7 @@ def step1(
             if parameter.Bpara_out == True:
                 print("after 3rd calib:")
                 Gthphi_out = [Bpara2Gthphi(B_parameter)]
-                if parameter.mva_fgm == True:
-                    mva(ctime, ctimestamp, fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z)
+        
             #if parameter.makeplot == True :
             #    Bplot.B_ctime_plot(
             #        ctime, fgs_ful_fgm_2nd_x - fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y - fgs_igrf_fgm_1st_y, 
@@ -484,6 +512,13 @@ def step1(
                 Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_4th_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_4th_y, fgs_igrf_dmxl_y], 
                     [fgs_ful_dmxl_4th_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after3rdcali") 
             
+             # att determine 
+            if parameter.att_determine == True:
+                att_gei_x, att_gei_y, att_gei_z = att_determine(
+                    fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z, datestr)
+            
             if parameter.cali_4th == True:
                 """
                     1.14 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 4th calibration
@@ -504,6 +539,12 @@ def step1(
                     fgs_igrf_smxl_4th_x, fgs_igrf_smxl_4th_y, fgs_igrf_smxl_4th_z] = coordinate.dmxl2smxl(
                         fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, phi_4th
                 )
+
+                # use mva angle as rotation angle
+                if parameter.mva_fgm == True:
+                    mva_ang = mva(ctime, ctimestamp, fgs_ful_fgm_4th_x, fgs_ful_fgm_4th_y, fgs_ful_fgm_4th_z)
+                    if parameter.mvaang_rotang == True:
+                        f = [(90-mva_ang) * np.pi / 180] * len(f)
 
                 # B igrf rotate from smxl to fgm
                 [
@@ -532,8 +573,7 @@ def step1(
                 if parameter.Bpara_out == True:
                     print("4th calib:")
                     Gthphi_out = [Bpara2Gthphi(B_parameter)]
-                    if parameter.mva_fgm == True:
-                        mva(ctime, ctimestamp, fgs_ful_fgm_5th_x, fgs_ful_fgm_5th_y, fgs_ful_fgm_5th_z)
+                
 
                 #if parameter.makeplot == True :
                 #    Bplot.B_ctime_plot(

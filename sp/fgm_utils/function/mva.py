@@ -6,7 +6,17 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z):
-    """get minimum variance vector direction
+    """
+    Get minimum variance vector direction. Because it use the mva func from pyspedas, time is required to create a tplot variable
+
+    Parameter
+        ctime: List of time
+        ctimestampe: timestampe of the first time
+        fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z: list of fgm data
+
+    Return
+        mva_ang: angle in deg of minimum variance vector w/r to fgm_x
+
     """
     store_data('fgs_ful_fgm', data={'x': ctime+ctimestamp, 'y': np.transpose(np.array([fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z]))})
     #tplot('fgs_ful_fgm')
@@ -23,6 +33,15 @@ def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th
     fgs_midvarvec_ang = np.rad2deg(np.arccos(fgs_midvarvec))
     fgs_minvarvec_ang = np.rad2deg(np.arccos(fgs_minvarvec))
 
+    if fgs_minvarvec_ang[:,0] > 90:
+        fgs_maxvarvec = -fgs_maxvarvec
+        fgs_midvarvec = -fgs_midvarvec
+        fgs_minvarvec = -fgs_minvarvec
+        fgs_maxvarvec_ang = np.rad2deg(np.arccos(fgs_maxvarvec))
+        fgs_midvarvec_ang = np.rad2deg(np.arccos(fgs_midvarvec))
+        fgs_minvarvec_ang = np.rad2deg(np.arccos(fgs_minvarvec))
+
+
     print(f"Minimum variance vector dirction:")
     print(f"MinVar median angle to fgm_x [deg]: {np.median(fgs_minvarvec_ang[:,0])}")
     print(f"MinVar median angle to fgm_y [deg]: {np.median(fgs_minvarvec_ang[:,1])}")
@@ -37,9 +56,8 @@ def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th
     print(f"MaxVar median angle to fgm_x [deg]: {np.median(fgs_maxvarvec_ang[:,0])}")
     print(f"MaxVar median angle to fgm_y [deg]: {np.median(fgs_maxvarvec_ang[:,1])}")
     print(f"MaxVar median angle to fgm_z [deg]: {np.median(fgs_maxvarvec_ang[:,2])}")
-    breakpoint()
 
-    return
+    return np.median(fgs_minvarvec_ang[:,0])
 
 def mva_flip(vec):
     """check the sign of adjacent vectors, flip if the signs are opposite

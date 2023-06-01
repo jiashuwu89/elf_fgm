@@ -20,7 +20,7 @@ eventlist = {
         },
     },
 
-    # elb collections
+    # elb long collections
     "elb": {
         1: {
             "mission": "elb",
@@ -380,7 +380,7 @@ eventlist = {
             ],
         },
 
-        17: {
+        17: { # two collection on two hemisphere
             "mission": "elb",
             "starttime_str":[
                 "2021-11-15/03:03:43",
@@ -687,6 +687,284 @@ eventlist = {
             ],
             "f_all":[
                 (90-54.61) * np.pi / 180, 
+            ],
+        },
+
+        33: {
+            "mission": "elb",
+            "starttime_str":[
+                "2021-03-06/05:29:21",
+                "2021-03-06/07:01:52",
+            ],
+            "endtime_str":[
+                "2021-03-06/05:35:33",
+                "2021-03-06/07:08:02",
+            ],
+            "f_all":[
+                (90-54.61) * np.pi / 180, 
+                (90-54.73) * np.pi / 180, 
+            ],
+        },
+        34: {
+            "mission": "elb",
+            "starttime_str": [
+                "2020-04-30/04:53:05",
+                "2020-04-30/06:16:29",
+            ],
+            "endtime_str": [
+                "2020-04-30/05:43:40",
+                "2020-04-30/07:16:44",
+            ],
+            "f_all": [
+                (90-55.0) * np.pi / 180,
+                (90-55.1) * np.pi / 180,  
+            ]
+        },
+        35: { # single long collect
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-15/10:16:29",
+            ],
+            "endtime_str":[
+                "2020-05-15/10:41:06",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        37: { # two collection in north, send by ethan, run by james
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-08/10:59:14",
+                "2022-01-08/11:12:05",
+                "2022-01-08/12:32:07",
+            ],
+            "endtime_str":[
+                "2022-01-08/11:05:27",
+                "2022-01-08/11:18:18",
+                "2022-01-08/12:38:19",
+            ],
+        },
+        38: { # two collection in north, other events send by ethan
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-09/11:46:36",
+                "2022-01-09/11:59:36",
+            ],
+            "endtime_str":[
+                "2022-01-09/11:52:49",
+                "2022-01-09/12:05:46",
+            ],
+        },
+        39: { # two collection in north, other events send by ethan
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-09/22:32:32",
+                "2022-01-09/22:45:35",
+            ],
+            "endtime_str":[
+                "2022-01-09/22:38:45",
+                "2022-01-09/22:51:45",
+            ],
+        },
+        40: { # two collection in north, send by ethan, run by james
+            "mission": "elb",
+            "starttime_str":[
+                "2022-03-22/16:48:35",
+                "2022-03-22/17:01:05",
+            ],
+            "endtime_str":[
+                "2022-03-22/16:54:47",
+                "2022-03-22/17:07:19",
+            ],
+        },
+        41: { # two collection in north, send by ethan, run by james
+            "mission": "elb",
+            "starttime_str":[
+                "2022-03-23/09:51:30",
+                "2022-03-23/10:04:27",
+            ],
+            "endtime_str":[
+                "2022-03-23/09:57:44",
+                "2022-03-23/10:10:39",
+            ],
+        },
+        42: { # two collection one in north one in south
+            "mission": "elb",
+            "starttime_str":[
+                "2022-08-31/16:48:22",
+                "2022-08-31/19:51:52",
+            ],
+            "endtime_str":[
+                "2022-08-31/16:54:34",
+                "2022-08-31/19:58:06",
+            ],
+        },
+        43: { # two collection one in north one in south
+            "mission": "elb",
+            "starttime_str":[
+                "2021-11-15/03:03:43",
+                "2021-11-15/04:02:46",
+            ],
+            "endtime_str":[
+                "2021-11-15/03:09:56",
+                "2021-11-15/04:08:59",
+            ],
+        },
+        44: { # two collection one in north one in south
+            "mission": "elb",
+            "starttime_str":[
+                "2021-11-16/00:13:08",
+                "2021-11-16/00:46:31",
+            ],
+            "endtime_str":[
+                "2021-11-16/00:19:18",
+                "2021-11-16/00:52:44",
+            ],
+        },
+        45: { # two collection one in north one in south
+            "mission": "elb",
+            "starttime_str":[
+                "2021-11-18/10:14:02",
+                "2021-11-18/11:12:57",
+            ],
+            "endtime_str":[
+                "2021-11-18/10:20:14",
+                "2021-11-18/11:19:08",
+            ],
+        },
+        46: { # two collection one in north one in south
+            "mission": "elb",
+            "starttime_str":[
+                "2021-11-19/12:02:29",
+                "2021-11-19/12:36:39",
+            ],
+            "endtime_str":[
+                "2021-11-19/12:08:40",
+                "2021-11-19/12:42:51",
+            ],
+        },
+        47: { # 4 collections 2 in north 2 in south
+            "mission": "elb",
+            "starttime_str":[
+                "2022-07-12/17:42:02",
+                "2022-07-12/17:54:32",
+                "2022-07-12/18:28:04",
+                "2022-07-12/18:40:20",
+            ],
+            "endtime_str":[
+                "2022-07-12/17:48:47",
+                "2022-07-12/18:01:16",
+                "2022-07-12/18:34:48",
+                "2022-07-12/18:47:00",
+            ],
+            "f_all": [
+                (90-55.0) * np.pi / 180,
+                (90-55.0) * np.pi / 180,  
+                (90-55.0) * np.pi / 180,  
+                (90-55.0) * np.pi / 180,  
+            ]
+        },
+        48: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-06-11/13:16:55",
+            ],
+            "endtime_str":[
+                "2020-06-11/14:01:10",
+            ],
+        },
+        49: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-06-02/12:00:01",
+            ],
+            "endtime_str":[
+                "2020-06-02/12:44:09",
+            ],
+        },
+        50: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-31/12:00:01",
+            ],
+            "endtime_str":[
+                "2020-05-31/12:40:24",
+            ],
+        },
+        51: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-06-12/00:07:56",
+            ],
+            "endtime_str":[
+                "2020-06-12/00:41:40",
+            ],
+        },
+        52: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-15/03:47:54",
+            ],
+            "endtime_str":[
+                "2020-05-15/04:20:23",
+            ],
+        },
+        53: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-30/15:55:27",
+            ],
+            "endtime_str":[
+                "2020-05-30/16:24:22",
+            ],
+            "f_all": [
+                (90-55.0) * np.pi / 180,
+            ]
+        },
+        54: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-15/10:16:29",
+            ],
+            "endtime_str":[
+                "2020-05-15/10:41:06",
+            ],
+        },
+        55: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2021-10-10/16:31:06",
+            ],
+            "endtime_str":[
+                "2021-10-10/16:51:29",
+            ],
+        },
+        56: { # single long collection
+            "mission": "elb",
+            "starttime_str":[
+                "2022-02-28/20:46:28",
+            ],
+            "endtime_str":[
+                "2022-02-28/21:05:38",
+            ],
+        },
+        57: { # single long collection, can't run
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-03/23:59:53",
+            ],
+            "endtime_str":[
+                "2022-01-04/00:18:48",
+            ],
+        },
+        58: { # single long collection, can't run
+            "mission": "elb",
+            "starttime_str":[
+                "2022-03-07/22:53:09",
+            ],
+            "endtime_str":[
+                "2022-03-07/23:11:50",
             ],
         },
     },

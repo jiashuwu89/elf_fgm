@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 from typing import List, Iterable
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from .. import parameter
+from .Bplot import B_ctime_plot_single
 
 def rotate_vector(vector, angle_radians, axis='x'):
 
@@ -36,7 +39,14 @@ def rodrigues_rotation(v, k, theta):
     return v * np.cos(theta) + np.cross(k, v) * np.sin(theta) + k * np.dot(k, v) * (1 - np.cos(theta))
 
 def cart2sphere(x, y, z):
-    
+    """
+    Convert cartesian to spherical coordinate
+
+    Parameter
+        x, y, z: in cartesian coordinate
+    Return
+        r, theta, phi: theta and phi are in rad
+    """
     r = np.sqrt(x**2 + y**2 + z**2)
     theta = np.arccos(z / r) # polar angle in radians
     phi = np.arctan2(y, x) # azimuthal angle, in radians
@@ -44,7 +54,14 @@ def cart2sphere(x, y, z):
     return r, theta, phi
 
 def sphere2cart(r, theta, phi):
+    """
+    Convert spherical to cartesian coordinate
 
+    Parameter
+        r, theta, phi: theta and phi are in rad
+    Return
+        x, y, z: same unit as r
+    """
     x = r * np.sin(theta) * np.cos(phi)
     y = r * np.sin(theta) * np.sin(phi)
     z = r * np.cos(theta)
@@ -125,3 +142,239 @@ def att_plot(v, rotated_points,):
 
     # Show the plot
     plt.show()
+
+
+def att_determine_func(x, Gper, Opar, Gpar, th, ph, igrf_x, igrf_y, igrf_z):
+    """
+    FIT Bper and Bpar to get five parameters 
+
+    Parameters
+        params: Gper, Opar, Gpar, thS, phS
+    Returns
+        Bmodel(np.ndarray): output of the fitted result
+    """
+    #Gper, Opar, Gpar, th, ph = params
+    #igrf_x, igrf_y, igrf_z = args
+    sth = np.sin(th)
+    cth = np.cos(th)
+    sph = np.sin(ph)
+    cph = np.cos(ph)
+ 
+    Bpar = igrf_x*sth*cph + igrf_y*sth*sph + igrf_z*cth
+    Bparvec = np.array([Bpar*sth*cph,Bpar*sth*sph,Bpar*cth])
+    Bparout = Gpar * Bpar - Opar 
+    Bpervec = np.array([igrf_x, igrf_y, igrf_z]) - Bparvec
+    Bper = np.sqrt(np.sum(Bpervec**2, axis=0))
+    Bperout = Gper * Bper    
+    Bmodel = np.append(Bparout, Bperout)
+
+    return Bmodel
+
+def ang_twovec(v1, v2):
+    """
+    Get angle between two vectors
+
+    Parameter
+        v1, v2: two vectors in the same coordinate
+    Return
+        ang: rad
+    """
+    # Convert the input lists to numpy arrays
+    v1_arr = np.array(v1)
+    v2_arr = np.array(v2)
+
+    # Calculate the dot product of the two vectors
+    dot_product = np.dot(v1_arr, v2_arr)
+
+    # Calculate the magnitudes of the vectors
+    v1_magnitude = np.linalg.norm(v1_arr)
+    v2_magnitude = np.linalg.norm(v2_arr)
+
+    # Calculate the cosine of the angle using the dot product and magnitudes
+    cos_ang = dot_product / (v1_magnitude * v2_magnitude)
+
+    # Calculate the angle in radians using the arccosine function
+    ang = np.arccos(cos_ang)
+
+    return ang
+
+
+def att_determine(
+        fgs_ful_smxl_x: np.ndarray, fgs_ful_smxl_y: np.ndarray, fgs_ful_smxl_z: np.ndarray, 
+        fgs_igrf_gei_x: np.ndarray, fgs_igrf_gei_y: np.ndarray, fgs_igrf_gei_z: np.ndarray, 
+        att_gei_x: np.ndarray, att_gei_y: np.ndarray, att_gei_z: np.ndarray, datestr: str):
+    """
+    Fit Bper and Bpar to IGRF to refine attitude th, phi in GEI coordinate. 
+    
+    This function is similar to idl att determination 
+
+    Parameters
+        fgs_ful_fgm_x, fgs_ful_fgm_y, fgs_ful_fgm_z: fgm calibrated data in smxl coordinate, x,y are in spin plane, z is along spin axis
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z:  igrf in gei coordiate
+        att_gei_x, att_gei_y, att_gei_z:  original attitude list in gei coordiate 
+    
+    Returns 
+        att_gei_refine_x, att_gei_refine_y, att_gei_refine_z: refined attitude list in gei coorindate
+    """
+
+    
+    # separate fgm measurement into Bpar and Bper
+    Bper_measure = np.sqrt(fgs_ful_smxl_x**2 + fgs_ful_smxl_y**2)
+    Bpar_measure = fgs_ful_smxl_z
+    
+    if parameter.att_split == False:  #fit only one attitude
+        # use the attitude in the middle as initial guess
+        att_gei_init_x =  np.median(att_gei_x)
+        att_gei_init_y =  np.median(att_gei_y)
+        att_gei_init_z =  np.median(att_gei_z)
+        r, th_init, ph_init = cart2sphere(att_gei_init_x, att_gei_init_y, att_gei_init_z)
+
+        B_measure = np.concatenate((Bpar_measure, Bper_measure))
+        # define fitting func
+        x = range(len(B_measure))
+        att_determine_func_args = lambda x, Gper, Opar, Gpar, th, ph: att_determine_func(x, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z)
+        params_opt, params_cov = curve_fit(
+            att_determine_func_args, x, B_measure, 
+            p0=[1, 0, 1, th_init, ph_init], 
+            #method = 'dogbox'
+            #bounds = (
+            #    [-np.inf, -np.inf, -np.inf, np.deg2rad(np.rad2deg(th_init)-5), np.deg2rad(np.rad2deg(ph_init)-5)],
+            #    [np.inf, np.inf, np.inf, np.deg2rad(np.rad2deg(th_init)+5), np.deg2rad(np.rad2deg(ph_init)+5)]),
+            )
+        signal_fit = att_determine_func_args(x, *params_opt)
+        signal_fit_init = att_determine_func_args(x, params_opt[0],params_opt[1],params_opt[2], th_init, ph_init)
+        Bpar_fit = signal_fit[0:len(fgs_ful_smxl_x)]
+        Bper_fit = signal_fit[len(fgs_ful_smxl_x):]
+        th_final = params_opt[3]
+        ph_final = params_opt[4]
+        # get new attitude in gei
+        att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
+        att_ang_diff = ang_twovec([att_gei_init_x, att_gei_init_y, att_gei_init_z], [att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid])
+
+        # update all att according to the middle point changes
+        att_gei_refine_x = []
+        att_gei_refine_y = []
+        att_gei_refine_z = []
+        for x, y, z in zip(att_gei_x, att_gei_y, att_gei_z):
+            r_i, th_i, ph_i = cart2sphere(x, y, z)
+            th_i = th_i + th_final - th_init
+            ph_i = ph_i + ph_final - ph_init
+            x_refine, y_refine, z_refine = sphere2cart(1, th_i, ph_i)
+            att_gei_refine_x.append(x_refine)
+            att_gei_refine_y.append(y_refine)
+            att_gei_refine_z.append(z_refine)
+        
+        # output 
+        print('===============att determine==============')
+        print("initial att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_init_x, att_gei_init_y, att_gei_init_z))
+        print("initial th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_init), np.rad2deg(ph_init)))
+        print("final att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid))
+        print("final th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_final), np.rad2deg(ph_final)))
+        print("att ang difference(deg): {:.5f}".format(np.rad2deg(att_ang_diff)))
+        print('==============att determine end===========')
+    else:  #fit multiple attitude
+        idx2 = 0
+        Bpar_fit = []
+        Bper_fit = []
+        Bpar_fit2 = []  #mapped attitude
+        Bper_fit2 = []
+        att_gei_refine_x = []
+        att_gei_refine_y = []
+        att_gei_refine_z = []
+        for i in range(parameter.att_split_num):
+            idx1 = idx2 
+            idx2 = idx2 + int(len(fgs_igrf_gei_x)/parameter.att_split_num)        
+            if i == parameter.att_split_num - 1:  #if this is the last interval, include all remaining points
+                idx2 = len(fgs_igrf_gei_x)
+            length = idx2 - idx1
+
+            # use the attitude in the middle as initial guess
+            att_gei_init_x =  np.median(att_gei_x[idx1:idx2])
+            att_gei_init_y =  np.median(att_gei_y[idx1:idx2])
+            att_gei_init_z =  np.median(att_gei_z[idx1:idx2])
+            r, th_init, ph_init = cart2sphere(att_gei_init_x, att_gei_init_y, att_gei_init_z)
+    
+
+            B_measure = np.concatenate((Bpar_measure[idx1:idx2], Bper_measure[idx1:idx2]))
+
+            # define fitting func
+            x = range(2*length)
+            att_determine_func_args = lambda x, Gper, Opar, Gpar, th, ph: att_determine_func(
+                x, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x[idx1:idx2], fgs_igrf_gei_y[idx1:idx2], fgs_igrf_gei_z[idx1:idx2])
+            params_opt, params_cov = curve_fit(
+                att_determine_func_args, x, B_measure, 
+                p0=[1, 0, 1, th_init, ph_init], 
+                #method = 'dogbox'
+                #bounds = (
+                #    [-np.inf, -np.inf, -np.inf, np.deg2rad(np.rad2deg(th_init)-5), np.deg2rad(np.rad2deg(ph_init)-5)],
+                #    [np.inf, np.inf, np.inf, np.deg2rad(np.rad2deg(th_init)+5), np.deg2rad(np.rad2deg(ph_init)+5)]),
+                )
+            signal_fit = att_determine_func_args(x, *params_opt)
+            Bpar_fit = np.append(Bpar_fit, signal_fit[:length])
+            Bper_fit = np.append(Bper_fit, signal_fit[length:])
+            th_final = params_opt[3]
+            ph_final = params_opt[4]
+
+            # get new attitude in gei
+            att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
+            att_ang_diff = ang_twovec(
+                [att_gei_init_x, att_gei_init_y, att_gei_init_z], 
+                [att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid])
+
+            # output
+            print('===============att determine==============')
+            print("initial att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_init_x, att_gei_init_y, att_gei_init_z))
+            print("initial th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_init), np.rad2deg(ph_init)))
+            print("final att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid))
+            print("final th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(params_opt[3]), np.rad2deg(params_opt[4])))
+            print("att ang difference(deg): {:.5f}".format(np.rad2deg(att_ang_diff)))
+            print('==============att determine end===========')
+
+       
+            # update all att according to the middle point changes
+            for x, y, z, igrf_x, igrf_y, igrf_z in zip(
+                att_gei_x[idx1:idx2], att_gei_y[idx1:idx2], att_gei_z[idx1:idx2], 
+                fgs_igrf_gei_x[idx1:idx2], fgs_igrf_gei_y[idx1:idx2], fgs_igrf_gei_z[idx1:idx2]):
+                r_i, th_i, ph_i = cart2sphere(x, y, z)
+                th_i = th_i + th_final - th_init
+                ph_i = ph_i + ph_final - ph_init
+                x_refine, y_refine, z_refine = sphere2cart(1, th_i, ph_i)
+                att_gei_refine_x.append(x_refine)
+                att_gei_refine_y.append(y_refine)
+                att_gei_refine_z.append(z_refine)            
+                signal_fit2 = att_determine_func(0, params_opt[0], params_opt[1], params_opt[2], th_i, ph_i, igrf_x, igrf_y, igrf_z)
+                Bpar_fit2 = np.append(Bpar_fit2, signal_fit2[0])
+                Bper_fit2 = np.append(Bper_fit2, signal_fit2[1])
+  
+    # plot Bper Bpar fit
+    if parameter.makeplot == True:
+        #B_ctime_plot_single(
+        #    range(len(fgs_ful_smxl_x)), 
+        #    [Bpar_measure, signal_fit_init[0:len(fgs_ful_smxl_x)], signal_fit[0:len(fgs_ful_smxl_x)]],
+        #    legend=['Bpar','Bpar_init','Bpar_fit'],title="Bpar")
+        # B_ctime_plot_single(
+        #     np.array(range(len(fgs_ful_smxl_x))), 
+        #     [Bpar_measure, Bpar_fit, Bpar_fit2],
+        #     legend=['Bpar','Bpar_fit','Bpar_fit2'],title="Bpar", datestr=datestr)
+        B_ctime_plot_single(
+            np.array(range(len(fgs_ful_smxl_x))), 
+            [Bpar_measure, Bpar_fit],
+            legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr)
+        #B_ctime_plot_single(
+        #    range(len(fgs_ful_smxl_x)), 
+        #    [Bper_measure, signal_fit_init[len(fgs_ful_smxl_x):], signal_fit[len(fgs_ful_smxl_x):]], 
+        #    legend=['Bper','Bper_init','Bper_fit'],title="Bper")
+        # B_ctime_plot_single(
+        #    np.array(range(len(fgs_ful_smxl_x))), 
+        #    [Bper_measure, Bper_fit, Bper_fit2], 
+        #    legend=['Bper','Bper_fit','Bper_fit2'],title="Bper", datestr=datestr)
+        B_ctime_plot_single(
+           np.array(range(len(fgs_ful_smxl_x))), 
+           [Bper_measure, Bper_fit], 
+           legend=['Bper','Bper_fit'],title="Bper", datestr=datestr)
+        breakpoint()
+
+
+    return att_gei_refine_x, att_gei_refine_y, att_gei_refine_z
+    
+    
