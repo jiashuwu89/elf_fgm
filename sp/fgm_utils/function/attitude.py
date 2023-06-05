@@ -272,8 +272,36 @@ def att_determine(
         print("final th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_final), np.rad2deg(ph_final)))
         print("att ang difference(deg): {:.5f}".format(np.rad2deg(att_ang_diff)))
         print('==============att determine end===========')
+
+        att_split_idx = None
     else:  #fit multiple attitude
-        idx2 = 0
+        att_split_idx1 = []  # start idx for att split snippet
+        att_split_idx2 = []  # end idx for att split snippet
+        att_split_len = [] # length of att split snippet
+        if parameter.att_split_num is not None: # divide interval into equal length snippets
+            idx2 = 0
+            att_split_num = parameter.att_split_num
+            for i in range(att_split_num):
+                idx1 = idx2 
+                idx2 = idx2 + int(len(fgs_igrf_gei_x)/att_split_num)        
+                if i == att_split_num - 1:  #if this is the last interval, include all remaining points
+                    idx2 = len(fgs_igrf_gei_x)
+                length = idx2 - idx1
+                att_split_idx1.append(idx1)
+                att_split_idx2.append(idx2)
+                att_split_len.append(length)
+                att_split_idx = att_split_idx1
+        else:  # divide according to att_split_idx
+            att_split_num = len(parameter.att_split_idx)
+            for i, _ in enumerate(parameter.att_split_idx):
+                idx1 = parameter.att_split_idx[i]
+                idx2 = parameter.att_split_idx[i+1] if i < len(parameter.att_split_idx)-1 else len(fgs_igrf_gei_x)
+                att_split_idx1.append(idx1)
+                att_split_idx2.append(idx2)
+                length = idx2 - idx1
+                att_split_len.append(length)
+                att_split_idx = parameter.att_split_idx
+ 
         Bpar_fit = []
         Bper_fit = []
         Bpar_fit2 = []  #mapped attitude
@@ -281,19 +309,17 @@ def att_determine(
         att_gei_refine_x = []
         att_gei_refine_y = []
         att_gei_refine_z = []
-        for i in range(parameter.att_split_num):
-            idx1 = idx2 
-            idx2 = idx2 + int(len(fgs_igrf_gei_x)/parameter.att_split_num)        
-            if i == parameter.att_split_num - 1:  #if this is the last interval, include all remaining points
-                idx2 = len(fgs_igrf_gei_x)
-            length = idx2 - idx1
+
+        for i in range(att_split_num):
+            idx1 = att_split_idx1[i]
+            idx2 = att_split_idx2[i]
+            length = att_split_len[i]
 
             # use the attitude in the middle as initial guess
             att_gei_init_x =  np.median(att_gei_x[idx1:idx2])
             att_gei_init_y =  np.median(att_gei_y[idx1:idx2])
             att_gei_init_z =  np.median(att_gei_z[idx1:idx2])
             r, th_init, ph_init = cart2sphere(att_gei_init_x, att_gei_init_y, att_gei_init_z)
-    
 
             B_measure = np.concatenate((Bpar_measure[idx1:idx2], Bper_measure[idx1:idx2]))
 
@@ -330,7 +356,6 @@ def att_determine(
             print("att ang difference(deg): {:.5f}".format(np.rad2deg(att_ang_diff)))
             print('==============att determine end===========')
 
-       
             # update all att according to the middle point changes
             for x, y, z, igrf_x, igrf_y, igrf_z in zip(
                 att_gei_x[idx1:idx2], att_gei_y[idx1:idx2], att_gei_z[idx1:idx2], 
@@ -359,7 +384,7 @@ def att_determine(
         B_ctime_plot_single(
             np.array(range(len(fgs_ful_smxl_x))), 
             [Bpar_measure, Bpar_fit],
-            legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr)
+            legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr, cross_times=att_split_idx)
         #B_ctime_plot_single(
         #    range(len(fgs_ful_smxl_x)), 
         #    [Bper_measure, signal_fit_init[len(fgs_ful_smxl_x):], signal_fit[len(fgs_ful_smxl_x):]], 
@@ -371,8 +396,8 @@ def att_determine(
         B_ctime_plot_single(
            np.array(range(len(fgs_ful_smxl_x))), 
            [Bper_measure, Bper_fit], 
-           legend=['Bper','Bper_fit'],title="Bper", datestr=datestr)
-        breakpoint()
+           legend=['Bper','Bper_fit'],title="Bper", datestr=datestr, cross_times=att_split_idx)
+
 
 
     return att_gei_refine_x, att_gei_refine_y, att_gei_refine_z

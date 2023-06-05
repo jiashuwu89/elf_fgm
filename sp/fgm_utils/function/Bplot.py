@@ -89,15 +89,15 @@ def B_ctime_plot(
                     if ctime_idx_flag is not None: 
                         colors = ['red','orange','magenta','darkviolet','green']
                         for k in range(ctime_idx_time.size):
-                            ax[j].axvline(ctime_idx_time[k], color=colors[ctime_idx_flag[k]-1]) 
+                            ax[j].axvline(ctime_idx_time[k]/10, color=colors[ctime_idx_flag[k]-1]) 
                     else:
                         for k in range(len(ctime_idx_time)):
-                            ax[j].axvline(ctime_idx_time[k], color='black') 
+                            ax[j].axvline(ctime_idx_time[k]/10, color='black') 
                 ax[j].set_title(filename) if j == 0 else None
                 ax[j].set_xlim(xlimt) if xlimt is not None else None
                 ax[j].set_ylim(ylimt[j]) if ylimt is not None else None
                 if cross_times is not None:
-                    [ax[j].axvline(k, linestyle='--', color='black') for k in cross_times]
+                    [ax[j].axvline(k/10, linestyle='--', color='black') for k in cross_times]
                 ax[j].set_xlabel('Relative Time (seconds)')
                 ax[j].set_ylabel(y_labels[j])
                 ax[j].legend()
@@ -150,7 +150,7 @@ def B_ctime_plot_single(
         else:
             [ax.plot(ctime/10, B[i], alpha=.5, label = f"{legend[i]}") for i in range(len(B))]
     if cross_times is not None:
-        [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
+        [ax.axvline(k/10, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_ylim(ylimt) if ylimt is not None else None
     ax.set_xlabel('Relative Time (seconds)')

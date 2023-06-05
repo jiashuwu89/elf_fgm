@@ -155,7 +155,16 @@ Bpara_out = True
 """
 att_determine = True
 
-"""attitude splite
+"""attitude split
 """
 att_split = True
-att_split_num = 4
+# if this is set, 
+# it will divide interval into equal length snippets, 
+# if not set, will check att_split_idx
+att_split_num = 6
+# start time of each snippet, 
+# if this is set, will use the setted ind to divided att, 
+# if not set, will use ind for sci zone
+#att_split_idx = [0, 13000, 26599, 46000]  # event 1
+att_split_idx = None
+att_split_detrend = True  # will detrend attitude before fitting

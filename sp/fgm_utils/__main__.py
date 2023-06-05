@@ -45,7 +45,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 1
+    eventnum = 53
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -154,6 +154,9 @@ if __name__ == "__main__":
     # att_gei_y = att_gei_refine_y
     # att_gei_z = att_gei_refine_z
     # breakpoint()
+
+    if parameter.att_split == True and parameter.att_split_num is None and parameter.att_split_idx is None:
+        parameter.att_split_idx = clip_start_idx
 
     if parameter.att_csv == True:
         """
