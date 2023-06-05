@@ -161,7 +161,7 @@ att_split = True
 # if this is set, 
 # it will divide interval into equal length snippets, 
 # if not set, will check att_split_idx
-att_split_num = 6
+att_split_num = None
 # start time of each snippet, 
 # if this is set, will use the setted ind to divided att, 
 # if not set, will use ind for sci zone

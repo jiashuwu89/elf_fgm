@@ -144,12 +144,12 @@ def att_plot(v, rotated_points,):
     plt.show()
 
 
-def att_determine_func(x, Gper, Opar, Gpar, th, ph, igrf_x, igrf_y, igrf_z):
+def att_determine_func(x, Oper, Gper, Opar, Gpar, th, ph, igrf_x, igrf_y, igrf_z):
     """
     FIT Bper and Bpar to get five parameters 
 
     Parameters
-        params: Gper, Opar, Gpar, thS, phS
+        params: Oper, Gper, Opar, Gpar, thS, phS
     Returns
         Bmodel(np.ndarray): output of the fitted result
     """
@@ -165,7 +165,7 @@ def att_determine_func(x, Gper, Opar, Gpar, th, ph, igrf_x, igrf_y, igrf_z):
     Bparout = Gpar * Bpar - Opar 
     Bpervec = np.array([igrf_x, igrf_y, igrf_z]) - Bparvec
     Bper = np.sqrt(np.sum(Bpervec**2, axis=0))
-    Bperout = Gper * Bper    
+    Bperout = Gper * Bper - Oper   
     Bmodel = np.append(Bparout, Bperout)
 
     return Bmodel
@@ -232,21 +232,21 @@ def att_determine(
         B_measure = np.concatenate((Bpar_measure, Bper_measure))
         # define fitting func
         x = range(len(B_measure))
-        att_determine_func_args = lambda x, Gper, Opar, Gpar, th, ph: att_determine_func(x, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z)
+        att_determine_func_args = lambda x, Oper, Gper, Opar, Gpar, th, ph: att_determine_func(x, Oper, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z)
         params_opt, params_cov = curve_fit(
             att_determine_func_args, x, B_measure, 
-            p0=[1, 0, 1, th_init, ph_init], 
+            p0=[0, 1, 0, 1, th_init, ph_init], 
             #method = 'dogbox'
             #bounds = (
             #    [-np.inf, -np.inf, -np.inf, np.deg2rad(np.rad2deg(th_init)-5), np.deg2rad(np.rad2deg(ph_init)-5)],
             #    [np.inf, np.inf, np.inf, np.deg2rad(np.rad2deg(th_init)+5), np.deg2rad(np.rad2deg(ph_init)+5)]),
             )
         signal_fit = att_determine_func_args(x, *params_opt)
-        signal_fit_init = att_determine_func_args(x, params_opt[0],params_opt[1],params_opt[2], th_init, ph_init)
+        signal_fit_init = att_determine_func_args(x, params_opt[0],params_opt[1],params_opt[2], params_opt[3], th_init, ph_init)
         Bpar_fit = signal_fit[0:len(fgs_ful_smxl_x)]
         Bper_fit = signal_fit[len(fgs_ful_smxl_x):]
-        th_final = params_opt[3]
-        ph_final = params_opt[4]
+        th_final = params_opt[4]
+        ph_final = params_opt[5]
         # get new attitude in gei
         att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
         att_ang_diff = ang_twovec([att_gei_init_x, att_gei_init_y, att_gei_init_z], [att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid])
@@ -325,11 +325,11 @@ def att_determine(
 
             # define fitting func
             x = range(2*length)
-            att_determine_func_args = lambda x, Gper, Opar, Gpar, th, ph: att_determine_func(
-                x, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x[idx1:idx2], fgs_igrf_gei_y[idx1:idx2], fgs_igrf_gei_z[idx1:idx2])
+            att_determine_func_args = lambda x, Oper, Gper, Opar, Gpar, th, ph: att_determine_func(
+                x, Oper, Gper, Opar, Gpar, th, ph, fgs_igrf_gei_x[idx1:idx2], fgs_igrf_gei_y[idx1:idx2], fgs_igrf_gei_z[idx1:idx2])
             params_opt, params_cov = curve_fit(
                 att_determine_func_args, x, B_measure, 
-                p0=[1, 0, 1, th_init, ph_init], 
+                p0=[0, 1, 0, 1, th_init, ph_init], 
                 #method = 'dogbox'
                 #bounds = (
                 #    [-np.inf, -np.inf, -np.inf, np.deg2rad(np.rad2deg(th_init)-5), np.deg2rad(np.rad2deg(ph_init)-5)],
@@ -338,8 +338,8 @@ def att_determine(
             signal_fit = att_determine_func_args(x, *params_opt)
             Bpar_fit = np.append(Bpar_fit, signal_fit[:length])
             Bper_fit = np.append(Bper_fit, signal_fit[length:])
-            th_final = params_opt[3]
-            ph_final = params_opt[4]
+            th_final = params_opt[4]
+            ph_final = params_opt[5]
 
             # get new attitude in gei
             att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
@@ -352,7 +352,7 @@ def att_determine(
             print("initial att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_init_x, att_gei_init_y, att_gei_init_z))
             print("initial th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_init), np.rad2deg(ph_init)))
             print("final att in gei: [{:.5f}, {:.5f}, {:.5f}]".format(att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid))
-            print("final th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(params_opt[3]), np.rad2deg(params_opt[4])))
+            print("final th and ph(deg): {:.5f}, {:.5f}".format(np.rad2deg(th_final), np.rad2deg(ph_final)))
             print("att ang difference(deg): {:.5f}".format(np.rad2deg(att_ang_diff)))
             print('==============att determine end===========')
 
@@ -367,7 +367,7 @@ def att_determine(
                 att_gei_refine_x.append(x_refine)
                 att_gei_refine_y.append(y_refine)
                 att_gei_refine_z.append(z_refine)            
-                signal_fit2 = att_determine_func(0, params_opt[0], params_opt[1], params_opt[2], th_i, ph_i, igrf_x, igrf_y, igrf_z)
+                signal_fit2 = att_determine_func(0, params_opt[0], params_opt[1], params_opt[2], params_opt[3], th_i, ph_i, igrf_x, igrf_y, igrf_z)
                 Bpar_fit2 = np.append(Bpar_fit2, signal_fit2[0])
                 Bper_fit2 = np.append(Bper_fit2, signal_fit2[1])
   
