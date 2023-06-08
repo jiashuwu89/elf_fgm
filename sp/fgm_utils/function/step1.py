@@ -569,6 +569,8 @@ def step1(
                 if parameter.makeplot == True: 
                     Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_5th_x, fgs_igrf_fgm_4th_x], [fgs_ful_fgm_5th_y, fgs_igrf_fgm_4th_y], 
                         [fgs_ful_fgm_5th_x, fgs_igrf_fgm_4th_z], title="ful_igrf_fgm_after4thcali") 
+                    Bplot.B_ctime_plot(ctime, fgs_ful_fgm_5th_x-fgs_igrf_fgm_4th_x, fgs_ful_fgm_5th_y-fgs_igrf_fgm_4th_y, 
+                        fgs_ful_fgm_5th_x-fgs_igrf_fgm_4th_z, title="res_fgm_after4thcali") 
 
                 if parameter.Bpara_out == True:
                     print("4th calib:")

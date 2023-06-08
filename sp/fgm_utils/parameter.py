@@ -81,12 +81,12 @@ ctime_repeat_check = True
 """post calibration parameter
 """
 cali_2nd = True  # add a second calibration 
-cali_3rd = True  # add a third calibration 
+cali_3rd = True # add a third calibration 
 cali_4th = True  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-fsp_detrend = False # detrend in dmxl if true
+fsp_detrend = True # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 #del_spike_fsp = False  # delete spike in fsp resolution
@@ -106,7 +106,7 @@ del_time_idxend = [306]
 
 """gei to obw
 """
-gei2obw = False
+gei2obw = True
 
 """change zero crossing location according to omege, in phase inter  
 """
@@ -161,10 +161,10 @@ att_split = True
 # if this is set, 
 # it will divide interval into equal length snippets, 
 # if not set, will check att_split_idx
-att_split_num = 6
+att_split_num = None
 # start time of each snippet, 
 # if this is set, will use the setted ind to divided att, 
 # if not set, will use ind for sci zone
 #att_split_idx = [0, 13000, 26599, 46000]  # event 1
 att_split_idx = None
-att_split_detrend = True  # will detrend attitude before fitting
+att_split_detrend = False  # will detrend attitude before fitting

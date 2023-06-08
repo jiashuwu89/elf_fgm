@@ -1,0 +1,16 @@
+# in sp folder, run exec(open("pdb.txt").read()) to run this file
+
+print(f"Minimum variance vector dirction:")
+print(f"MinVar median angle to fgm_x [deg]: {np.median(fgs_minvarvec_ang[:,0])}")
+print(f"MinVar median angle to fgm_y [deg]: {np.median(fgs_minvarvec_ang[:,1])}")
+print(f"MinVar median angle to fgm_z [deg]: {np.median(fgs_minvarvec_ang[:,2])}")
+
+print(f"Middle variance vector dirction:")
+print(f"MidVar median angle to fgm_x [deg]: {np.median(fgs_midvarvec_ang[:,0])}")
+print(f"MidVar median angle to fgm_y [deg]: {np.median(fgs_midvarvec_ang[:,1])}")
+print(f"MidVar median angle to fgm_z [deg]: {np.median(fgs_midvarvec_ang[:,2])}")
+
+print(f"Maxium variance vector dirction:")
+print(f"MaxVar median angle to fgm_x [deg]: {np.median(fgs_maxvarvec_ang[:,0])}")
+print(f"MaxVar median angle to fgm_y [deg]: {np.median(fgs_maxvarvec_ang[:,1])}")
+print(f"MaxVar median angle to fgm_z [deg]: {np.median(fgs_maxvarvec_ang[:,2])}")

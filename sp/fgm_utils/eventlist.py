@@ -967,5 +967,14 @@ eventlist = {
                 "2022-03-07/23:11:50",
             ],
         },
+        59: { # single short collection good example for gem poster
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-14/18:58:38",
+            ],
+            "endtime_str":[
+                "2022-01-14/19:04:52",
+            ],
+        },
     },
 }

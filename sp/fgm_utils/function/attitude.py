@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from .. import parameter
 from .Bplot import B_ctime_plot_single
+from scipy.signal import detrend
 
 def rotate_vector(vector, angle_radians, axis='x'):
 
@@ -321,7 +322,10 @@ def att_determine(
             att_gei_init_z =  np.median(att_gei_z[idx1:idx2])
             r, th_init, ph_init = cart2sphere(att_gei_init_x, att_gei_init_y, att_gei_init_z)
 
-            B_measure = np.concatenate((Bpar_measure[idx1:idx2], Bper_measure[idx1:idx2]))
+            Bpar_measure_snippet = Bpar_measure[idx1:idx2]
+            Bper_measure_snippet = Bper_measure[idx1:idx2]
+            B_measure = np.concatenate((Bpar_measure_snippet, Bper_measure_snippet))
+
 
             # define fitting func
             x = range(2*length)
@@ -335,11 +339,16 @@ def att_determine(
                 #    [-np.inf, -np.inf, -np.inf, np.deg2rad(np.rad2deg(th_init)-5), np.deg2rad(np.rad2deg(ph_init)-5)],
                 #    [np.inf, np.inf, np.inf, np.deg2rad(np.rad2deg(th_init)+5), np.deg2rad(np.rad2deg(ph_init)+5)]),
                 )
+            breakpoint()
+            params_opt[3] = th_init
+            params_opt[4] = ph_init
+            breakpoint()
             signal_fit = att_determine_func_args(x, *params_opt)
             Bpar_fit = np.append(Bpar_fit, signal_fit[:length])
             Bper_fit = np.append(Bper_fit, signal_fit[length:])
             th_final = params_opt[3]
             ph_final = params_opt[4]
+            
 
             # get new attitude in gei
             att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
@@ -373,10 +382,6 @@ def att_determine(
   
     # plot Bper Bpar fit
     if parameter.makeplot == True:
-        #B_ctime_plot_single(
-        #    range(len(fgs_ful_smxl_x)), 
-        #    [Bpar_measure, signal_fit_init[0:len(fgs_ful_smxl_x)], signal_fit[0:len(fgs_ful_smxl_x)]],
-        #    legend=['Bpar','Bpar_init','Bpar_fit'],title="Bpar")
         # B_ctime_plot_single(
         #     np.array(range(len(fgs_ful_smxl_x))), 
         #     [Bpar_measure, Bpar_fit, Bpar_fit2],
@@ -385,10 +390,6 @@ def att_determine(
             np.array(range(len(fgs_ful_smxl_x))), 
             [Bpar_measure, Bpar_fit],
             legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr, cross_times=att_split_idx)
-        #B_ctime_plot_single(
-        #    range(len(fgs_ful_smxl_x)), 
-        #    [Bper_measure, signal_fit_init[len(fgs_ful_smxl_x):], signal_fit[len(fgs_ful_smxl_x):]], 
-        #    legend=['Bper','Bper_init','Bper_fit'],title="Bper")
         # B_ctime_plot_single(
         #    np.array(range(len(fgs_ful_smxl_x))), 
         #    [Bper_measure, Bper_fit, Bper_fit2], 
@@ -397,7 +398,7 @@ def att_determine(
            np.array(range(len(fgs_ful_smxl_x))), 
            [Bper_measure, Bper_fit], 
            legend=['Bper','Bper_fit'],title="Bper", datestr=datestr, cross_times=att_split_idx)
-
+        breakpoint()
 
 
     return att_gei_refine_x, att_gei_refine_y, att_gei_refine_z
