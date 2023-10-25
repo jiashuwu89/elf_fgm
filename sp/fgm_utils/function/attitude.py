@@ -338,9 +338,12 @@ def att_determine(
             signal_fit = att_determine_func_args(x, *params_opt)
             Bpar_fit = np.append(Bpar_fit, signal_fit[:length])
             Bper_fit = np.append(Bper_fit, signal_fit[length:])
+            #params_opt[4] = th_init
+            #params_opt[5] = ph_init
+            #breakpoint()
             th_final = params_opt[4]
             ph_final = params_opt[5]
-
+            
             # get new attitude in gei
             att_gei_refine_x_mid, att_gei_refine_y_mid, att_gei_refine_z_mid = sphere2cart(1, th_final, ph_final)
             att_ang_diff = ang_twovec(
@@ -382,9 +385,10 @@ def att_determine(
         #     [Bpar_measure, Bpar_fit, Bpar_fit2],
         #     legend=['Bpar','Bpar_fit','Bpar_fit2'],title="Bpar", datestr=datestr)
         B_ctime_plot_single(
-            np.array(range(len(fgs_ful_smxl_x))), 
+            np.array(range(len(fgs_ful_smxl_x)))/10., 
             [Bpar_measure, Bpar_fit],
-            legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr, cross_times=att_split_idx)
+            #legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr, cross_times=att_split_idx)
+            legend=['Bpar','Bpar_fit'],title="Bpar", datestr=datestr)
         #B_ctime_plot_single(
         #    range(len(fgs_ful_smxl_x)), 
         #    [Bper_measure, signal_fit_init[len(fgs_ful_smxl_x):], signal_fit[len(fgs_ful_smxl_x):]], 
@@ -394,10 +398,11 @@ def att_determine(
         #    [Bper_measure, Bper_fit, Bper_fit2], 
         #    legend=['Bper','Bper_fit','Bper_fit2'],title="Bper", datestr=datestr)
         B_ctime_plot_single(
-           np.array(range(len(fgs_ful_smxl_x))), 
+           np.array(range(len(fgs_ful_smxl_x)))/10., 
            [Bper_measure, Bper_fit], 
-           legend=['Bper','Bper_fit'],title="Bper", datestr=datestr, cross_times=att_split_idx)
-
+        #   legend=['Bper','Bper_fit'],title="Bper", datestr=datestr, cross_times=att_split_idx)
+            legend=['Bper','Bper_fit'],title="Bper", datestr=datestr)
+        breakpoint()
 
 
     return att_gei_refine_x, att_gei_refine_y, att_gei_refine_z

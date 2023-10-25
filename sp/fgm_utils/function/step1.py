@@ -42,6 +42,9 @@ def step1(
     )    
     logger.debug(f"[1.1] phase angle is done. ")
 
+    # if parameter.makeplot == True:
+    #     Bplot.phase_plot(ctime, phi_1st, cross_times_1st, xlimt=[0,50])
+    #     breakpoint()
     """
         # 1.2 IGRF coorindate transformation: gei -> dmxl -> smxl -> fgm
     """
@@ -216,7 +219,8 @@ def step1(
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
         Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
-            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali") 
+            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali")
+        Bplot.B_ctime_plot(ctime, fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, cross_times=cross_times_1st, xlimt=[50,100])
         
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 

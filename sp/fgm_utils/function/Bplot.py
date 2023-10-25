@@ -83,8 +83,8 @@ def B_ctime_plot(
         fig, ax = plt.subplots(3, figsize=(12,7))
         for i in range(dim):
             for j in range(3):           
-                ax[j].plot(ctime[i]/10, B[j][i], label=labels[j][i], alpha=.5)
-                ax[j].scatter(ctime[i]/10, B[j][i], label=[], alpha=.5) if scatter == True else None
+                ax[j].plot(ctime[i], B[j][i], label=labels[j][i], alpha=.5)
+                ax[j].scatter(ctime[i], B[j][i], label=[], alpha=.5) if scatter == True else None
                 if ctime_idx_time is not None and len(ctime_idx_time) != 0:
                     if ctime_idx_flag is not None: 
                         colors = ['red','orange','magenta','darkviolet','green']
@@ -97,7 +97,7 @@ def B_ctime_plot(
                 ax[j].set_xlim(xlimt) if xlimt is not None else None
                 ax[j].set_ylim(ylimt[j]) if ylimt is not None else None
                 if cross_times is not None:
-                    [ax[j].axvline(k/10, linestyle='--', color='black') for k in cross_times]
+                    [ax[j].axvline(k, linestyle='--', color='black') for k in cross_times]
                 ax[j].set_xlabel('Relative Time (seconds)')
                 ax[j].set_ylabel(y_labels[j])
                 ax[j].legend()
@@ -105,7 +105,7 @@ def B_ctime_plot(
         fig, ax = plt.subplots(1, figsize=(12,7))
         for i in range(dim):
             for j in range(3):
-                ax.plot(ctime[i]/10, B[j][i], label=labels[j][i], alpha=.5)
+                ax.plot(ctime[i], B[j][i], label=labels[j][i], alpha=.5)
         ax.set_title(filename)
         ax.set_xlim(xlimt) if xlimt is not None else None
         ax.set_ylim(ylimt) if ylimt is not None else None
@@ -142,21 +142,23 @@ def B_ctime_plot_single(
     fig, ax = plt.subplots(1, figsize=(12,7))
 
     if dim == 1:
-        ax.plot(ctime/10, B, alpha=.5)
-        ax.scatter(ctime/10, B, alpha=.5) if scatter == True else None
+        ax.plot(ctime, B, alpha=.5)
+        ax.scatter(ctime, B, alpha=.5) if scatter == True else None
     else:
         if legend is None:
-            [ax.plot(ctime/10, B[i], alpha=.5, label = f"X_{i}") for i in range(len(B))]
+            [ax.plot(ctime, B[i], alpha=.5, label = f"X_{i}") for i in range(len(B))]
         else:
-            [ax.plot(ctime/10, B[i], alpha=.5, label = f"{legend[i]}") for i in range(len(B))]
+            [ax.plot(ctime, B[i], alpha=.5, label = f"{legend[i]}") for i in range(len(B))]
     if cross_times is not None:
-        [ax.axvline(k/10, linestyle='--') for k in cross_times if cross_times is not None]
+        [ax.axvline(k, linestyle='--') for k in cross_times if cross_times is not None]
     ax.set_xlim(xlimt) if xlimt is not None else None
     ax.set_ylim(ylimt) if ylimt is not None else None
-    ax.set_xlabel('Relative Time (seconds)')
-    ax.set_ylabel('B (nT)')
-    ax.set_title(filename)
-    ax.legend() if legend is not None else None
+    ax.set_xlabel('Relative Time (seconds)', fontsize=parameter.fig_fontsize)
+    ax.set_ylabel('B (nT)', fontsize=parameter.fig_fontsize)
+    ax.set_title(filename, fontsize=parameter.fig_fontsize+2)
+    plt.xticks(fontsize=parameter.fig_fontsize)
+    plt.yticks(fontsize=parameter.fig_fontsize)
+    ax.legend(fontsize=parameter.fig_fontsize) if legend is not None else None
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 
     plt.close()
 

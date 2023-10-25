@@ -45,7 +45,7 @@ if __name__ == "__main__":
     csvpath = f"fgm_utils/temp/{mission}_fgm_data_availability.csv"
     elfin_url = "https://data.elfin.ucla.edu/"
 
-    eventnum = 53
+    eventnum = 64
     starttime_str = eventlist[mission][eventnum]["starttime_str"]
     endtime_str = eventlist[mission][eventnum]["endtime_str"]
     f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -84,7 +84,11 @@ if __name__ == "__main__":
                 print(f"download error:{fgm_url}") 
                 breakpoint() 
 
-        fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+        if parameter.fakedata == False:
+            fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+        else:
+            fgm_cdfdata = preprocess.get_fakedata(parameter.fakedata_path)
+            
         logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]}")
         att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time[i], end_time[i])
         logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]}")      

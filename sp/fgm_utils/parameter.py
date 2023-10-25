@@ -80,9 +80,9 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = True  # add a second calibration 
-cali_3rd = True  # add a third calibration 
-cali_4th = True  # add a third calibration 
+cali_2nd = False  # add a second calibration 
+cali_3rd = False  # add a third calibration 
+cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
@@ -93,9 +93,9 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
-savepng = True
-output = False # if true output to txt file
+makeplot = False
+savepng = True  # only works when makeplot = True
+output = True  # if true output dmxl_x/y/z to txt file, file folder fgm_utils/temp/
 download_data = True
 
 """specify time interval for some events
@@ -106,7 +106,7 @@ del_time_idxend = [306]
 
 """gei to obw
 """
-gei2obw = False
+gei2obw = True
 
 """change zero crossing location according to omege, in phase inter  
 """
@@ -141,11 +141,11 @@ att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"
 
 """run mva during each run
 """
-mva_fgm = True
+mva_fgm = False
 
 """use angle from mva as rotation angle, works only when mva_fgm is true
 """
-mvaang_rotang = False
+mvaang_rotang = True
 
 """print out B parameter in each calibration
 """
@@ -153,11 +153,12 @@ Bpara_out = True
 
 """attitude determination
 """
-att_determine = True
+att_determine = False
+att_determine_Oper = False
 
 """attitude split
 """
-att_split = True
+att_split = False
 # if this is set, 
 # it will divide interval into equal length snippets, 
 # if not set, will check att_split_idx
@@ -168,3 +169,10 @@ att_split_num = None
 #att_split_idx = [0, 13000, 26599, 46000]  # event 1
 att_split_idx = None
 att_split_detrend = True  # will detrend attitude before fitting
+
+# figure option
+fig_fontsize = 16
+
+# fake data path
+fakedata = False
+fakedata_path = 'fgm_utils/temp/elx_bt89_fgmc_dmxlx.txt'
