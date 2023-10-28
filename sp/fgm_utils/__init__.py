@@ -3,12 +3,14 @@ from logging import Logger
 from typing import Literal, List
 import numpy as np
 import pandas as pd
+import traceback
+import sys
+import requests
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
-import traceback
-import sys
+from .function.attitude import att_rot
 
 datestr = ""
 
@@ -95,6 +97,106 @@ def fgm_fsp_calib_prepos(
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
         att_gei_x, att_gei_y, att_gei_z,
         pos_gei_x, pos_gei_y, pos_gei_z]
+
+
+def fgm_fsp_calib_prepos_wrapper(
+        mission: Literal["ela", "elb"], 
+        start_time: List[datetime.datetime], 
+        end_time: List[datetime.datetime],
+        f_all: List[float],
+        logger: Logger) -> List[np.ndarray]:
+    """Wrapper for fgm_fsp_calib_prepos_wrapper.
+    Read data from all science zones and prepare for processing
+    
+    Args:
+        mission: 'ela' or 'elb'
+        start_time: List of start time of sci zones
+        end_time: List of end time of sci zones
+        f_all: List of rotation angle
+    
+    Returns:
+        List of numpy array
+    """
+    for i in range(len(start_time)):
+        sta_datestr = start_time[i].strftime("%Y%m%d")
+        logger.info(f"▶️ Received {mission} collection from {start_time[i]} to {end_time[i]}")
+        sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+        fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf" 
+
+        if parameter.download_data == True:
+            try:
+                sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+                res = requests.get(sta_url)
+                with open(sta_cdfpath, 'wb') as f:
+                    f.write(res.content)
+            except:
+                print(f"download error:{sta_url}")
+
+            try:
+                fgm_url = f"{parameter.elfin_url}{mission}/l1/fgm/survey/{start_time[i].year}/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
+                res = requests.get(fgm_url)
+                with open(fgm_cdfpath, 'wb') as f:
+                    f.write(res.content)
+            except:
+                print(f"download error:{fgm_url}") 
+                breakpoint() 
+
+        fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
+        logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]}")
+        att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time[i], end_time[i])
+        logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]}")      
+
+        if parameter.att_rot == True:
+            att_cdfdata = att_rot(att_cdfdata, parameter.att_rot_ang, parameter.att_rot_axis)    
+
+                
+        [
+            ctime_0, ctimestamp_0,
+            fgs_ful_fgm_0th_x_0, fgs_ful_fgm_0th_y_0, fgs_ful_fgm_0th_z_0, 
+            fgs_igrf_gei_x_0, fgs_igrf_gei_y_0, fgs_igrf_gei_z_0,
+            att_gei_x_0, att_gei_y_0, att_gei_z_0,
+            pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
+                mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)
+        f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
+        
+        if i == 0: # first collection 
+            [
+                ctime, ctimestamp, 
+                fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z, f_all_arry] = [
+                    ctime_0, ctimestamp_0, 
+                    fgs_ful_fgm_0th_x_0, fgs_ful_fgm_0th_y_0, fgs_ful_fgm_0th_z_0, 
+                    fgs_igrf_gei_x_0, fgs_igrf_gei_y_0, fgs_igrf_gei_z_0, 
+                    att_gei_x_0, att_gei_y_0, att_gei_z_0, 
+                    pos_gei_x_0, pos_gei_y_0, pos_gei_z_0, f_all_arry_0]
+            clip_start_idx = [0]
+            clip_end_idx = [len(ctime)-1]
+
+        else: # multiple collection
+            ctime = np.concatenate((ctime, ctime_0 + ctime[-1] + 60))
+            fgs_ful_fgm_0th_x = np.concatenate((fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_x_0))
+            fgs_ful_fgm_0th_y = np.concatenate((fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_y_0))
+            fgs_ful_fgm_0th_z = np.concatenate((fgs_ful_fgm_0th_z, fgs_ful_fgm_0th_z_0))
+            fgs_igrf_gei_x = np.concatenate((fgs_igrf_gei_x, fgs_igrf_gei_x_0))
+            fgs_igrf_gei_y = np.concatenate((fgs_igrf_gei_y, fgs_igrf_gei_y_0))
+            fgs_igrf_gei_z = np.concatenate((fgs_igrf_gei_z, fgs_igrf_gei_z_0))
+            att_gei_x = np.concatenate((att_gei_x, att_gei_x_0))
+            att_gei_y = np.concatenate((att_gei_y, att_gei_y_0))
+            att_gei_z = np.concatenate((att_gei_z, att_gei_z_0))
+            pos_gei_x = np.concatenate((pos_gei_x, pos_gei_x_0))
+            pos_gei_y = np.concatenate((pos_gei_y, pos_gei_y_0))
+            pos_gei_z = np.concatenate((pos_gei_z, pos_gei_z_0))
+            f_all_arry = np.concatenate([f_all_arry, f_all_arry_0])
+            clip_start_idx.append(clip_end_idx[-1]+1) # start index of each sci zone
+            clip_end_idx.append(len(ctime)-1) # end index of each sci zone
+        
+        return [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, 
+                pos_gei_x, pos_gei_y, pos_gei_z,
+                f_all_arry, clip_start_idx, clip_end_idx]
 
 
 def fgm_fsp_calib(

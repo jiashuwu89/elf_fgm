@@ -7,7 +7,7 @@ import datetime
 import os.path
 from . import error 
 from .. import parameter
-from . import Bplot
+import datetime as dt
 
 
 def get_cdf(cdfpath: str, vars: Union[List[str], None]):
@@ -148,3 +148,26 @@ def ctime_check(ctime):
         else:
             i += 1
     return ctime_idx_repeat
+
+
+def get_fgmCSV(csvpath: str, startdate: str, enddate: str):
+    """Read start_time and end_time from fgm_data_availablity.csv
+    """
+    try:
+        data = pd.read_csv(csvpath)
+        data['Time Start_datetime'] = data['Time Start'].apply(lambda ts: dt.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S'))
+        data['Time End_datetime'] = data['Time End'].apply(lambda ts: dt.datetime.strptime(ts,'%Y-%m-%d/%H:%M:%S'))
+        startdate_datetime = dt.datetime.strptime(startdate,'%Y-%m-%d/%H:%M:%S')
+        enddate_datetime = dt.datetime.strptime(enddate,'%Y-%m-%d/%H:%M:%S')
+        data_select = data[(data['Time Start_datetime'] > startdate_datetime) & (data['Time End_datetime'] < enddate_datetime)]
+
+        start_list = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), data_select['Time Start']))
+        end_list = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), data_select['Time End']))    
+    except:
+        raise error.SCreadError()
+    else:
+        if len(data_select) == 0:
+            raise error.SCreadError()
+
+    return start_list, end_list
+

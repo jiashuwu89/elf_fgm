@@ -20,12 +20,19 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
     sta_datestr = date.strftime("%Y%m%d")
     return os.path.join("/nfs/elfin-mirror/elfin", mission, "l1/state/defn", year_str, f"{mission}_l1_state_defn_{sta_datestr}_v02.cdf")
 
+elfin_url = "https://data.elfin.ucla.edu/"
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
 relative_integrate = True
 bidirectional_integrate = True
 
+init_secs = 0 # inital seconds to exclude
+funkyfgm = False
+f = (90-55) * np.pi / 180
+
+"""zero crossing parameter
+"""
 eps_1 = 5
 eps_2 = 5
 eps_3 = 4
@@ -33,10 +40,7 @@ N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
 zero_crossing_method = 3   
-f = (90-55) * np.pi / 180
-init_secs = 0 # seconds
 
-funkyfgm = False
 """ctime spike paramter
 """
 # in ctime_calib, criterion for finding ctime gaps difference between jumps and ctime median in seconds
@@ -80,9 +84,9 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = True  # add a second calibration 
-cali_3rd = True # add a third calibration 
-cali_4th = True  # add a third calibration 
+cali_2nd = False  # add a second calibration 
+cali_3rd = False # add a third calibration 
+cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
@@ -93,8 +97,8 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = True
-savepng = True
+makeplot = False
+savepng = False
 output = False # if true output to txt file
 download_data = True
 
@@ -108,7 +112,7 @@ del_time_idxend = [306]
 """
 gei2obw = True
 
-"""change zero crossing location according to omege, in phase inter  
+"""change zero crossing location according to omege, in phase interation  
 """
 CrossTime_Update = True
 
@@ -116,7 +120,7 @@ CrossTime_Update = True
 """
 fit_bound = False
 
-"""loop f 
+"""loop f, if set ignore the f value above 
 """
 f_loop = False
 f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 100)))
@@ -153,11 +157,11 @@ Bpara_out = True
 
 """attitude determination
 """
-att_determine = True
+att_determine = False
 
 """attitude split
 """
-att_split = True
+att_split = False
 # if this is set, 
 # it will divide interval into equal length snippets, 
 # if not set, will check att_split_idx
@@ -168,3 +172,7 @@ att_split_num = None
 #att_split_idx = [0, 13000, 26599, 46000]  # event 1
 att_split_idx = None
 att_split_detrend = False  # will detrend attitude before fitting
+
+"""run batch sci zones from fgm_availablity.csv
+"""
+batch_run = True
