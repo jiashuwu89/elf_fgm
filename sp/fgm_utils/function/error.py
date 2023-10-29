@@ -126,3 +126,35 @@ class fsp_spike_del_error(Exception):
     def __str__(self):
         return f"❌ {self.message}" 
 
+
+class preproc_resample_error(Exception):
+    """Exception raised when preprocessing fail
+    """
+    def __init__(self, message = "[PREPROCESS] Resample fail!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"❌ {self.message}" 
+
+
+class preproc_download_error(Exception):
+    """Exception raised when preprocessing fail
+    """
+    def __init__(self, message = "[PREPROCESS] Download CDF fail!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"❌ {self.message}" 
+    
+
+class postproc_fgs_igrf(Exception):
+    """Exception raised when fgs_igrf fails in determining the fsp data
+    """
+    def __init__(self, message = "[POSTPREPROCESS] fgs_igrf fail!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"❌ {self.message}" 

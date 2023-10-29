@@ -4,10 +4,9 @@ import logging.config
 from . import fgm_fsp_calib_prepos_wrapper, fgm_fsp_calib, parameter
 from .function import error, preprocess
 from .function.postprocess import Bpara2Gthphi
-import requests
 import numpy as np
-from scipy.interpolate import interp1d
-from .function.Bplot import Gain_f
+import traceback
+import sys
 from .function.attitude import att_rot, att_loop, att_plot
 from .eventlist import eventlist
 from .function.output import output_txt
@@ -180,11 +179,11 @@ if __name__ == "__main__":
 
     if parameter.batch_run == True:
         # not batch run, run one example from eventlist
-        starttime_str = '2022-01-01/00:00:00'
-        endtime_str = '2022-01-01/12:00:00'
+        starttime_str = '2021-12-28/00:00:00'
+        endtime_str = '2021-12-28/23:59:59'
         start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
         beta_df = get_betaCSV(betacsvpath)
-        Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, beta_out = [], [], [], [], [], []
+        Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, beta_out, start_times_str, end_times_str = [], [], [], [], [], [], [], []
 
         for start_time, end_time in zip(start_times, end_times):
             start_time = [start_time]
@@ -194,23 +193,33 @@ if __name__ == "__main__":
             read all sci zones data 
             ====================
             """
-            [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
-                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z, 
-                pos_gei_x, pos_gei_y, pos_gei_z,
-                f_all_arry, clip_start_idx, clip_end_idx] = fgm_fsp_calib_prepos_wrapper(mission, start_time, end_time, None, logger)
-            """
-            ====================
-            start processing
-            ====================
-            """
-            # no att loop, no floop, just a single sci zone      
-            Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = process_single(
-                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
-                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z, 
-                pos_gei_x, pos_gei_y, pos_gei_z,
-                f_all_arry, logger)
+            try:
+                [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z, 
+                    pos_gei_x, pos_gei_y, pos_gei_z,
+                    f_all_arry, clip_start_idx, clip_end_idx] = fgm_fsp_calib_prepos_wrapper(mission, start_time, end_time, None, logger)
+                """
+                ====================
+                start processing
+                ====================
+                """
+                # no att loop, no floop, just a single sci zone      
+                Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = process_single(
+                    ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z, 
+                    pos_gei_x, pos_gei_y, pos_gei_z,
+                    f_all_arry, logger)
+            except (error.preproc_resample_error, error.preproc_download_error) as e:
+                # this error usually raise when 
+                logger.error(e.__str__())
+                Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = [], [], [], [], []
+            except Exception as e:
+                logger.error(f"❌ step 0 other error. Stop processing.")
+                logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+                print('\n'.join(traceback.format_exception(*sys.exc_info())))
+                Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = [], [], [], [], []
             
             Bpara_out.append(Bpara_single)
             Gthphi_out.append(Gthphi_single)
@@ -226,6 +235,16 @@ if __name__ == "__main__":
             mid_time = start_time[0] + 0.5*(end_time[0] - start_time[0])
             beta_angle = get_beta(beta_df, mid_time)
             beta_out.append(beta_angle)
+
+            """
+            ====================
+            get date array
+            ====================
+            """
+            start_time_str = dt.datetime.strftime(start_time[0], "%Y-%m-%d/%H:%M:%S")
+            end_time_str = dt.datetime.strftime(end_time[0], "%Y-%m-%d/%H:%M:%S")
+            start_times_str.append(start_time_str)
+            end_times_str.append(end_time_str)
 
         
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
@@ -305,7 +324,10 @@ if __name__ == "__main__":
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Gthphi.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Bpara.csv"
-    
+
+        start_times_str, end_times_str = [], []
+        start_times_str.append(starttime_str[0])
+        end_times_str.append(endtime_str[-1])
     """
     ====================
     get beta
@@ -322,13 +344,13 @@ if __name__ == "__main__":
     """
 
     Gthphi_columns = [ 
-        'f', 'att_rot', 'res_med', 'beta_ang'
+        'start_time', 'end_time', 'f', 'att_rot', 'beta_ang', 'res_med',
         'G1', 'G2', 'G3',
         'th1','th2','th3',
         'ph1','ph2','ph3',
         'O1/G1','O2/G2','O3/G3']
     Bpara_columns = [ 
-        'f', 'att_rot', 'res_med', 'beta_ang'
+        'start_time', 'end_time', 'f', 'att_rot', 'beta_ang', 'res_med',
         'G11', 'G12', 'G13',
         'G21','G22','G23',
         'G31','G32','G33',
@@ -337,8 +359,8 @@ if __name__ == "__main__":
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
   
     for iline in range(len(Bpara_out)):
-        Gthphi_row = [f_out[iline], att_rot_out[iline], res_rot_out[iline], beta_out[iline], *Gthphi_out[iline]]
-        Bpara_row = [f_out[iline], att_rot_out[iline], res_rot_out[iline], beta_out[iline], *Bpara_out[iline]]
+        Gthphi_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Gthphi_out[iline]]
+        Bpara_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Bpara_out[iline]]
         Gthphi_row = [dict(zip(Gthphi_columns, Gthphi_row))]
         Bpara_row = [dict(zip(Bpara_columns, Bpara_row))]
 

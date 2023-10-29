@@ -226,3 +226,4 @@ def Gain_f(f, Gain_x, Gain_y, Gain_z, mission = None):
     ax.legend() 
     plt.savefig(f"fgm_utils/temp/Gain_f_{mission}") if mission is not None else plt.savefig(f"fgm_utils/temp/Gain_f")
     plt.close()
+

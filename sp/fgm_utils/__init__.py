@@ -34,14 +34,17 @@ def fgm_fsp_calib_prepos(
     # read fgm cdf and clip
     fgm_cdfdata.set_index(f"{mission}_fgs_time", inplace=True)
     fgm_cdfdata = preprocess.clip_cdfdata(fgm_cdfdata, starttime, endtime)
-
-    # resample att and pos to fgm time resolution
-    df["att_gei"] = preprocess.resample_data(
-        att_cdfdata.index, att_cdfdata[f"{mission}_att_gei"], fgm_cdfdata.index
-    )
-    df["pos_gei"] = preprocess.resample_data(
-        pos_cdfdata.index, pos_cdfdata[f"{mission}_pos_gei"], fgm_cdfdata.index
-    )
+    try:
+        # resample att and pos to fgm time resolution
+        df["att_gei"] = preprocess.resample_data(
+            att_cdfdata.index, att_cdfdata[f"{mission}_att_gei"], fgm_cdfdata.index
+        )
+        df["pos_gei"] = preprocess.resample_data(
+            pos_cdfdata.index, pos_cdfdata[f"{mission}_pos_gei"], fgm_cdfdata.index
+        )
+    except:
+        raise error.preproc_resample_error()
+    
     df["fgm_fgm"] = pd.Series(fgm_cdfdata[f"{mission}_fgs"].tolist())
     df["time"] = fgm_cdfdata.index
     df["timestamp"] = df["time"].apply(lambda ts: pd.Timestamp(ts).timestamp())
@@ -130,7 +133,8 @@ def fgm_fsp_calib_prepos_wrapper(
                 with open(sta_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
-                print(f"download error:{sta_url}")
+                logger.error(f"download error:{sta_url}")
+                raise error.preproc_download_error()
 
             try:
                 fgm_url = f"{parameter.elfin_url}{mission}/l1/fgm/survey/{start_time[i].year}/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
@@ -138,8 +142,9 @@ def fgm_fsp_calib_prepos_wrapper(
                 with open(fgm_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
-                print(f"download error:{fgm_url}") 
-                breakpoint() 
+                logger.error(f"download error:{fgm_url}") 
+                raise error.preproc_download_error()
+                
 
         fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
         logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]}")
@@ -149,14 +154,14 @@ def fgm_fsp_calib_prepos_wrapper(
         if parameter.att_rot == True:
             att_cdfdata = att_rot(att_cdfdata, parameter.att_rot_ang, parameter.att_rot_axis)    
 
-                
         [
             ctime_0, ctimestamp_0,
             fgs_ful_fgm_0th_x_0, fgs_ful_fgm_0th_y_0, fgs_ful_fgm_0th_z_0, 
             fgs_igrf_gei_x_0, fgs_igrf_gei_y_0, fgs_igrf_gei_z_0,
             att_gei_x_0, att_gei_y_0, att_gei_z_0,
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
-                mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)
+                mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)      
+        
         f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
         
         if i == 0: # first collection 
@@ -335,14 +340,22 @@ def fgm_fsp_calib(
         # 2 : step 2 fgs fsp resolution
     """
     logger.info(f"Step 2 fsp data starts ... ")
-    [
-        fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z] = cross_time.fsp_igrf(
-            ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
-    )
-    [
-        fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
-            ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
-    )
+    try:
+        [
+            fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z] = cross_time.fsp_igrf(
+                ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
+        )
+        [
+            fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
+                ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+        )
+    except error.postproc_fgs_igrf as e:
+        logger.error(e.__str__())
+        return [ [] for _ in range(17) ]
+    except Exception as e:
+        logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
+        print('\n'.join(traceback.format_exception(*sys.exc_info())))
+        
     #[
     #    fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
     #        ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z

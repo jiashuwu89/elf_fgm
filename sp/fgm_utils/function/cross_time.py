@@ -5,7 +5,7 @@ from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
 from .Bplot import B_ctime_plot, B_ctime_plot_single, omega_fit
-from .error import CrossTime1Error
+from .error import CrossTime1Error, postproc_fgs_igrf
 func = calibration.quad_fit
 
 def cross_time_stage_1(
@@ -646,7 +646,7 @@ def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
                 fgs_fsp_y[i] = 0
                 fgs_fsp_z[i] = 0 
         except:
-            breakpoint()
+            raise postproc_fgs_igrf()
 
     return [fgs_fsp_x, fgs_fsp_y, fgs_fsp_z]
 

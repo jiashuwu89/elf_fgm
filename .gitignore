@@ -9,3 +9,4 @@ __pycache__
 sp/fgm_utils/temp*/
 \**/*.gitignore
 log/
+*.csv

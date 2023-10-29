@@ -35,4 +35,3 @@ def get_beta(df: pd.DataFrame, mid_time: dt.datetime):
     beta = before['beta_angle'] + slope*(target_timestamp - before_timestamp)
 
     return beta
-
