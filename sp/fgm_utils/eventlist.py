@@ -8,6 +8,24 @@ eventlist = {
         1: {
             "mission": "ela",
             "starttime_str": [
+                "2022-01-03/07:00:49",
+            ],
+            "endtime_str": [
+                "2022-01-03/07:20:39",
+            ]
+        },
+        2: {
+            "mission": "ela",
+            "starttime_str": [
+                "2022-01-03/14:50:00",
+            ],
+            "endtime_str": [
+                "2022-01-03/15:06:00",
+            ]
+        },
+        10: {
+            "mission": "ela",
+            "starttime_str": [
                 "2019-04-30/18:30:52",
                 "2019-08-02/02:01:49",
                 "2019-08-06/07:39:26",
@@ -970,10 +988,10 @@ eventlist = {
         59: { # single short collection good example for gem poster
             "mission": "elb",
             "starttime_str":[
-                "2022-01-14/18:58:38",
+                "2022-02-04/07:16:00",
             ],
             "endtime_str":[
-                "2022-01-14/19:04:52",
+                "2022-02-04/07:25:00",
             ],
             "f_all":[
                 (90-55.1) * np.pi / 180, 

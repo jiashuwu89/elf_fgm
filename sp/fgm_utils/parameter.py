@@ -175,4 +175,8 @@ att_split_detrend = False  # will detrend attitude before fitting
 
 """run batch sci zones from fgm_availablity.csv
 """
-batch_run = True
+batch_run = False
+
+"""run spectra
+"""
+spectra_run = True # can only run with one event, no batch run no loop

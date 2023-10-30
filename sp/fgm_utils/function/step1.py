@@ -232,6 +232,18 @@ def step1(
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
             [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
 
+    if parameter.spectra_run == True:
+        from .spectra import fgm_spectra, plot_fgm_spectra, plot_fgm_psd
+        from .Bplot import B_ctime_plot
+        #plot_fgm_psd(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2))
+        #B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z)
+        #breakpoint()
+        #fft_freq, fft_psd = fgm_spectra(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2) )
+        #plot_fgm_spectra(fft_freq, fft_psd)
+        #breakpoint()
+        plot_fgm_psd(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2))
+        breakpoint()
+
     # att determine 
     if parameter.att_determine == True:
         att_gei_x, att_gei_y, att_gei_z = att_determine(
