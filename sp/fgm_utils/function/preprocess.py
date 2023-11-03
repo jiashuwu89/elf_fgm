@@ -71,16 +71,20 @@ def resample_data(
 
 def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"], 
     starttime: datetime.datetime, endtime: datetime.datetime) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    # read state cdf for att
-    att_cdfdata = pd.DataFrame(
-        get_cdf(sta_cdfpath, vars=[f"{mission}_att_time", f"{mission}_att_gei"])
-    )
-    att_cdfdata.set_index(f"{mission}_att_time", inplace=True)
-    att_cdfdata = clip_cdfdata(
-        att_cdfdata,
-        starttime - datetime.timedelta(minutes=2),
-        endtime + datetime.timedelta(minutes=2),
-    )
+    try:
+        # read state cdf for att
+        att_cdfdata = pd.DataFrame(
+            get_cdf(sta_cdfpath, vars=[f"{mission}_att_time", f"{mission}_att_gei"])
+        )
+        att_cdfdata.set_index(f"{mission}_att_time", inplace=True)
+        att_cdfdata = clip_cdfdata(
+            att_cdfdata,
+            starttime - datetime.timedelta(minutes=2),
+            endtime + datetime.timedelta(minutes=2),
+        )
+    except:
+        breakpoint()
+        pass
 
     # read state cdf for pos; not read together with att b/c different length
     pos_cdfdata = pd.DataFrame(

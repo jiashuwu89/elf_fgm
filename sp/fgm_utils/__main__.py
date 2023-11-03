@@ -4,6 +4,7 @@ import logging.config
 from . import fgm_fsp_calib_prepos_wrapper, fgm_fsp_calib, parameter
 from .function import error, preprocess
 from .function.postprocess import Bpara2Gthphi
+from scipy.interpolate import interp1d
 import numpy as np
 import traceback
 import sys
@@ -211,7 +212,7 @@ if __name__ == "__main__":
                     att_gei_x, att_gei_y, att_gei_z, 
                     pos_gei_x, pos_gei_y, pos_gei_z,
                     f_all_arry, logger)
-            except (error.preproc_resample_error, error.preproc_download_error) as e:
+            except (error.preproc_resample_error, error.preproc_download_error, error.prepoc_fgmtime_nonmonotonic) as e:
                 # this error usually raise when 
                 logger.error(e.__str__())
                 Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = [], [], [], [], []
@@ -250,7 +251,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 2
+        eventnum = 9
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)

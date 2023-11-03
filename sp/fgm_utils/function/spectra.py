@@ -30,10 +30,10 @@ def plot_fgm_spectra(fft_freq: np.ndarray, psd: np.ndarray):
     ax.plot(fft_freq, psd)
     ax.set_xlabel('frequency [Hz]')
     ax.set_ylabel('nT/sqrt(Hz)')
-    ax.set_xlim([0.1, 100])
-    ax.set_xticks([0.1, 1, 10, 100])
-    ax.set_ylim([1e-3, 1e1])
-    ax.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 1e1])
+    #ax.set_xlim([0.1, 100])
+    #ax.set_xticks([0.1, 1, 10, 100])
+    #ax.set_ylim([1e-3, 1e1])
+    #ax.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 1e1])
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
@@ -42,23 +42,21 @@ def plot_fgm_spectra(fft_freq: np.ndarray, psd: np.ndarray):
     plt.show()
 
 
-def plot_fgm_psd(fgm_time: np.ndarray, fgm_z: np.ndarray):
+def plot_fgm_psd(fgm_time: np.ndarray, fgm_z: np.ndarray, title:str, ytitle=None, xlim=None, ylim=None):
     figure, ax1 = plt.subplots()
     dt = np.mean(np.diff(fgm_time))
     fs = 1/dt
     Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=2048, visible=False)
     ax1.plot(freqs, np.sqrt(Pxx))
     ax1.set_xlabel('frequency [Hz]')
-    ax1.set_ylabel('nT/sqrt(Hz)')
-    ax1.set_xlim([0.1, 100])
-    ax1.set_xticks([0.1, 1, 10, 100])
-    ax1.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 1e1])
-    ax1.set_ylim([1e-1, 1.5e3])
+    ax1.set_ylabel('nT/sqrt(Hz)') if ytitle is None else ax1.set_ylabel(ytitle)
+    ax1.set_xlim([0.05, 100]) if xlim is None else ax1.set_xlim(xlim)
+    ax1.set_ylim([1e-1, 1.5e3]) if ylim is None else ax1.set_ylim(ylim)
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
     ax1.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
-    ax1.set_title('ela')
+    ax1.set_title(title)
     plt.show()
     
     # figure, (ax1, ax2) = plt.subplots(nrows=2)

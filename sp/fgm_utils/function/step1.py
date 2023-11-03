@@ -235,13 +235,27 @@ def step1(
     if parameter.spectra_run == True:
         from .spectra import fgm_spectra, plot_fgm_spectra, plot_fgm_psd
         from .Bplot import B_ctime_plot
+        import datetime as dt
         #plot_fgm_psd(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2))
         #B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z)
         #breakpoint()
         #fft_freq, fft_psd = fgm_spectra(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2) )
         #plot_fgm_spectra(fft_freq, fft_psd)
         #breakpoint()
-        plot_fgm_psd(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2))
+        timestamp_str=str(dt.datetime.fromtimestamp(ctimestamp, tz=dt.timezone.utc))
+        plot_fgm_psd(
+            ctime, fgs_ful_fgm_1st_z, 
+            title=timestamp_str+" fgm", 
+            ytitle="ADC units/sqrt(Hz)", 
+            xlim=[0.05, 50], 
+            ylim=[1e-1, 1e8])
+        breakpoint()
+        plot_fgm_psd(
+            ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2), 
+            title=timestamp_str+" dmxl", 
+            ytitle="nT/sqrt(Hz)",
+            xlim=[0.05, 50], 
+            ylim=[5e-3, 1e5])
         breakpoint()
 
     # att determine 

@@ -180,3 +180,7 @@ batch_run = False
 """run spectra
 """
 spectra_run = True # can only run with one event, no batch run no loop
+
+"""run 80hz fgm fast mode data
+"""
+fgf_run = False

@@ -158,3 +158,14 @@ class postproc_fgs_igrf(Exception):
 
     def __str__(self):
         return f"❌ {self.message}" 
+    
+
+class prepoc_fgmtime_nonmonotonic(Exception):
+    """Exception raised when fgm_cdfdata doesn't have monotonic time
+    """
+    def __init__(self, message = "[PREPREPROCESS] time in fgm_cdfdata is not monotonic!"):
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f"❌ {self.message}"

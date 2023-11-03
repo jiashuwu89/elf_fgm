@@ -4,24 +4,86 @@ import numpy as np
 eventlist = {
     # ela collections
     "ela": {
-        # ela long collection
-        1: {
+        1: { # fgf before this event can't run because attitude has issue
             "mission": "ela",
             "starttime_str": [
-                "2022-01-03/07:00:49",
+                "2019-05-29/08:40:00",
             ],
             "endtime_str": [
-                "2022-01-03/07:20:39",
+                "2019-05-29/08:50:59",
             ]
         },
         2: {
             "mission": "ela",
             "starttime_str": [
-                "2022-01-03/14:50:00",
+                "2019-06-12/00:10:00",
             ],
             "endtime_str": [
-                "2022-01-03/15:06:00",
+                "2019-06-12/23:50:59",
             ]
+        },
+        3: {
+        "mission": "ela",
+        "starttime_str": [
+            "2019-07-02/00:10:00",
+        ],
+        "endtime_str": [
+            "2019-07-02/23:50:59",
+        ]
+        },
+        4: {
+        "mission": "ela",
+        "starttime_str": [
+            "2020-06-04/00:10:00",
+        ],
+        "endtime_str": [
+            "2020-06-04/23:50:59",
+        ]
+        },
+        5: {
+        "mission": "ela",
+        "starttime_str": [
+            "2020-08-24/00:10:00",
+        ],
+        "endtime_str": [
+            "2020-08-24/23:50:59",
+        ]
+        },
+        6: {
+        "mission": "ela",
+        "starttime_str": [
+            "2020-10-26/00:10:00",
+        ],
+        "endtime_str": [
+            "2020-10-26/23:50:59",
+        ]
+        },
+        7: {
+        "mission": "ela",
+        "starttime_str": [
+            "2021-02-28/00:10:00",
+        ],
+        "endtime_str": [
+            "2021-02-28/23:50:59",
+        ]
+        },
+        8: {
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-30/18:30:52",
+        ],
+        "endtime_str": [
+            "2019-04-30/20:00:04",
+        ]
+        },
+        9: {
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-16/10:10:03",
+        ],
+        "endtime_str": [
+            "2019-04-16/10:34:52",
+        ]
         },
         10: {
             "mission": "ela",
