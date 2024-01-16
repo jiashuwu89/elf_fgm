@@ -39,7 +39,7 @@ def fgm_fsp_calib_prepos(
     
     if fgm_cdfdata.index.is_monotonic_increasing is False:
         raise error.prepoc_fgmtime_nonmonotonic()
-
+    
     fgm_cdfdata = preprocess.clip_cdfdata(fgm_cdfdata, starttime, endtime)
     try:
         # resample att and pos to fgm time resolution

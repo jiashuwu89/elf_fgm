@@ -4,7 +4,7 @@ import numpy as np
 eventlist = {
     # ela collections
     "ela": {
-        1: { # fgf before this event can't run because attitude has issue
+        1: { # fgf event 80hz
             "mission": "ela",
             "starttime_str": [
                 "2019-05-29/08:40:00",
@@ -76,7 +76,7 @@ eventlist = {
             "2019-04-30/20:00:04",
         ]
         },
-        9: {
+        9: {# can't run, time nonmonotonic
         "mission": "ela",
         "starttime_str": [
             "2019-04-16/10:10:03",
@@ -86,6 +86,105 @@ eventlist = {
         ]
         },
         10: {
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-14/18:35:51",
+        ],
+        "endtime_str": [
+            "2019-04-14/18:40:04",
+        ]
+        },
+        11: {
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-10/08:20:55",
+        ],
+        "endtime_str": [
+            "2019-04-10/08:25:15",
+        ]
+        },
+        12:{ # event with long period, can't run because state file has issue. 
+        "mission": "ela",
+        "starttime_str": [
+            "2019-01-05/05:57:00",
+        ],
+        "endtime_str":[
+            "2019-01-05/06:02:00",
+        ],
+        },
+        13:{ # event with long period, can't run because state file has issue. 
+        "mission": "ela",
+        "starttime_str": [
+            "2019-03-20/08:35:00",
+        ],
+        "endtime_str":[
+            "2019-03-20/08:41:00",
+        ],
+        },
+        14:{ # event with long period, can run
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-10/08:20:00",
+        ],
+        "endtime_str":[
+            "2019-04-10/08:26:00",
+        ],
+        },
+        15:{ # event with long period, can run
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-14/18:35:00",
+        ],
+        "endtime_str":[
+            "2019-04-14/18:42:00",
+        ],
+        },
+        16:{ # event with long period, can't run, fgm time nonmontonic
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-17/08:15:00",
+        ],
+        "endtime_str":[
+            "2019-04-17/08:20:00",
+        ],
+        },
+        17:{ # event with long period, can't run, fgm time nonmontonic
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-17/08:29:00",
+        ],
+        "endtime_str":[
+            "2019-04-17/08:35:00",
+        ],
+        },
+        18:{ # event with long period, long collection
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-30/18:30:52",
+        ],
+        "endtime_str":[
+            "2019-04-30/18:45:04",
+        ],
+        },
+        19:{ # event with long period, long collection
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-30/19:00:52",
+        ],
+        "endtime_str":[
+            "2019-04-30/19:30:04",
+        ],
+        },
+        20:{ # event with long period, long collection
+        "mission": "ela",
+        "starttime_str": [
+            "2019-04-30/19:30:52",
+        ],
+        "endtime_str":[
+            "2019-04-30/19:59:04",
+        ],
+        },
+        100: {
             "mission": "ela",
             "starttime_str": [
                 "2019-04-30/18:30:52",
@@ -1054,6 +1153,30 @@ eventlist = {
             ],
             "endtime_str":[
                 "2022-02-04/07:25:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        60: { # 80 hz, can't run because all 0
+            "mission": "elb",
+            "starttime_str":[
+                "2020-04-08/00:10:00",
+            ],
+            "endtime_str":[
+                "2020-04-08/23:50:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        61: { # 80 hz, only 12 data points nonzero
+            "mission": "elb",
+            "starttime_str":[
+                "2020-05-16/00:10:00",
+            ],
+            "endtime_str":[
+                "2020-05-16/23:50:00",
             ],
             "f_all":[
                 (90-55.1) * np.pi / 180, 

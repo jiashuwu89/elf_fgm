@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.mlab import window_hanning, window_none
+from scipy.signal import welch, windows, hann
 
 def fgm_spectra(fgm_time: np.ndarray, fgm_z: np.ndarray):
     """calculate fgm spectra
@@ -43,10 +45,11 @@ def plot_fgm_spectra(fft_freq: np.ndarray, psd: np.ndarray):
 
 
 def plot_fgm_psd(fgm_time: np.ndarray, fgm_z: np.ndarray, title:str, ytitle=None, xlim=None, ylim=None):
-    figure, ax1 = plt.subplots()
+    figure0, ax1 = plt.subplots()
     dt = np.mean(np.diff(fgm_time))
     fs = 1/dt
-    Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=2048, visible=False)
+    Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=len(fgm_z), visible=False, window=window_hanning)
+    #Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=len(fgm_z), visible=False, window=window_none)
     ax1.plot(freqs, np.sqrt(Pxx))
     ax1.set_xlabel('frequency [Hz]')
     ax1.set_ylabel('nT/sqrt(Hz)') if ytitle is None else ax1.set_ylabel(ytitle)
@@ -59,34 +62,122 @@ def plot_fgm_psd(fgm_time: np.ndarray, fgm_z: np.ndarray, title:str, ytitle=None
     ax1.set_title(title)
     plt.show()
     
-    # figure, (ax1, ax2) = plt.subplots(nrows=2)
-    # dt = np.mean(np.diff(fgm_time))
-    # fs = 1/dt
-    # Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=2048, visible=False)
-    # ax1.plot(freqs, np.sqrt(Pxx))
-    # ax1.set_xlabel('frequency [Hz]')
-    # ax1.set_ylabel('PSD')
-    # ax1.set_xlim([0.1, 100])
-    # ax1.set_xticks([0.1, 1, 10, 100])
-    # ax1.set_ylim([1e-3, 1e1])
-    # ax1.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 1e1])
-    # ax1.set_xscale('log')
-    # ax1.set_yscale('log')
-    # ax1.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
-    # ax1.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
-    # ax1.set_title('ela sqrt')
 
-    # Pxx, freqs = plt.psd(fgm_z, Fs=fs, NFFT=1024, visible=False)
-    # ax2.plot(freqs, Pxx)
-    # ax2.set_xlabel('frequency [Hz]')
-    # ax2.set_ylabel('PSD')
-    # ax2.set_xlim([0.1, 100])
-    # ax2.set_xticks([0.1, 1, 10, 100])
-    # ax2.set_ylim([1e-3, 1e1])
-    # ax2.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 1e1])
-    # ax2.set_xscale('log')
-    # ax2.set_yscale('log')
-    # ax2.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
-    # ax2.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
-    # ax2.set_title('ela')
-    # plt.show()
+def plot_fgm_periodogram(fgm_time: np.ndarray, fgm_z: np.ndarray, title:str, ytitle=None, xlim=None, ylim=None):
+    """
+    Calculate FFT with scipy.signal.periodogram
+
+    :param window: e.g. 'hann' or 'hamming'
+    :param nfft: if none, length of x will be used
+    :param scaling: 'spectrum' for power spectrum with unit of V**2, or 
+                    'density' for power spectrum density with unit of V**2/Hz
+
+    """
+    from scipy.signal import periodogram
+    dt = np.mean(np.diff(fgm_time))
+    fs = 1/dt
+    freqs, Pxx = periodogram(fgm_z, fs=fs, detrend=False, scaling='density', window='hann', nfft=len(fgm_z))
+    figure0, ax1 = plt.subplots()
+    ax1.plot(freqs, np.sqrt(Pxx))
+    ax1.set_xlabel('frequency [Hz]')
+    ax1.set_ylabel('nT/sqrt(Hz)') if ytitle is None else ax1.set_ylabel(ytitle)
+    ax1.set_xlim([0.05, 100]) if xlim is None else ax1.set_xlim(xlim)
+    ax1.set_ylim([1e-1, 1.5e3]) if ylim is None else ax1.set_ylim(ylim)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.set_title(title)
+    plt.show()
+
+
+def plot_fgm_spectrogram(
+        fgm_time: np.ndarray,
+          fgm_z: np.ndarray, 
+          title:str, 
+          ytitle=None, 
+          xlim=None, 
+          ylim=None,
+          win='hann',
+          nperseg=None,
+          detr=None):
+    """
+    Calculate FFT with scipy.signal.spectrogram
+
+    :param window: e.g. 'hann' or 'hamming'
+    :param nfft: if none, length of x will be used
+    :param scaling: 'spectrum' for power spectrum with unit of V**2, or 
+                    'density' for power spectrum density with unit of V**2/Hz
+
+    """
+    from scipy.signal import spectrogram
+    dt = np.mean(np.diff(fgm_time))
+    fs = 1/dt
+    nperseg = len(fgm_z) if nperseg is None else nperseg
+    detrend = 'constant' if detr is None else detr
+    window_functions = {
+        'boxcar': windows.boxcar,
+        'hann': windows.hann
+    }
+    if win in window_functions:
+        window = window_functions[win](nperseg)
+    freqs, times, Sxx = spectrogram(fgm_z, fs=fs, window=window, nperseg=nperseg, noverlap=nperseg // 2, nfft=nperseg, scaling='density', detrend=detrend)
+    
+    figure0, ax1 = plt.subplots()
+    for time_idx in range(len(times)):
+        ax1.plot(freqs, np.sqrt(Sxx[:, time_idx]))
+    ax1.set_xlabel('frequency [Hz]')
+    ax1.set_ylabel('nT/sqrt(Hz)') if ytitle is None else ax1.set_ylabel(ytitle)
+    ax1.set_xlim([0.05, 100]) if xlim is None else ax1.set_xlim(xlim)
+    ax1.set_ylim([1e-1, 1.5e3]) if ylim is None else ax1.set_ylim(ylim)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.set_title(title)
+    plt.show()
+
+
+def plot_fgm_welch(
+        fgm_time: np.ndarray, 
+        fgm_z: np.ndarray, 
+        title:str, 
+        ytitle=None, 
+        xlim=None, 
+        ylim=None, 
+        win='hann',
+        nperseg=None,
+        detr=None,):
+    """
+    Calculate FFT with scipy.signal.periodogram
+
+    :param window: e.g. 'hann' or 'hamming'
+    :param nfft: if none, length of x will be used
+    :param scaling: 'spectrum' for power spectrum with unit of V**2, or 
+                    'density' for power spectrum density with unit of V**2/Hz
+
+    """
+    dt = np.mean(np.diff(fgm_time))
+    fs = 1/dt
+    nperseg = len(fgm_z) if nperseg is None else nperseg
+    detrend = 'constant' if detr is None else detr
+    window_functions = {
+        'boxcar': windows.boxcar,
+        'hann': windows.hann
+    }
+    if win in window_functions:
+        window = window_functions[win](nperseg)
+    freqs, psd = welch(fgm_z, fs, window=window, nperseg=nperseg, noverlap=nperseg // 2, nfft=nperseg, scaling='density', detrend=detrend)
+    figure0, ax1 = plt.subplots()
+    ax1.plot(freqs, np.sqrt(psd))
+    ax1.set_xlabel('frequency [Hz]')
+    ax1.set_ylabel('nT/sqrt(Hz)') if ytitle is None else ax1.set_ylabel(ytitle)
+    ax1.set_xlim([0.05, 100]) if xlim is None else ax1.set_xlim(xlim)
+    ax1.set_ylim([1e-1, 1.5e3]) if ylim is None else ax1.set_ylim(ylim)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.xaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.yaxis.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.set_title(title)
+    plt.show()
+

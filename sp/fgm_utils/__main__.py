@@ -150,11 +150,11 @@ def process_single(
         logger,
     )
     
-    Bpara_out = B_parameter
-    Gthphi_out = Bpara2Gthphi(B_parameter) if np.any(B_parameter) else []
-    f_out = f_all_arry[0]/ (np.pi / 180)
-    att_rot_out = -1
-    res_rot_out = np.median([(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)])
+    Bpara_out = [B_parameter]
+    Gthphi_out = [Bpara2Gthphi(B_parameter)] if np.any(B_parameter) else []
+    f_out = [f_all_arry[0]/ (np.pi / 180)]
+    att_rot_out = [-1]
+    res_rot_out = [np.median([(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)])]
 
     #res_out = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
     #print(f"median of residual: {np.median(res_out)}")
@@ -251,11 +251,11 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 9
+        eventnum = 14
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
-
+        beta_df = get_betaCSV(betacsvpath)
         start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
         end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
 
@@ -292,7 +292,7 @@ if __name__ == "__main__":
         """
         if parameter.att_loop == True:
             # loop of attitude
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_attloop(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_attloop(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 
         elif parameter.f_loop == True:
             # loop of f
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_floop(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_floop(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -316,7 +316,7 @@ if __name__ == "__main__":
 
         else:
             # no att loop, no floop, just a single sci zone      
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_single(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_single(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -335,9 +335,8 @@ if __name__ == "__main__":
     ====================
     """
     mid_time = start_time[0] + 0.5*(end_time[-1] - start_time[0])
-    beta_angle = get_beta(beta_df, mid_time)
-    beta_out.append(beta_angle)
-    
+    beta_out = get_beta(beta_df, mid_time) if beta_df != [] else [-1]
+
     """
     ====================
     output

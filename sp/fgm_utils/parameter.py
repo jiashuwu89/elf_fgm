@@ -97,8 +97,8 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
 download_data = True
 
@@ -179,8 +179,11 @@ batch_run = False
 
 """run spectra
 """
-spectra_run = True # can only run with one event, no batch run no loop
+spectra_run = False # can only run with one event, no batch run no loop
 
 """run 80hz fgm fast mode data
 """
 fgf_run = False
+
+# figure option
+fig_fontsize = 16

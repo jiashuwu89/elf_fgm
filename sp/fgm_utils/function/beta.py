@@ -9,10 +9,7 @@ def get_betaCSV(csvpath: str):
         data = pd.read_csv(csvpath)
         data['start_time_datetime'] = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S.%f"), data['start_time']))
     except:
-        raise error.SCreadError()
-    else:
-        if len(data) == 0:
-            raise error.SCreadError()
+        data = []
 
     return data
 

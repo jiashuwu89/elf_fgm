@@ -215,9 +215,24 @@ def step1(
     if parameter.makeplot == True :
         Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
-        Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
-            fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali") 
-        
+        #Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
+        #    fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali") 
+        res_x = fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x
+        res_y = fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y
+        import pandas as pd
+        df = pd.DataFrame({'ctime': ctime, 'fgs_r': np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2)})
+        df['spin'] = pd.cut(df['ctime'], bins=np.insert(cross_times_2nd, [0, len(cross_times_2nd)], [-np.inf, np.inf]), labels=False, right=False)
+        df['fgs_r_max'] = df.groupby('spin')['fgs_r'].transform('max')
+        df['fgs_res'] = np.sqrt((fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x)**2+(fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y)**2)
+        df['fgs_mag'] = np.sqrt(fgs_ful_dmxl_2nd_x**2 + fgs_ful_dmxl_2nd_y**2)
+        df['fgs_ratio'] = df['fgs_res']/df['fgs_r_max']
+        Bplot.B_ctime_plot_single(
+            ctime, 
+            df['fgs_ratio'].to_numpy(),
+            title="res_dmxl_after1stcali_max"
+            )
+        breakpoint()
+    
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
             [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
@@ -233,7 +248,7 @@ def step1(
             [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
 
     if parameter.spectra_run == True:
-        from .spectra import fgm_spectra, plot_fgm_spectra, plot_fgm_psd
+        from .spectra import plot_fgm_welch, plot_fgm_spectrogram
         from .Bplot import B_ctime_plot
         import datetime as dt
         #plot_fgm_psd(ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2))
@@ -243,14 +258,46 @@ def step1(
         #plot_fgm_spectra(fft_freq, fft_psd)
         #breakpoint()
         timestamp_str=str(dt.datetime.fromtimestamp(ctimestamp, tz=dt.timezone.utc))
-        plot_fgm_psd(
+        # plot_fgm_psd(
+        #     ctime, fgs_ful_fgm_1st_z, 
+        #     title=timestamp_str+" fgm", 
+        #     ytitle="ADC units/sqrt(Hz)", 
+        #     xlim=[0.05, 50], 
+        #     ylim=[1e-1, 1e8])
+        plot_fgm_spectrogram(
             ctime, fgs_ful_fgm_1st_z, 
             title=timestamp_str+" fgm", 
             ytitle="ADC units/sqrt(Hz)", 
             xlim=[0.05, 50], 
-            ylim=[1e-1, 1e8])
+            ylim=[1e-1, 1e8],
+            nperseg=256)
         breakpoint()
-        plot_fgm_psd(
+        
+        plot_fgm_welch(
+            ctime, fgs_ful_fgm_1st_z, 
+            title=timestamp_str+" fgm", 
+            ytitle="ADC units/sqrt(Hz)", 
+            xlim=[0.05, 50], 
+            ylim=[1e-1, 1e8],)
+        breakpoint()
+
+        plot_fgm_welch(
+            ctime, fgs_ful_fgm_1st_z, 
+            title=timestamp_str+" fgm residual", 
+            ytitle="ADC units/sqrt(Hz)", 
+            detr='linear',
+            xlim=[0.05, 50], 
+            ylim=[1e-1, 1e8])
+        
+        breakpoint()
+        # plot_fgm_psd(
+        #     ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2), 
+        #     title=timestamp_str+" dmxl", 
+        #     ytitle="nT/sqrt(Hz)",
+        #     xlim=[0.05, 50], 
+        #     ylim=[5e-3, 1e5])
+        
+        plot_fgm_welch(
             ctime, np.sqrt(fgs_ful_dmxl_2nd_x**2+fgs_ful_dmxl_2nd_y**2), 
             title=timestamp_str+" dmxl", 
             ytitle="nT/sqrt(Hz)",
