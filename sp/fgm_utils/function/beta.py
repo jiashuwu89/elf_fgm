@@ -21,17 +21,20 @@ def get_beta(df: pd.DataFrame, mid_time: dt.datetime):
     """get the linear interpolation of beta angle at certain time
     """
     mask = (df['start_time_datetime'] <= mid_time)
-    before = df[mask].iloc[-1]
-    after = df[~mask].iloc[0]
+    try:
+        before = df[mask].iloc[-1]
+        after = df[~mask].iloc[0]
 
-    before_timestamp = before['start_time_datetime'].timestamp()
-    after_timestamp = after['start_time_datetime'].timestamp()
-    target_timestamp = mid_time.timestamp()
+        before_timestamp = before['start_time_datetime'].timestamp()
+        after_timestamp = after['start_time_datetime'].timestamp()
+        target_timestamp = mid_time.timestamp()
 
-    # calculate slope
-    slope = (after['beta_angle'] - before['beta_angle']) / (after_timestamp - before_timestamp)
+        # calculate slope
+        slope = (after['beta_angle'] - before['beta_angle']) / (after_timestamp - before_timestamp)
 
-    # get beta angle
-    beta = before['beta_angle'] + slope*(target_timestamp - before_timestamp)
+        # get beta angle
+        beta = before['beta_angle'] + slope*(target_timestamp - before_timestamp)
+    except:
+        return
 
     return beta

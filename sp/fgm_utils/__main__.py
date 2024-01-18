@@ -176,13 +176,14 @@ if __name__ == "__main__":
     mission = "elb"
     fgmcsvpath = f"fgm_utils/{mission}_fgm_data_availability.csv"
     betacsvpath = f"fgm_utils/orbits_fgm_cal_{mission}.csv"
-
+    beta_df = get_betaCSV(betacsvpath)
+    beta_out = []
     if parameter.batch_run == True:
         # not batch run, run one example from eventlist
-        starttime_str = '2021-12-28/00:00:00'
-        endtime_str = '2021-12-28/23:59:59'
+        starttime_str = '2022-01-14/00:00:00'
+        endtime_str = '2022-01-14/23:59:59'
         start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
-        beta_df = get_betaCSV(betacsvpath)
+
         Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, beta_out, start_times_str, end_times_str = [], [], [], [], [], [], [], []
 
         for start_time, end_time in zip(start_times, end_times):
@@ -250,7 +251,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 59
+        eventnum = 1
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -315,7 +316,7 @@ if __name__ == "__main__":
 
         else:
             # no att loop, no floop, just a single sci zone      
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_single(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_single(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -351,10 +352,9 @@ if __name__ == "__main__":
         'O1/G1','O2/G2','O3/G3']
     Bpara_columns = [ 
         'start_time', 'end_time', 'f', 'att_rot', 'beta_ang', 'res_med',
-        'G11', 'G12', 'G13',
-        'G21','G22','G23',
-        'G31','G32','G33',
-        'O1','O2','O3']
+        'G11', 'G12', 'G13', 'O1',
+        'G21','G22','G23', 'O2',
+        'G31','G32','G33', 'O3']
     Gthphi_df = pd.DataFrame(columns = Gthphi_columns)
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
   

@@ -184,15 +184,18 @@ def step1(
         cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3,
     )
     logger.debug(f"[1.5] phi angle calib is done. ")
-    # if parameter.makeplot == True:
-    #     Bplot.omega_stage123(
-    #         cross_times_2nd_1_mids, w_syn_2nd_1, 
-    #         cross_times_2nd_2_mids, w_syn_2nd_2, 
-    #         cross_times_2nd,  w_syn_2nd, 
-    #         cross_times_2nd_fit, w_syn_2nd_fit,
-    #         #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
-    #         title="period_stage123", datestr = datestr, ylimt = [2.10, 2.15]
-    #     ) 
+    
+    if parameter.makeplot == True:
+        Bplot.omega_stage123(
+            cross_times_2nd_1_mids, w_syn_2nd_1, 
+            cross_times_2nd_2_mids, w_syn_2nd_2, 
+            cross_times_2nd,  w_syn_2nd, 
+            cross_times_2nd_fit, w_syn_2nd_fit,
+            #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+            title="period_stage123", datestr = datestr,
+            #ylimt = [2.15, 2.2]
+            #ylimt = [2.10, 2.15]
+        ) 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
     #    Bplot.phase_plot(
     #        ctime, phi_calib, cross_times_calib, datestr = datestr, 

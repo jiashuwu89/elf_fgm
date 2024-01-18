@@ -33,9 +33,9 @@ f = (90-55) * np.pi / 180
 
 """zero crossing parameter
 """
-eps_1 = 5
-eps_2 = 5
-eps_3 = 4
+eps_1 = 2
+eps_2 = 2
+eps_3 = 2
 N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
@@ -97,8 +97,8 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
 download_data = True
 
@@ -114,7 +114,7 @@ gei2obw = True
 
 """change zero crossing location according to omege, in phase interation  
 """
-CrossTime_Update = True
+CrossTime_Update = False
 
 """add boundary to least square fitting, in calibration
 """
@@ -145,7 +145,7 @@ att_csv_filename = "fgm_utils/att_csv/20210317_1829_1851_att_gei.csv"
 
 """run mva during each run
 """
-mva_fgm = True
+mva_fgm = False
 
 """use angle from mva as rotation angle, works only when mva_fgm is true
 """

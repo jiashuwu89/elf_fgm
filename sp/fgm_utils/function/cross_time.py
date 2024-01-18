@@ -59,7 +59,7 @@ def cross_time_stage_1(
 
     # Get indices of valid spin-periods
     valid_idx_1 = calibration.running_filter(
-        cross_times_1_mids, w_syn_d_1, parameter.eps_1
+        cross_times_1_mids, w_syn_d_1, parameter.eps_1, T=100
     )
 
     # Select the corresponding crossing time mid-points, synodic angular velocities and spin-periods
@@ -174,7 +174,7 @@ def cross_time_stage_2(
         raise CrossTime1Error(2)
 
     valid_idx_2 = calibration.running_filter(
-        cross_times_2_mids, w_syn_d_2, parameter.eps_2
+        cross_times_2_mids, w_syn_d_2, parameter.eps_2, T=100
     )
 
     cross_times_2_mids_select = cross_times_2_mids[

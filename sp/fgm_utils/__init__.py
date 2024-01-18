@@ -221,7 +221,7 @@ def fgm_fsp_calib(
     pos_gei_y: List[float],
     pos_gei_z: List[float],
     logger: Logger,
-    att_loop_idx = None,
+    att_loop_idx = [],
 ):
 
     if parameter.funkyfgm == True:

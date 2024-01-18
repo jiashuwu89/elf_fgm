@@ -170,17 +170,17 @@ def B_3d(B_x: List[float],B_y: List[float], B_z: List[float]):
 
 
 def omega_stage123(cross_times_1, w_syn_1, 
-    cross_times_2,  w_syn_2, 
-    cross_times_3,  w_syn_3,
-    cross_times_fit,  w_syn_fit,
+    cross_times_2=None,  w_syn_2=None, 
+    cross_times_3=None,  w_syn_3=None,
+    cross_times_fit=None,  w_syn_fit=None,
     title = "omega_stage_fit", datestr = None, xlimt = None, ylimt = None):
     filename = datestr + "_" + title if datestr is not None else title
     fig, ax = plt.subplots(1, figsize=(15,7))
 
     ax.scatter(cross_times_1, w_syn_1, label='Stage 1')
-    ax.scatter(cross_times_2, w_syn_2, label='Stage 2')
-    ax.scatter(cross_times_3, w_syn_3, label='Stage 3')
-    ax.scatter(cross_times_fit, w_syn_fit, label='Fit')
+    ax.scatter(cross_times_2, w_syn_2, label='Stage 2') if cross_times_2 is not None else None
+    ax.scatter(cross_times_3, w_syn_3, label='Stage 3') if cross_times_3 is not None else None
+    ax.scatter(cross_times_fit, w_syn_fit, label='Fit') if cross_times_fit is not None else None
     ax.set_xlabel('Relative Time (s)')
     ax.set_ylabel(r'$\omega_{synodic}$')
 
