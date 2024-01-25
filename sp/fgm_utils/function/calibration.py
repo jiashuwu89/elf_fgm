@@ -78,7 +78,12 @@ def running_spline(time, sample_time, sample_signal, T=10, func=cube_fit):
     return signal_fit
 
 
-def running_filter(time, signal, eps=1, T=20):
+def running_filter(time, signal, eps=1, T=None):
+    """add setting default T to the entire length of the sci zone. 
+    if T is too short, too many exursion points will be included
+    """
+    if T is None:
+        T = time[-1]-time[0]
     filter_idx = []
     for i in range(len(time)):
         if time[i] - time[0] < T / 2:
@@ -126,10 +131,10 @@ def calib_leastsquare(
         #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
         LS_func = lambda x: IGRF_fgm_fit(x, A, b)
 
-        x0 = [1, 0, 0, 0, 0, 1, 0 , 0, 0, 0, 114, 0]
+        x0 = [-50, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0]
         if parameter.fit_bound == True:
-            bounds = ([0, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf, -np.inf, -np.inf, -np.inf, 0, -np.inf], 
-                [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+            bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
+                [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
             #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
             #        -0.01, -np.inf, -0.01, -np.inf,
             #        -np.inf, -np.inf, -np.inf, -np.inf], 

@@ -13,6 +13,7 @@ from .function.output import output_txt
 from .function.mva import mva
 from .function.preprocess import get_fgmCSV
 from .function.beta import get_betaCSV, get_beta
+from scipy.interpolate import interpolate
 
 
 def process_attloop(
@@ -101,6 +102,11 @@ def process_floop(
         f_all_arry, logger):
     """processing code for loop of rotation angle
     """
+    Bpara_out = []
+    Gthphi_out = []
+    f_out = []
+    att_rot_out = [] 
+    res_rot_out = []
     for if_loop in parameter.f_loop_value:
         f_all_arry = [if_loop] * len(fgs_ful_fgm_0th_x) 
         [
@@ -135,6 +141,11 @@ def process_single(
         f_all_arry, logger):
     """processing code for a single science zone
     """
+    Bpara_out = []
+    Gthphi_out = []
+    f_out = []
+    att_rot_out = [] 
+    res_rot_out = []
     [
         FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
         fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
@@ -148,13 +159,13 @@ def process_single(
         pos_gei_x, pos_gei_y, pos_gei_z,
         logger,
     )
-    
-    Bpara_out = B_parameter
-    Gthphi_out = Bpara2Gthphi(B_parameter) if np.any(B_parameter) else []
-    f_out = f_all_arry[0]/ (np.pi / 180)
-    att_rot_out = -1
-    res_rot_out = np.median([(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)])
 
+    Bpara_out.append(B_parameter)
+    Gthphi_out.append(Bpara2Gthphi(B_parameter)) if np.any(B_parameter) else []
+    f_out.append(f_all_arry[0]/ (np.pi / 180))
+    att_rot_out.append(-1)
+    res_rot =  np.median([(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)])
+    res_rot_out.append(res_rot)
     #res_out = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
     #print(f"median of residual: {np.median(res_out)}")
     
@@ -180,8 +191,8 @@ if __name__ == "__main__":
     beta_out = []
     if parameter.batch_run == True:
         # not batch run, run one example from eventlist
-        starttime_str = '2022-01-14/00:00:00'
-        endtime_str = '2022-01-14/23:59:59'
+        starttime_str = '2022-01-13/00:00:00'
+        endtime_str = '2022-01-13/02:00:00'
         start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
 
         Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, beta_out, start_times_str, end_times_str = [], [], [], [], [], [], [], []
@@ -251,7 +262,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 1
+        eventnum = 34
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -357,7 +368,7 @@ if __name__ == "__main__":
         'G31','G32','G33', 'O3']
     Gthphi_df = pd.DataFrame(columns = Gthphi_columns)
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
-  
+
     for iline in range(len(Bpara_out)):
         Gthphi_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Gthphi_out[iline]]
         Bpara_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Bpara_out[iline]]

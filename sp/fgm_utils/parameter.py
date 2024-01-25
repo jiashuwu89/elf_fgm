@@ -25,7 +25,7 @@ elfin_url = "https://data.elfin.ucla.edu/"
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
 relative_integrate = True
-bidirectional_integrate = True
+bidirectional_integrate = False
 
 init_secs = 0 # inital seconds to exclude
 funkyfgm = False
@@ -33,7 +33,7 @@ f = (90-55) * np.pi / 180
 
 """zero crossing parameter
 """
-eps_1 = 2
+eps_1 = 1
 eps_2 = 2
 eps_3 = 2
 N_spins_fit = 4
@@ -118,7 +118,7 @@ CrossTime_Update = False
 
 """add boundary to least square fitting, in calibration
 """
-fit_bound = False
+fit_bound = True
 
 """loop f, if set ignore the f value above 
 """
@@ -175,4 +175,4 @@ att_split_detrend = False  # will detrend attitude before fitting
 
 """run batch sci zones from fgm_availablity.csv
 """
-batch_run = True
+batch_run = False

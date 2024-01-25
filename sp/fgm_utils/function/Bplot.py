@@ -192,7 +192,7 @@ def omega_stage123(cross_times_1, w_syn_1,
 
 
 def omega_fit(cross_times_org, w_syn_org, 
-    cross_times_fit,  w_syn_fit, 
+    cross_times_fit = None,  w_syn_fit = None, 
     title = "omega_fit", datestr = None, xlimt = None, ylimt = None):
     """plot spin period in stage 1, 2, 3 and fitted
     """
@@ -200,13 +200,12 @@ def omega_fit(cross_times_org, w_syn_org,
     fig, ax = plt.subplots(1, figsize=(15,7))
 
     ax.scatter(cross_times_org, w_syn_org, label='org')
-    ax.scatter(cross_times_fit, w_syn_fit, label='fit')
+    ax.scatter(cross_times_fit, w_syn_fit, label='fit') if cross_times_fit is not None else None
     ax.set_xlabel('Relative Time (s)')
     ax.set_ylabel(r'$\omega_{synodic}$')
 
     #ax.set_ylim(2.217, 2.2225)
     ax.legend() 
-    breakpoint()
     if ylimt is not None: ax.set_ylim(ylimt)
     if xlimt is not None: ax.set_xlim(xlimt)
     plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{filename}") 

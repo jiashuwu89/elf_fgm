@@ -193,7 +193,7 @@ def step1(
             cross_times_2nd_fit, w_syn_2nd_fit,
             #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
             title="period_stage123", datestr = datestr,
-            #ylimt = [2.15, 2.2]
+            ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
             #ylimt = [2.10, 2.15]
         ) 
     #if parameter.makeplot == True and len(ctime_idx) != 0:
