@@ -24,7 +24,7 @@ elfin_url = "https://data.elfin.ucla.edu/"
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
-relative_integrate = True
+relative_integrate = False
 bidirectional_integrate = False
 
 init_secs = 0 # inital seconds to exclude
@@ -176,3 +176,7 @@ att_split_detrend = False  # will detrend attitude before fitting
 """run batch sci zones from fgm_availablity.csv
 """
 batch_run = False
+
+"""spin rate fit
+"""
+wfit_run = True

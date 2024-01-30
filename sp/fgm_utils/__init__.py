@@ -8,7 +8,7 @@ import sys
 import requests
 from pyspedas.cotrans import cotrans_lib
 from . import parameter
-from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend
+from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend, wfit
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
 from .function.attitude import att_rot
 
@@ -298,18 +298,32 @@ def fgm_fsp_calib(
     """
     logger.info(f"Step 1 calibration starts ... ")
     try:
-        [
-            cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
-            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
-            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
-            B_parameter1,
-            ] = step1.step1(
-                #ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
-                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
-                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
-                att_gei_x, att_gei_y, att_gei_z,
-                datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,
-            )
+        if parameter.wfit_run == True:
+            [
+                cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
+                fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+                fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+                B_parameter1,
+                ] = wfit.step1(
+                    #ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                    ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z,
+                    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,
+                )
+        else:
+            [
+                cross_times_calib, w_syn_d_calib, T_spins_d_calib, DMXL_2_GEI_fsp,
+                fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+                fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+                B_parameter1,
+                ] = step1.step1(
+                    #ctime, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
+                    ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+                    fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                    att_gei_x, att_gei_y, att_gei_z,
+                    datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,
+                )
 
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")
