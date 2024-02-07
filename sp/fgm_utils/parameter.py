@@ -180,3 +180,16 @@ batch_run = False
 """spin rate fit
 """
 wfit_run = True
+wfit_run_maxiter = 1
+wfit_gradient_figure = True  ##genreate the figure for gradient 
+wfit_gradient_choice_lst = {
+    1: 'cross_time0', 
+    2: 'wfit_m', 
+    3: 'wfit_c', 
+    4: 't',
+    }
+wfit_gradient_choice = 4
+
+"""calibration in dmxl
+"""
+cal_dmxl = False

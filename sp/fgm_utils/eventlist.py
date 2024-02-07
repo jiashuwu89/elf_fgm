@@ -977,5 +977,17 @@ eventlist = {
                 (90-55.1) * np.pi / 180, 
             ],
         },
+        60: { # event with o larger than w
+            "mission": "elb",
+            "starttime_str":[
+                "2022-03-15/18:08:00",
+            ],
+            "endtime_str":[
+                "2022-03-15/18:18:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
     },
 }

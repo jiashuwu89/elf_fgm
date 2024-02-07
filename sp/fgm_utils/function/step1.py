@@ -196,12 +196,7 @@ def step1(
             ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
             #ylimt = [2.10, 2.15]
         ) 
-    #if parameter.makeplot == True and len(ctime_idx) != 0:
-    #    Bplot.phase_plot(
-    #        ctime, phi_calib, cross_times_calib, datestr = datestr, 
-    #        xlimt = [ctime[ctime_idx[3]]-20, ctime[ctime_idx[3]]+20], ctime_idx = ctime_idx
-    #        )
-
+             
     """
         change to dmxl to see the results
     """
@@ -220,8 +215,6 @@ def step1(
             [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="fuligrf_dmxl_after1stcali") 
         Bplot.B_ctime_plot(ctime, fgs_ful_dmxl_2nd_x-fgs_igrf_dmxl_x, fgs_ful_dmxl_2nd_y-fgs_igrf_dmxl_y, 
             fgs_ful_dmxl_2nd_z-fgs_igrf_dmxl_z, title="res_dmxl_after1stcali") 
-        
-    if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_smxl_2nd_x, fgs_igrf_smxl_1st_x], [fgs_ful_smxl_2nd_y, fgs_igrf_smxl_1st_y], 
             [fgs_ful_smxl_2nd_z, fgs_igrf_smxl_1st_z], plot3 = True, title="fuligrf_sxml_after1stcali")
         [

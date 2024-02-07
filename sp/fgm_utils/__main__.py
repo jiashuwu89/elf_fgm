@@ -13,7 +13,7 @@ from .function.output import output_txt
 from .function.mva import mva
 from .function.preprocess import get_fgmCSV
 from .function.beta import get_betaCSV, get_beta
-from scipy.interpolate import interpolate
+from scipy.interpolate import interp1d
 
 
 def process_attloop(
