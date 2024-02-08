@@ -262,7 +262,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 34
+        eventnum = 61
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -340,6 +340,7 @@ if __name__ == "__main__":
         start_times_str, end_times_str = [], []
         start_times_str.append(starttime_str[0])
         end_times_str.append(endtime_str[-1])
+    logger.info("Processing is done. Now output to file ...")
     """
     ====================
     get beta
@@ -380,6 +381,8 @@ if __name__ == "__main__":
 
     Gthphi_df.to_csv(Gthphi_filename, index=False)
     Bpara_df.to_csv(Bpara_filename, index=False)
+
+    logger.info("Done.")
 
     
    

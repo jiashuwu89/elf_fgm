@@ -179,8 +179,8 @@ batch_run = False
 
 """spin rate fit
 """
-wfit_run = True
-wfit_run_maxiter = 1
+wfit_run = False # this has to be true for the parameters to work
+wfit_run_maxiter = 1 # gradient descend
 wfit_gradient_figure = True  ##genreate the figure for gradient 
 wfit_gradient_choice_lst = {
     1: 'cross_time0', 
@@ -193,3 +193,7 @@ wfit_gradient_choice = 4
 """calibration in dmxl
 """
 cal_dmxl = False
+
+"""try new att with state file v03
+"""
+state03 = False

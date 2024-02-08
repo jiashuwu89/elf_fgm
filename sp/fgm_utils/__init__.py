@@ -123,13 +123,21 @@ def fgm_fsp_calib_prepos_wrapper(
     for i in range(len(start_time)):
         sta_datestr = start_time[i].strftime("%Y%m%d")
         logger.info(f"▶️ Received {mission} collection from {start_time[i]} to {end_time[i]}")
-        sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+        
+        if parameter.state03 == True:
+            sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v03.cdf"
+        else:
+            sta_cdfpath = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
         fgm_cdfpath = f"fgm_utils/test/{mission}_l1_fgs_{sta_datestr}_v01.cdf" 
 
         if parameter.download_data == True:
             try:
-                sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+                if parameter.state03 == True:
+                    sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v03.cdf"
+                else:    
+                    sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
                 res = requests.get(sta_url)
+                logger.info(f"Download file {sta_url} sucessful!")
                 with open(sta_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
@@ -139,6 +147,7 @@ def fgm_fsp_calib_prepos_wrapper(
             try:
                 fgm_url = f"{parameter.elfin_url}{mission}/l1/fgm/survey/{start_time[i].year}/{mission}_l1_fgs_{sta_datestr}_v01.cdf"
                 res = requests.get(fgm_url)
+                logger.info(f"Download file {fgm_url} sucessful!")
                 with open(fgm_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
@@ -147,9 +156,9 @@ def fgm_fsp_calib_prepos_wrapper(
                 
 
         fgm_cdfdata = pd.DataFrame(preprocess.get_cdf(fgm_cdfpath, vars=[f"{mission}_fgs_time", f"{mission}_fgs"]))
-        logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]}")
+        logger.info(f"Sucessfully read cdf for {mission} from {start_time[i]} to {end_time[i]} from file {fgm_cdfpath}")
         att_cdfdata, pos_cdfdata = preprocess.get_relevant_state_data(sta_cdfpath, mission, start_time[i], end_time[i])
-        logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]}")      
+        logger.info(f"Sucessfully read state cdf for {mission} from {start_time[i]} to {end_time[i]} from file {sta_cdfpath}")      
 
         if parameter.att_rot == True:
             att_cdfdata = att_rot(att_cdfdata, parameter.att_rot_ang, parameter.att_rot_axis)    

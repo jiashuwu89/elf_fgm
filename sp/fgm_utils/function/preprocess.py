@@ -30,7 +30,6 @@ def get_cdf(cdfpath: str, vars: Union[List[str], None]):
                 data[var] = val.tolist()
             else:
                 data[var] = val
-
         return data
     except:
         if os.path.exists(cdfpath) == False:
