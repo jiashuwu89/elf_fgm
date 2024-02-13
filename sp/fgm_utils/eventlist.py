@@ -1001,5 +1001,29 @@ eventlist = {
                 (90-55.1) * np.pi / 180, 
             ],
         },
+        62: { #  event to test new attitude,, with o similar to w
+            "mission": "elb",
+            "starttime_str":[
+                "2021-11-16/06:25:00",
+            ],
+            "endtime_str":[
+                "2021-11-16/06:34:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        63: { #  event to test new attitude,
+            "mission": "elb",
+            "starttime_str":[
+                "2021-04-23/04:50:00",
+            ],
+            "endtime_str":[
+                "2021-04-23/04:58:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
     },
 }

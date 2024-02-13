@@ -49,7 +49,6 @@ def step1(
         DMXL_2_GEI, GEI_2_DMXL] = coordinate.dmxl_gei_matrix(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, att_gei_x, att_gei_y, att_gei_z
     )
-
     # B igrf rotate from gei to dmxl
     [
         fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z] = coordinate.gei2dmxl(

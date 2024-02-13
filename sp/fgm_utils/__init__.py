@@ -171,6 +171,13 @@ def fgm_fsp_calib_prepos_wrapper(
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
                 mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)      
         
+        breakpoint()
+        if parameter.state03_plotatt == True:
+            sta_cdfpath2 = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
+            att_cdfdata2, pos_cdfdata2 = preprocess.get_relevant_state_data(sta_cdfpath2, mission, start_time[i], end_time[i])
+            Bplot.att_compare(att_cdfdata, column=f'{mission}_att_gei', att_cdfdata2=att_cdfdata2, datestr=datestr)
+
+
         f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
         
         if i == 0: # first collection 

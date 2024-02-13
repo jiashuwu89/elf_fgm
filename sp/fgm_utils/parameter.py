@@ -196,4 +196,5 @@ cal_dmxl = False
 
 """try new att with state file v03
 """
-state03 = False
+state03 = True
+state03_plotatt = True

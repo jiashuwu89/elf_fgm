@@ -228,3 +228,44 @@ def Gain_f(f, Gain_x, Gain_y, Gain_z, mission = None):
     plt.savefig(f"fgm_utils/temp/Gain_f_{mission}") if mission is not None else plt.savefig(f"fgm_utils/temp/Gain_f")
     plt.close()
 
+
+def att_compare(att_cdfdata, column, att_cdfdata2 = None, datestr = None):
+    fig, ax = plt.subplots(3, 1, figsize=(10, 15))
+
+    df = att_cdfdata.copy()
+    df['x'] = df[column].apply(lambda x: x[0])
+    df['y'] = df[column].apply(lambda x: x[1])
+    df['z'] = df[column].apply(lambda x: x[2])
+    
+    if att_cdfdata2 is not None:
+        df2 =  att_cdfdata2.copy()
+        df2['x'] = df2[column].apply(lambda x: x[0])
+        df2['y'] = df2[column].apply(lambda x: x[1])
+        df2['z'] = df2[column].apply(lambda x: x[2])
+
+    ax[0].plot(df.index, df['x'], label='v03', linestyle='-', marker='*')
+    ax[0].plot(df2.index, df2['x'], label='v02', linestyle='-', marker='*') if att_cdfdata2 is not None else None
+    ax[0].set_title('x')
+    ax[0].set_xlabel('time')
+    ax[1].plot(df.index, df['y'], label='v03', linestyle='-', marker='*')
+    ax[1].plot(df2.index, df2['y'], label='v02', linestyle='-', marker='*') if att_cdfdata2 is not None else None
+    ax[1].set_title('y')
+    ax[1].set_xlabel('time')
+    ax[2].plot(df.index, df['z'], label='v03', linestyle='-', marker='*')
+    ax[2].plot(df2.index, df2['z'], label='v02', linestyle='-', marker='*') if att_cdfdata2 is not None else None
+    ax[2].set_title('z')
+    ax[2].set_xlabel('time')
+    plt.legend()
+
+    def get_angle(vec1, vec2):
+        dotprod = np.dot(vec1, vec2)
+        norm_v1 = np.linalg.norm(vec1)
+        norm_v2 = np.linalg.norm(vec2)
+        cos_angle = dotprod / (norm_v1 * norm_v2)
+        ang_rad = np.arccos(np.clip(cos_angle, -1.0, 1.0))
+        return np.degrees(ang_rad)
+    
+    if att_cdfdata2 is not None:
+        angles = df.apply(lambda row: get_angle(np.array(row[column]), np.array(df2.loc[row.name, column])), axis=1)
+    print(f"Max angle difference: {np.max(angles)}")
+    plt.show() if parameter.savepng is False else plt.savefig(f"fgm_utils/temp/{datestr}_att") 

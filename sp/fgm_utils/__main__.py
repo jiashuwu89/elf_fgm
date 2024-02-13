@@ -262,7 +262,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 61
+        eventnum = 63
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
