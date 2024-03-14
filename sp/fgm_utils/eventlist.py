@@ -968,10 +968,10 @@ eventlist = {
         59: { # single short collection good example for gem poster
             "mission": "elb",
             "starttime_str":[
-                "2022-01-14/18:58:38",
+                "2022-01-14/18:40:00",
             ],
             "endtime_str":[
-                "2022-01-14/19:04:52",
+                "2022-01-14/18:55:00",
             ],
             "f_all":[
                 (90-55.1) * np.pi / 180, 
@@ -1020,6 +1020,54 @@ eventlist = {
             ],
             "endtime_str":[
                 "2021-04-23/04:58:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        64: { # opposite fac study, opposite one
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-14/18:40:00",
+            ],
+            "endtime_str":[
+                "2022-01-14/18:55:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        65: { # opposite fac study, opposite one
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-14/18:40:00",
+            ],
+            "endtime_str":[
+                "2022-01-14/18:55:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        66: { # opposite fac study, correct one
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-14/15:40:00",
+            ],
+            "endtime_str":[
+                "2022-01-14/15:50:00",
+            ],
+            "f_all":[
+                (90-55.1) * np.pi / 180, 
+            ],
+        },
+        67: { # opposite fac study, correct one
+            "mission": "elb",
+            "starttime_str":[
+                "2022-01-14/20:15:00",
+            ],
+            "endtime_str":[
+                "2022-01-14/20:27:00",
             ],
             "f_all":[
                 (90-55.1) * np.pi / 180, 

@@ -335,12 +335,32 @@ def Bpara2Gthphi(B_parameter: List[float]) -> Tuple[float]:
     ph1 = np.degrees(np.arctan(G12/G11))
     ph2 = np.degrees(np.arctan(G22/G21))
     ph3 = np.degrees(np.arctan(G32/G31))
-
-    print('===============calib para================')
-    print(f'G1: {G1} G2:{G2} G3:{G3}\n')
-    print(f'th1: {th1} th2:{th2} th3:{th3}\n')
-    print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
-    print(f'O1/G1: {O1/G1} O2/G2:{O2/G2} O3/G3:{O3/G3}\n')
-    print('=============calib para end==============')
           
     return [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1/G1, O2/G2, O3/G3]
+
+def print_parameter(parameter_set: List, Gthphi: bool = False):
+    """print parameters to screen
+    """
+    if Gthphi == False:
+        # parameters are G11, G12, G13 ...
+        (G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3) = parameter_set[0] 
+        print('===============calib para================')  
+        print(f'G11: {G11} G12:{G12} G13:{G13}\n')
+        print(f'G21: {G21} G22:{G22} G23:{G23}\n')
+        print(f'G31: {G31} G32:{G32} G33:{G33}\n')
+        print(f'O1: {O1} O2:{O2} O3:{O3}\n')
+        print('=============calib para end==============')
+    else:
+        # parameters are G th phi
+        (G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1G1, O2G2, O3G3) = parameter_set[0]  
+        print('===============calib para================')
+        print(f'G1: {G1} G2:{G2} G3:{G3}\n')
+        print(f'th1: {th1} th2:{th2} th3:{th3}\n')
+        print(f'ph1: {ph1} ph2:{ph2} ph3:{ph3}\n')
+        print(f'O1/G1: {O1G1} O2/G2:{O2G2} O3/G3:{O3G3}\n')
+        print('=============calib para end==============')
+    return
+          
+
+
+    return

@@ -171,7 +171,6 @@ def fgm_fsp_calib_prepos_wrapper(
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
                 mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)      
         
-        breakpoint()
         if parameter.state03_plotatt == True:
             sta_cdfpath2 = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
             att_cdfdata2, pos_cdfdata2 = preprocess.get_relevant_state_data(sta_cdfpath2, mission, start_time[i], end_time[i])
@@ -237,6 +236,7 @@ def fgm_fsp_calib(
     pos_gei_y: List[float],
     pos_gei_z: List[float],
     logger: Logger,
+    mission: str,
     att_loop_idx = None,
 ):
 
@@ -357,9 +357,9 @@ def fgm_fsp_calib(
                         datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
         output.output_txt(
             FGM_datetime, 
-            [fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z], 
-            ['Timestamp','fsp_gei_x','fsp_gei_y','fsp_gei_z'], 
-            title='ela_fgs_res_dmxl')  
+            [fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, fgs_res_dmxl_x, fgs_res_dmxl_y, fgs_res_dmxl_z,], 
+            ['Timestamp', 'fgs_ful_dmxl_x', 'fgs_ful_dmxl_y', 'fgs_ful_dmxl_z', 'fgs_res_dmxl_x', 'fgs_res_dmxl_y', 'fgs_res_dmxl_z'], 
+            title=f'{mission}_fgs_res_dmxl')  
 
         print(f"std res_x: {np.std(fgs_res_dmxl_x)}") 
         print(f"std res_y: {np.std(fgs_res_dmxl_y)}") 

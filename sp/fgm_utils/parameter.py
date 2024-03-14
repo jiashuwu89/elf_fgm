@@ -24,7 +24,7 @@ elfin_url = "https://data.elfin.ucla.edu/"
 
 proper_pad = False  # fails when data have gaps
 fit_running_spline = False
-relative_integrate = False
+relative_integrate = True
 bidirectional_integrate = False
 
 init_secs = 0 # inital seconds to exclude
@@ -99,8 +99,8 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 """
 makeplot = True
 savepng = True
-output = False # if true output to txt file
-download_data = True
+output = True # if true output to txt file
+download_data = False
 
 """specify time interval for some events
 """
@@ -118,7 +118,7 @@ CrossTime_Update = False
 
 """add boundary to least square fitting, in calibration
 """
-fit_bound = True
+fit_bound = False
 
 """loop f, if set ignore the f value above 
 """
@@ -196,5 +196,5 @@ cal_dmxl = False
 
 """try new att with state file v03
 """
-state03 = True
-state03_plotatt = True
+state03 = False
+state03_plotatt = False

@@ -3,7 +3,7 @@ import pandas as pd
 import logging.config
 from . import fgm_fsp_calib_prepos_wrapper, fgm_fsp_calib, parameter
 from .function import error, preprocess
-from .function.postprocess import Bpara2Gthphi
+from .function.postprocess import Bpara2Gthphi, print_parameter
 import numpy as np
 import traceback
 import sys
@@ -21,7 +21,7 @@ def process_attloop(
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
         att_gei_x, att_gei_y, att_gei_z, 
         pos_gei_x, pos_gei_y, pos_gei_z,
-        f_all_arry, clip_start_idx, clip_end_idx, logger):
+        f_all_arry, clip_start_idx, clip_end_idx, logger, mission):
     """processing code for loop of attitude
     """
     Bpara_out = []
@@ -81,7 +81,7 @@ def process_attloop(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
             att_gei_x_rot[:,idx], att_gei_y_rot[:,idx], att_gei_z_rot[:,idx],
             pos_gei_x, pos_gei_y, pos_gei_z,
-            logger, att_loop_idx = idx
+            logger, mission, att_loop_idx = idx,
         )
         if B_parameter != []:
             Bpara_out.append(B_parameter)
@@ -99,7 +99,7 @@ def process_floop(
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
         att_gei_x, att_gei_y, att_gei_z, 
         pos_gei_x, pos_gei_y, pos_gei_z,
-        f_all_arry, logger):
+        f_all_arry, logger, mission):
     """processing code for loop of rotation angle
     """
     Bpara_out = []
@@ -120,7 +120,7 @@ def process_floop(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
             att_gei_x, att_gei_y, att_gei_z,
             pos_gei_x, pos_gei_y, pos_gei_z,
-            logger
+            logger, mission
         )
         Bpara_out.append(B_parameter)
         Gthphi_out.append(Bpara2Gthphi(B_parameter)) 
@@ -138,7 +138,7 @@ def process_single(
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
         att_gei_x, att_gei_y, att_gei_z, 
         pos_gei_x, pos_gei_y, pos_gei_z,
-        f_all_arry, logger):
+        f_all_arry, logger, mission):
     """processing code for a single science zone
     """
     Bpara_out = []
@@ -157,7 +157,7 @@ def process_single(
         fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
         att_gei_x, att_gei_y, att_gei_z,
         pos_gei_x, pos_gei_y, pos_gei_z,
-        logger,
+        logger, mission
     )
 
     Bpara_out.append(B_parameter)
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     beta_df = get_betaCSV(betacsvpath)
     beta_out = []
     if parameter.batch_run == True:
-        # not batch run, run one example from eventlist
+        # batch run
         starttime_str = '2022-01-13/00:00:00'
         endtime_str = '2022-01-13/02:00:00'
         start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
                     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                     att_gei_x, att_gei_y, att_gei_z, 
                     pos_gei_x, pos_gei_y, pos_gei_z,
-                    f_all_arry, logger)
+                    f_all_arry, logger, mission)
             except (error.preproc_resample_error, error.preproc_download_error) as e:
                 # this error usually raise when 
                 logger.error(e.__str__())
@@ -262,7 +262,8 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        eventnum = 63
+        # not patch run, just one event from eventlist
+        eventnum = 67
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -308,7 +309,7 @@ if __name__ == "__main__":
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
                 pos_gei_x, pos_gei_y, pos_gei_z,
-                f_all_arry, clip_start_idx, clip_end_idx) 
+                f_all_arry, clip_start_idx, clip_end_idx, logger, mission) 
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_attloop_Gthphi_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_attloop_Bpara_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
@@ -320,7 +321,7 @@ if __name__ == "__main__":
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
                 pos_gei_x, pos_gei_y, pos_gei_z,
-                f_all_arry, logger)
+                f_all_arry, logger, mission)
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Gthphi.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Bpara.csv"
@@ -332,7 +333,10 @@ if __name__ == "__main__":
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
                 pos_gei_x, pos_gei_y, pos_gei_z,
-                f_all_arry, logger)
+                f_all_arry, logger, mission)
+            
+            print_parameter(Bpara_out, Gthphi=False)
+            print_parameter(Gthphi_out, Gthphi=True)
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Gthphi.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Bpara.csv"
@@ -340,6 +344,8 @@ if __name__ == "__main__":
         start_times_str, end_times_str = [], []
         start_times_str.append(starttime_str[0])
         end_times_str.append(endtime_str[-1])
+
+
     logger.info("Processing is done. Now output to file ...")
     """
     ====================
