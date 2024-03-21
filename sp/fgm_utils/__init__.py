@@ -170,7 +170,7 @@ def fgm_fsp_calib_prepos_wrapper(
             att_gei_x_0, att_gei_y_0, att_gei_z_0,
             pos_gei_x_0, pos_gei_y_0, pos_gei_z_0] = fgm_fsp_calib_prepos(
                 mission, start_time[i], end_time[i], fgm_cdfdata, att_cdfdata, pos_cdfdata)      
-        
+
         if parameter.state03_plotatt == True:
             sta_cdfpath2 = f"fgm_utils/test/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
             att_cdfdata2, pos_cdfdata2 = preprocess.get_relevant_state_data(sta_cdfpath2, mission, start_time[i], end_time[i])
@@ -239,7 +239,7 @@ def fgm_fsp_calib(
     mission: str,
     att_loop_idx = None,
 ):
-
+    
     if parameter.funkyfgm == True:
         try:
             preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)

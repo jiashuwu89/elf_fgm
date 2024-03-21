@@ -4,6 +4,7 @@ from scipy.optimize import curve_fit, least_squares, minimize
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import lsqr
 from .. import parameter
+from .postprocess import Bpara2Gthphi, Gthphi2Bpara
 #import function.Bplot as plot
 
 def IGRF_fgm_fit(x, A, b):
@@ -13,6 +14,13 @@ def IGRF_fgm_fit(x, A, b):
     #return res[:int(2*len(y)/3)]
     #return np.abs(y - b) + np.std(np.abs(y[int(2*len(y)/3):]-b[int(2*len(y)/3):]))**2
     #return np.abs(y - b) + np.std(np.abs(y[int(len(y)/3)+1:int(2*len(y)/3)]-b[int(len(y)/3)+1:int(2*len(y)/3)]))**2
+
+def IGRF_fgm_nonlinearfit(x, A, b):
+    # x is G th phi, xx is G11, G12, G13
+    xx = Gthphi2Bpara(x)
+    y = A@xx
+    res = y - b
+    return res
 
 def linear_fit(x, m, c):
     return m * x + c
@@ -126,29 +134,49 @@ def calib_leastsquare(
     A[2 * n : 3 * n, 10] = fgs_igrf_fgm_z
     A[2 * n : 3 * n, 11] = np.ones(n)
     A = csc_matrix(A)
-   
-    if init is None:
-        #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
-        LS_func = lambda x: IGRF_fgm_fit(x, A, b)
-
-        x0 = [-50, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0]
-        if parameter.fit_bound == True:
-            bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
-                [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
-            #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
-            #        -0.01, -np.inf, -0.01, -np.inf,
-            #        -np.inf, -np.inf, -np.inf, -np.inf], 
-            #        [np.inf, 0.01, 0.01, np.inf,  # upper
-            #        0.01, np.inf, 0.01, np.inf, 
-            #        np.inf, np.inf, np.inf, np.inf])
-            res1 = least_squares(LS_func, x0, bounds = bounds)
-        else:
-            res1 = least_squares(LS_func, x0)
-
-        x = res1.x
+    
+    #x0 = [146.2, 168.8, 94.7, 90.5, 89.2, 0.03, 169.1 , -80.7, 136.4, -986, 457.8, -571]
+    x0 = [146.2, 168.8, 94.7, 90.5, 89.2, 0.20, -10.8 , 99.2, 122.8, 700, -1600, -571]
+    if parameter.skipfit == True:
+        # if skipfitting and use x0 as the final paramter
+        x = Gthphi2Bpara(x0)
     else:
-        x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
-        #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
+        if parameter.nonlinear == True:
+            # nonlinear least square fitting
+            LS_func = lambda x: IGRF_fgm_nonlinearfit(x, A, b)
+
+            # fit 
+            if parameter.fit_bound == True:
+                bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
+                    [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+                res1 = least_squares(LS_func, x0, bounds = bounds)
+            else:
+                res1 = least_squares(LS_func, x0)
+            x = Gthphi2Bpara(res1.x)
+
+        else:
+            # linear least square fitting, x = [G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3]
+            if init is None:
+                #x = lsqr(A, b, atol=1e-10, btol=1e-10)[0]
+                LS_func = lambda x: IGRF_fgm_fit(x, A, b)
+                x0 = [-50, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0]
+                if parameter.fit_bound == True:
+                    bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
+                        [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+                    #bounds = ([-np.inf, -0.01, -0.01, -np.inf,  # lower
+                    #        -0.01, -np.inf, -0.01, -np.inf,
+                    #        -np.inf, -np.inf, -np.inf, -np.inf], 
+                    #        [np.inf, 0.01, 0.01, np.inf,  # upper
+                    #        0.01, np.inf, 0.01, np.inf, 
+                    #        np.inf, np.inf, np.inf, np.inf])
+                    res1 = least_squares(LS_func, x0, bounds = bounds)
+                else:
+                    res1 = least_squares(LS_func, x0)
+
+                x = res1.x
+            else:
+                x = lsqr(A, b, atol=1e-6, btol=1e-6, x0=init)[0]
+                #x = lsqr(A, b, atol=1e-10, btol=1e-10, x0=init)[0]
 
     #x = [ -1,  0,  0,  0,
     #   0, 1,  0, 0,

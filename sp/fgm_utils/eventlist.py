@@ -1058,10 +1058,10 @@ eventlist = {
                 "2022-01-14/15:50:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
-        67: { # opposite fac study, correct one
+        67: { # opposite fac study, correct polarity but large magnitude
             "mission": "elb",
             "starttime_str":[
                 "2022-01-14/20:15:00",
@@ -1070,7 +1070,7 @@ eventlist = {
                 "2022-01-14/20:27:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
     },

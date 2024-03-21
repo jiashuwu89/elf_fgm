@@ -62,11 +62,11 @@ def process_attloop(
         # output att for future run, you have to speicfy the number of the att to output.
         FGM_datetime = list(map(lambda ts: (
             dt.datetime.fromtimestamp(ctimestamp, tz=dt.timezone.utc) + dt.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), ctime))
-        output_txt(
-            FGM_datetime, 
-            [att_gei_x_rot[:, 83], att_gei_y_rot[:, 83], att_gei_z_rot[:, 83]], 
-            ['Timestamp','att_gei_x','att_gei_y','att_gei_z'], 
-            title='att_gei')
+        # output_txt(
+        #     FGM_datetime, 
+        #     [att_gei_x_rot[:, 83], att_gei_y_rot[:, 83], att_gei_z_rot[:, 83]], 
+        #     ['Timestamp','att_gei_x','att_gei_y','att_gei_z'], 
+        #     title='att_gei')
     
     # run calib with rotate att
     for idx in range(rot_len):
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        # not patch run, just one event from eventlist
+        # not patch run, run one event or att loop
         eventnum = 67
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
@@ -304,7 +304,7 @@ if __name__ == "__main__":
         """
         if parameter.att_loop == True:
             # loop of attitude
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_attloop(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_attloop(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -313,10 +313,13 @@ if __name__ == "__main__":
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_attloop_Gthphi_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_attloop_Bpara_{parameter.att_loop_width}_{parameter.att_loop_step}.csv"
+            
+            start_times_str = [starttime_str[0]] * len(Bpara_out)
+            end_times_str = [endtime_str[-1]] * len(Bpara_out)
 
         elif parameter.f_loop == True:
             # loop of f
-            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, Gthphi_filename, Bpara_filename = process_floop(
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_floop(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 
@@ -326,6 +329,8 @@ if __name__ == "__main__":
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Gthphi.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Bpara.csv"
 
+            start_times_str = [starttime_str[0]] * len(Bpara_out)
+            end_times_str = [endtime_str[-1]] * len(Bpara_out)
         else:
             # no att loop, no floop, just a single sci zone      
             Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_single(
@@ -334,17 +339,16 @@ if __name__ == "__main__":
                 att_gei_x, att_gei_y, att_gei_z, 
                 pos_gei_x, pos_gei_y, pos_gei_z,
                 f_all_arry, logger, mission)
-            
+
             print_parameter(Bpara_out, Gthphi=False)
             print_parameter(Gthphi_out, Gthphi=True)
             
             Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Gthphi.csv"
             Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_Bpara.csv"
 
-        start_times_str, end_times_str = [], []
-        start_times_str.append(starttime_str[0])
-        end_times_str.append(endtime_str[-1])
-
+            start_times_str, end_times_str = [], []
+            start_times_str.append(starttime_str[0])
+            end_times_str.append(endtime_str[-1])
 
     logger.info("Processing is done. Now output to file ...")
     """
@@ -354,7 +358,7 @@ if __name__ == "__main__":
     """
     mid_time = start_time[0] + 0.5*(end_time[-1] - start_time[0])
     beta_angle = get_beta(beta_df, mid_time)
-    beta_out.append(beta_angle)
+    beta_out=[beta_angle]*len(Bpara_out)
     
     """
     ====================
@@ -375,15 +379,17 @@ if __name__ == "__main__":
         'G31','G32','G33', 'O3']
     Gthphi_df = pd.DataFrame(columns = Gthphi_columns)
     Bpara_df = pd.DataFrame(columns = Bpara_columns)
+    try:
+        for iline in range(len(Bpara_out)):
+            Gthphi_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Gthphi_out[iline]]
+            Bpara_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Bpara_out[iline]]
+            Gthphi_row = [dict(zip(Gthphi_columns, Gthphi_row))]
+            Bpara_row = [dict(zip(Bpara_columns, Bpara_row))]
 
-    for iline in range(len(Bpara_out)):
-        Gthphi_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Gthphi_out[iline]]
-        Bpara_row = [start_times_str[iline], end_times_str[iline], f_out[iline], att_rot_out[iline], beta_out[iline], res_rot_out[iline], *Bpara_out[iline]]
-        Gthphi_row = [dict(zip(Gthphi_columns, Gthphi_row))]
-        Bpara_row = [dict(zip(Bpara_columns, Bpara_row))]
-
-        Gthphi_df = pd.concat([Gthphi_df] + [pd.DataFrame(Gthphi_row)])
-        Bpara_df = pd.concat([Bpara_df] + [pd.DataFrame(Bpara_row)])
+            Gthphi_df = pd.concat([Gthphi_df] + [pd.DataFrame(Gthphi_row)])
+            Bpara_df = pd.concat([Bpara_df] + [pd.DataFrame(Bpara_row)])
+    except:
+        breakpoint()
 
     Gthphi_df.to_csv(Gthphi_filename, index=False)
     Bpara_df.to_csv(Bpara_filename, index=False)

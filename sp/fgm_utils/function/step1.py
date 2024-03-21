@@ -3,7 +3,7 @@ from . import cross_time, error, coordinate, calibration, ctime_spike, Bplot
 from .ctime_spike_80 import spike_sinefit_80
 import numpy as np
 from .mva import mva
-from .postprocess import Bpara2Gthphi
+from .postprocess import Bpara2Gthphi, Gthphi2Bpara
 from .attitude import att_determine
 
 def step1(
@@ -77,8 +77,8 @@ def step1(
         # 1.3 use igrf to calibrate fgs data
     """
     if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_before1stcali")     
+        Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x*100], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y*100], 
+            [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z*100], plot3 = True, title="fuligrf_fgm_before1stcali")     
           
     [
         fgs_fsp_ful_fgm_x, fgs_fsp_ful_fgm_y, fgs_fsp_ful_fgm_z] = cross_time.fsp_ful(
@@ -89,8 +89,8 @@ def step1(
             ctime, cross_times_1st, T_spins_1st, fgs_igrf_fgm_1st_x, fgs_igrf_fgm_1st_y, fgs_igrf_fgm_1st_z
     )
     if parameter.makeplot == True: 
-        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y], 
-            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z], plot3 = True, title="fuligrf_fgm_fsp_before1stcali")     
+        Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_fgm_x, fgs_fsp_igrf_fgm_x*100], [fgs_fsp_ful_fgm_y, fgs_fsp_igrf_fgm_y*100], 
+            [fgs_fsp_ful_fgm_z, fgs_fsp_igrf_fgm_z*100], plot3 = True, title="fuligrf_fgm_fsp_before1stcali")     
     
     # 1st calibration of B in dmxl 
     [
@@ -104,10 +104,11 @@ def step1(
     if parameter.Bpara_out == True:
         print("after 1st calib:")
         Gthphi_out = [Bpara2Gthphi(B_parameter)]
+        #B_parameter_out = [Gthphi2Bpara(Gthphi_out[0])]
 
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_2nd_x, fgs_igrf_fgm_1st_x], [fgs_ful_fgm_2nd_y, fgs_igrf_fgm_1st_y], 
-            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali")  
+            [fgs_ful_fgm_2nd_z, fgs_igrf_fgm_1st_z], plot3 = True, title="fuligrf_fgm_after1stcali", xlimt=[150, 250])  
         Bplot.B_ctime_plot(ctime, fgs_ful_fgm_2nd_x-fgs_igrf_fgm_1st_x, fgs_ful_fgm_2nd_y-fgs_igrf_fgm_1st_y, 
             fgs_ful_fgm_2nd_z-fgs_igrf_fgm_1st_z, plot3 = True, title="res_fgm_after1stcali")  
 

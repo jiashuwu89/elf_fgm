@@ -332,11 +332,36 @@ def Bpara2Gthphi(B_parameter: List[float]) -> Tuple[float]:
     th2 = np.degrees(np.arccos(G23/G2))
     th3 = np.degrees(np.arccos(G33/G3))
 
-    ph1 = np.degrees(np.arctan(G12/G11))
-    ph2 = np.degrees(np.arctan(G22/G21))
-    ph3 = np.degrees(np.arctan(G32/G31))
+    ph1 = np.degrees(np.arctan2(G12, G11))
+    ph2 = np.degrees(np.arctan2(G22, G21))
+    ph3 = np.degrees(np.arctan2(G32, G31))
           
     return [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1/G1, O2/G2, O3/G3]
+
+
+def Gthphi2Bpara(Gthphi: List[float]) -> Tuple[float]:
+
+    [G1, G2, G3, th1, th2, th3, ph1, ph2, ph3, O1G1, O2G2, O3G3] = [*Gthphi]  
+    th1, th2, th3, ph1, ph2, ph3 = np.radians([th1, th2, th3, ph1, ph2, ph3])
+
+    G11 = G1*np.sin(th1)*np.cos(ph1)
+    G12 = G1*np.sin(th1)*np.sin(ph1)
+    G13 = G1*np.cos(th1)
+
+    G21 = G2*np.sin(th2)*np.cos(ph2)
+    G22 = G2*np.sin(th2)*np.sin(ph2)
+    G23 = G2*np.cos(th2)
+
+    G31 = G3*np.sin(th3)*np.cos(ph3)
+    G32 = G3*np.sin(th3)*np.sin(ph3)
+    G33 = G3*np.cos(th3)
+
+    O1 = O1G1 * G1
+    O2 = O2G2 * G2
+    O3 = O3G3 * G3
+          
+    return [G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3]
+
 
 def print_parameter(parameter_set: List, Gthphi: bool = False):
     """print parameters to screen

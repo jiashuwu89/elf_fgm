@@ -198,3 +198,17 @@ cal_dmxl = False
 """
 state03 = False
 state03_plotatt = False
+
+"""nonlinear least square fitting
+"""
+nonlinear = True
+
+"""nonlinear least square fitting with ph2=ph1+90, 
+work only when nonlinear is true
+"""
+nonlinear_phi = True
+
+"""use x0 in calibration without actually run the fit
+This is to show the comparison of data with "corret parameters"
+"""
+skipfit = True
