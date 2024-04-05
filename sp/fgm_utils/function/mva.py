@@ -1,8 +1,7 @@
-from pytplot import store_data, tplot, get_data
-from pyspedas.cotrans.minvar_matrix_make import minvar_matrix_make
+#from pytplot import store_data, tplot, get_data
+#from pyspedas.cotrans.minvar_matrix_make import minvar_matrix_make
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z):
@@ -17,6 +16,10 @@ def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th
     Return
         mva_ang: angle in deg of minimum variance vector w/r to fgm_x
 
+    """
+    # TODO: apply mva without pytplot package
+    print("This function is pending... run wihtout mva for now!!!")
+    return 0
     """
     store_data('fgs_ful_fgm', data={'x': ctime+ctimestamp, 'y': np.transpose(np.array([fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z]))})
     #tplot('fgs_ful_fgm')
@@ -58,6 +61,7 @@ def mva(ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th
     print(f"MaxVar median angle to fgm_z [deg]: {np.median(fgs_maxvarvec_ang[:,2])}")
 
     return np.median(fgs_minvarvec_ang[:,0])
+    """
 
 def mva_flip(vec):
     """check the sign of adjacent vectors, flip if the signs are opposite

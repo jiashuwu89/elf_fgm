@@ -6,7 +6,7 @@ import pandas as pd
 import traceback
 import sys
 import requests
-from pyspedas.cotrans import cotrans_lib
+from .pyspedas.cotrans import cotrans_lib
 from . import parameter
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend, wfit
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
