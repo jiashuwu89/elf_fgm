@@ -22,6 +22,14 @@ def IGRF_fgm_nonlinearfit(x, A, b):
     res = y - b
     return res
 
+def IGRF_fgm_nonlinearfit_phi90(x, A, b):
+    # x is only 11 parameters, phi2=phi1+90
+    xx = np.insert(x, 7, x[6]+90)
+    xxx = Gthphi2Bpara(xx)
+    y = A@xxx
+    res = y - b
+    return res
+
 def linear_fit(x, m, c):
     return m * x + c
 
@@ -142,17 +150,26 @@ def calib_leastsquare(
         x = Gthphi2Bpara(x0)
     else:
         if parameter.nonlinear == True:
-            # nonlinear least square fitting
-            LS_func = lambda x: IGRF_fgm_nonlinearfit(x, A, b)
-
-            # fit 
-            if parameter.fit_bound == True:
-                bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
-                    [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
-                res1 = least_squares(LS_func, x0, bounds = bounds)
-            else:
+            
+            # nonlinear fitting, fit G th phi
+            if parameter.nonlinear_phi90 == True:
+                # phi2 = ph1 + 90, fit only 11 parameters
+                x0 = [146.2, 168.8, 94.7, 90.5, 89.2, 0.20, -10.8, 122.8, 700, -1600, -571]
+                LS_func = lambda x: IGRF_fgm_nonlinearfit_phi90(x, A, b)
                 res1 = least_squares(LS_func, x0)
-            x = Gthphi2Bpara(res1.x)
+                x = Gthphi2Bpara(np.insert(res1.x, 7, res1.x[6]+90))
+            else:
+                # fit all 12 parameters
+                LS_func = lambda x: IGRF_fgm_nonlinearfit(x, A, b)
+
+                if parameter.fit_bound == True:
+                    bounds = ([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], 
+                        [-50, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+                    res1 = least_squares(LS_func, x0, bounds = bounds)
+                else:
+                    res1 = least_squares(LS_func, x0)
+
+                x = Gthphi2Bpara(res1.x)
 
         else:
             # linear least square fitting, x = [G11, G12, G13, O1, G21, G22, G23, O2, G31, G32, G33, O3]

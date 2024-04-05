@@ -14,6 +14,7 @@ from .function.mva import mva
 from .function.preprocess import get_fgmCSV
 from .function.beta import get_betaCSV, get_beta
 from scipy.interpolate import interp1d
+from .function.calibration import running_spline
 
 
 def process_attloop(
@@ -81,9 +82,9 @@ def process_attloop(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
             att_gei_x_rot[:,idx], att_gei_y_rot[:,idx], att_gei_z_rot[:,idx],
             pos_gei_x, pos_gei_y, pos_gei_z,
-            logger, mission, att_loop_idx = idx,
+            logger, mission, loop_idx = idx,
         )
-        if B_parameter != []:
+        if len(B_parameter) != 0:
             Bpara_out.append(B_parameter)
             Gthphi_out.append(Bpara2Gthphi(B_parameter))
             f_out.append(f_all_arry[0]/ (np.pi / 180))
@@ -128,6 +129,55 @@ def process_floop(
         att_rot_out.append([att_gei_x[0], att_gei_y[0], att_gei_z[0]])
         res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
         res_rot_out.append(np.median(res_rot))
+
+    return Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out
+
+
+def process_shiftloop(
+        ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+        fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+        att_gei_x, att_gei_y, att_gei_z, 
+        pos_gei_x, pos_gei_y, pos_gei_z,
+        f_all_arry, logger, mission):
+    """processing code for loop of shift
+    """
+    Bpara_out = []
+    Gthphi_out = []
+    f_out = []
+    att_rot_out = [] 
+    res_rot_out = []
+    idx = 0  #this is used to keep track of shift loop index. use as loop_idx
+    for ishift_loop_x in parameter.shift_loop_x:
+        for ishift_loop_y in parameter.shift_loop_y:
+            interp_func = interp1d(ctime+ishift_loop_x, fgs_ful_fgm_0th_x, fill_value='extrapolate')
+            fgs_ful_fgm_0th_x_shift = interp_func(ctime) 
+            interp_func = interp1d(ctime+ishift_loop_y, fgs_ful_fgm_0th_y, fill_value='extrapolate')
+            fgs_ful_fgm_0th_y_shift = interp_func(ctime) 
+            #from .function.Bplot import B_ctime_plot_single
+            #B_ctime_plot_single(ctime, [fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_x_shift], xlimt=[50, 80])
+   
+            [
+                FGM_timestamp, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z,
+                fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z,
+                fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z,
+                fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z,
+                fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, B_parameter]=fgm_fsp_calib(
+                ctime, ctimestamp, f_all_arry,
+                fgs_ful_fgm_0th_x_shift, fgs_ful_fgm_0th_y_shift, fgs_ful_fgm_0th_z, 
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+                att_gei_x, att_gei_y, att_gei_z,
+                pos_gei_x, pos_gei_y, pos_gei_z,
+                logger, mission, loop_idx = idx
+            )
+            if len(B_parameter) != 0:
+                Bpara_out.append(B_parameter)
+                Gthphi_out.append(Bpara2Gthphi(B_parameter)) 
+                f_out.append(f_all_arry[0]/ (np.pi / 180))
+                att_rot_out.append(idx)
+                res_rot = [(x**2 + y**2 + z**2)**0.5 for x, y, z in zip(fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)]
+                res_rot_out.append(np.median(res_rot))
+
+            idx += 1
 
     return Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out
 
@@ -262,8 +312,8 @@ if __name__ == "__main__":
         Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Gthphi.csv"
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
-        # not patch run, run one event or att loop
-        eventnum = 67
+        # not patch run, run one event or att loop or shift loop or f loop
+        eventnum = 72
         starttime_str = eventlist[mission][eventnum]["starttime_str"]
         endtime_str = eventlist[mission][eventnum]["endtime_str"]
         f_all = eventlist[mission][eventnum].get("f_all", None)
@@ -320,6 +370,21 @@ if __name__ == "__main__":
         elif parameter.f_loop == True:
             # loop of f
             Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_floop(
+                ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+                fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+                att_gei_x, att_gei_y, att_gei_z, 
+                pos_gei_x, pos_gei_y, pos_gei_z,
+                f_all_arry, logger, mission)
+            
+            Gthphi_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Gthphi.csv"
+            Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0][0:10]}_{starttime_str[0][11:13]}{starttime_str[0][14:16]}_{mission}_floop_Bpara.csv"
+
+            start_times_str = [starttime_str[0]] * len(Bpara_out)
+            end_times_str = [endtime_str[-1]] * len(Bpara_out)
+
+        elif parameter.shift_loop == True:
+            # loop of shift
+            Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out = process_shiftloop(
                 ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                 att_gei_x, att_gei_y, att_gei_z, 

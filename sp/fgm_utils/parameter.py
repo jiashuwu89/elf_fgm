@@ -100,7 +100,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 makeplot = True
 savepng = True
 output = True # if true output to txt file
-download_data = False
+download_data = True
 
 """specify time interval for some events
 """
@@ -134,8 +134,8 @@ att_rot_axis = 'z'
 """loop of attitude around the original attitude by an angle
 """
 att_loop = False
-att_loop_width = 5 # deg
-att_loop_step = 1 # step when rotate from 0 to 360
+att_loop_width = 1 # deg
+att_loop_step = 0.5 # step when rotate from 0 to 360
 att_loop_figure = False # plot attitude vector and rotated vectors in 3d plot
 
 """use att in txt file. this usually require output att to txt first
@@ -206,9 +206,21 @@ nonlinear = True
 """nonlinear least square fitting with ph2=ph1+90, 
 work only when nonlinear is true
 """
-nonlinear_phi = True
+nonlinear_phi90 = True
 
-"""use x0 in calibration without actually run the fit
+"""use x0 in calibration without actually run the fit, need to modify x0 in calibration
 This is to show the comparison of data with "corret parameters"
 """
-skipfit = True
+skipfit = False     # default should be false
+
+"""detrend according to igrf before calibration
+this is to address misalignment of igrf and fgm
+"""
+beforecali_detrend = True
+
+
+"""loop of shift
+"""
+shift_loop = True
+shift_loop_x = np.arange(-0.5, 0.5, 0.05)
+shift_loop_y = np.arange(-0.5, 0.5, 0.05)

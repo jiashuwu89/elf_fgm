@@ -5,6 +5,7 @@ import numpy as np
 from .mva import mva
 from .postprocess import Bpara2Gthphi, Gthphi2Bpara
 from .attitude import att_determine
+from .detrend import detrend_linear
 
 def step1(
     ctime, ctimestamp, fgs_ful_fgm_1st_x, fgs_ful_fgm_1st_y, fgs_ful_fgm_1st_z, 
@@ -76,6 +77,30 @@ def step1(
     """
         # 1.3 use igrf to calibrate fgs data
     """
+    if parameter.beforecali_detrend == True:
+        [fgs_ful_fgm_1st_x_detrend, fgs_ful_fgm_1st_y_detrend, fgs_ful_fgm_1st_z_detrend] = detrend_linear(
+            ctime,
+            fgs_ful_fgm_1st_x, 
+            fgs_ful_fgm_1st_y, 
+            fgs_ful_fgm_1st_z)
+        
+        [fgs_igrf_fgm_1st_x_detrend, fgs_igrf_fgm_1st_y_detrend, fgs_igrf_fgm_1st_z_detrend] = detrend_linear(
+            ctime,
+            fgs_igrf_fgm_1st_x, 
+            fgs_igrf_fgm_1st_y, 
+            fgs_igrf_fgm_1st_z)
+    
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, 
+                [fgs_ful_fgm_1st_x_detrend, fgs_igrf_fgm_1st_x_detrend*100], 
+                [fgs_ful_fgm_1st_y_detrend, fgs_igrf_fgm_1st_y_detrend*100], 
+                [fgs_ful_fgm_1st_z_detrend, fgs_igrf_fgm_1st_z_detrend*100], plot3 = True, title="fuligrf_fgm_detrend_before1stcali") 
+
+
+        fgs_ful_fgm_1st_x = fgs_ful_fgm_1st_x - fgs_ful_fgm_1st_x_detrend + fgs_igrf_fgm_1st_x_detrend*100
+        fgs_ful_fgm_1st_y = fgs_ful_fgm_1st_y - fgs_ful_fgm_1st_y_detrend + fgs_igrf_fgm_1st_y_detrend*100
+        
+       
     if parameter.makeplot == True: 
         Bplot.B_ctime_plot(ctime, [fgs_ful_fgm_1st_x, fgs_igrf_fgm_1st_x*100], [fgs_ful_fgm_1st_y, fgs_igrf_fgm_1st_y*100], 
             [fgs_ful_fgm_1st_z, fgs_igrf_fgm_1st_z*100], plot3 = True, title="fuligrf_fgm_before1stcali")     

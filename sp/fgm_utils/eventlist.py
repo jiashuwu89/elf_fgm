@@ -998,7 +998,7 @@ eventlist = {
                 "2022-01-03/22:35:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
         62: { #  event to test new attitude,, with o similar to w
@@ -1010,7 +1010,7 @@ eventlist = {
                 "2021-11-16/06:34:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
         63: { #  event to test new attitude,
@@ -1028,13 +1028,13 @@ eventlist = {
         64: { # opposite fac study, opposite one
             "mission": "elb",
             "starttime_str":[
-                "2022-01-14/18:40:00",
+                "2022-01-14/17:14:00",
             ],
             "endtime_str":[
-                "2022-01-14/18:55:00",
+                "2022-01-14/17:22:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
         65: { # opposite fac study, opposite one
@@ -1046,7 +1046,7 @@ eventlist = {
                 "2022-01-14/18:55:00",
             ],
             "f_all":[
-                (90-55.1) * np.pi / 180, 
+                (-90-55.1) * np.pi / 180, 
             ],
         },
         66: { # opposite fac study, correct one
@@ -1070,7 +1070,67 @@ eventlist = {
                 "2022-01-14/20:27:00",
             ],
             "f_all":[
-                (-90-55.1) * np.pi / 180, 
+                (-90-55) * np.pi / 180, 
+            ],
+        },
+        68: { # elb event with wiggle
+            "mission": "elb",
+            "starttime_str":[
+                "2022-04-05/09:56:00",
+            ],
+            "endtime_str":[
+                "2022-04-05/10:06:00",
+            ],
+            "f_all":[
+                (-90-55) * np.pi / 180, 
+            ],
+        },
+        69: { # ela with obw issue
+            "mission": "ela",
+            "starttime_str":[
+                "2022-09-10/23:42:00",
+            ],
+            "endtime_str":[
+                "2022-09-10/23:50:00",
+            ],
+            "f_all":[
+                (-90-55) * np.pi / 180, 
+            ],
+        },
+        70: { # elb with obw issue
+            "mission": "elb",
+            "starttime_str":[
+                "2021-12-08/07:50:00",
+            ],
+            "endtime_str":[
+                "2021-12-08/08:00:00",
+            ],
+            "f_all":[
+                (-90-55) * np.pi / 180, 
+            ],
+        },
+        71: { # elb with obw issue
+            "mission": "elb",
+            "starttime_str":[
+                "2021-07-14/18:35:00",
+            ],
+            "endtime_str":[
+                "2021-07-14/18:45:00",
+            ],
+            "f_all":[
+                (-90-55) * np.pi / 180, 
+            ],
+        },
+        72: { # elb with obw issue
+            "mission": "elb",
+            "starttime_str":[
+                "2021-06-12/01:18:00",
+            ],
+            "endtime_str":[
+                "2021-06-12/01:30:00",
+            ],
+            "f_all":[
+                (-90-55) * np.pi / 180, 
             ],
         },
     },

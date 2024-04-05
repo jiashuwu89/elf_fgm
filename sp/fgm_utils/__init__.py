@@ -237,7 +237,7 @@ def fgm_fsp_calib(
     pos_gei_z: List[float],
     logger: Logger,
     mission: str,
-    att_loop_idx = None,
+    loop_idx = None,
 ):
     
     if parameter.funkyfgm == True:
@@ -494,12 +494,12 @@ def fgm_fsp_calib(
         if parameter.att_loop == True:
             Bplot.B_ctime_plot(
                 cross_times_calib, fgs_fsp_res_dmxl_x, 
-                fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title=f"res_dmxl_fsp{att_loop_idx}", scatter = True, 
+                fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, title=f"res_dmxl_fsp{loop_idx}", scatter = True, 
                 ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag,
             )
             Bplot.B_ctime_plot(
                 cross_times_calib, fgs_fsp_res_gei_x, 
-                fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title=f"res_gei_fsp{att_loop_idx}", scatter = True, 
+                fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, title=f"res_gei_fsp{loop_idx}", scatter = True, 
                 ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
             )
         else:
@@ -524,8 +524,8 @@ def fgm_fsp_calib(
         [GEI_2_OBW, OBW_2_GEI] = gei_obw_matrix(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z)
         [fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z] = gei2obw(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, GEI_2_OBW)
         if parameter.makeplot == True:
-            if att_loop_idx is not None:
-                Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title=f"res_obw_fsp{att_loop_idx}", 
+            if loop_idx is not None:
+                Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title=f"res_obw_fsp{loop_idx}", 
                     ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
             else:
                 Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title=f"res_obw_fsp", 

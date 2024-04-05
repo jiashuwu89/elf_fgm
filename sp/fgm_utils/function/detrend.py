@@ -8,7 +8,7 @@ from . import Bplot
 def detrend_linear(
     ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
     ):
-    """detrend with quadratic fit 
+    """detrend with linear fit 
 
     """
     B_x_trend = calibration.linear_fit(
