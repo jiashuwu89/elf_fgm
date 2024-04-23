@@ -8,9 +8,7 @@ from typing import List, Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from ..fgm_utils.function.preprocess import get_relevant_state_data
-from ..fgm_utils import fgm_fsp_calib
-from ..fgm_utils import parameter
+from ..fgm_utils import fgm_fsp_calib, fgm_fsp_calib_prepos_wrapper
 from ..fgm_utils.function import error
 
 router = APIRouter(
@@ -64,45 +62,39 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     })
     logger.info(f"▶️ Received {mission} collection from {start_time} to {end_time}")
 
-    # Get relevant state data
-    all_att_cdfdata = []
-    all_pos_cdfdata = []
-    cur_date = start_time.date()
-    while cur_date <= end_time.date():
-        try:
-            sta_cdfpath = parameter.get_state_cdf_path(mission, cur_date)
-            logger.info(f"Sucessfully read state cdf")
-        except error.cdfError as e:
-            logger.error(e.__str__())
-            return
-
-        cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
-        all_att_cdfdata.append(cur_att_cdfdata)
-        all_pos_cdfdata.append(cur_pos_cdfdata)
-
-        cur_date += dt.timedelta(days=1)
-    att_cdfdata = pd.concat(all_att_cdfdata).sort_index()
-    pos_cdfdata = pd.concat(all_pos_cdfdata).sort_index()
+    [ctime, ctimestamp, fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z,
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
+            att_gei_x, att_gei_y, att_gei_z, 
+            pos_gei_x, pos_gei_y, pos_gei_z,
+            f_all_arry, clip_start_idx, clip_end_idx] = fgm_fsp_calib_prepos_wrapper(mission, start_time, end_time, None, logger)
 
     try:
         [
-            FGM_timestamp,
-            fgs_fsp_res_dmxl_x,
-            fgs_fsp_res_dmxl_y,
-            fgs_fsp_res_dmxl_z,
-            fgs_fsp_igrf_dmxl_x,
-            fgs_fsp_igrf_dmxl_y,
-            fgs_fsp_igrf_dmxl_z,
-            fgs_fsp_res_dmxl_trend_x,
-            fgs_fsp_res_dmxl_trend_y,
-            fgs_fsp_res_dmxl_trend_z,
-            fgs_fsp_res_gei_x,
-            fgs_fsp_res_gei_y,
-            fgs_fsp_res_gei_z,
-            fgs_fsp_igrf_gei_x,
-            fgs_fsp_igrf_gei_y,
-            fgs_fsp_igrf_gei_z,
-        ] = fgm_fsp_calib(mission, start_time, end_time, fgm_data, att_cdfdata, pos_cdfdata, logger)
+        FGM_timestamp, 
+        fgs_fsp_res_dmxl_x, 
+        fgs_fsp_res_dmxl_y, 
+        fgs_fsp_res_dmxl_z,
+        fgs_fsp_igrf_dmxl_x, 
+        fgs_fsp_igrf_dmxl_y, 
+        fgs_fsp_igrf_dmxl_z,
+        fgs_fsp_res_dmxl_trend_x, 
+        fgs_fsp_res_dmxl_trend_y, 
+        fgs_fsp_res_dmxl_trend_z,
+        fgs_fsp_res_gei_x, 
+        fgs_fsp_res_gei_y, 
+        fgs_fsp_res_gei_z,
+        fgs_fsp_igrf_gei_x, 
+        fgs_fsp_igrf_gei_y, 
+        fgs_fsp_igrf_gei_z, 
+        B_parameter]=fgm_fsp_calib(
+            ctime, ctimestamp, f_all_arry,
+            fgs_ful_fgm_0th_x, fgs_ful_fgm_0th_y, fgs_ful_fgm_0th_z, 
+            fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z,
+            att_gei_x, att_gei_y, att_gei_z,
+            pos_gei_x, pos_gei_y, pos_gei_z,
+            logger, mission
+    )
+        
     except Exception as e:
         traceback_msg = traceback.format_exc()
         logger.error(f"fsp calibration failed ({e}): {traceback_msg}")

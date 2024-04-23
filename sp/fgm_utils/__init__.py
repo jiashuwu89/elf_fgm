@@ -9,7 +9,7 @@ import requests
 from .pyspedas.cotrans import cotrans_lib
 from . import parameter
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend, wfit
-from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix
+from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix, geo_nec_matrix, geo2nec
 from .function.attitude import att_rot
 
 datestr = ""
@@ -520,15 +520,26 @@ def fgm_fsp_calib(
     FGM_timestamp = ctimestamp + cross_times_calib     
     
     if parameter.gei2obw == True:
+        # transform to obw
         [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)
         [GEI_2_OBW, OBW_2_GEI] = gei_obw_matrix(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z)
         [fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z] = gei2obw(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, GEI_2_OBW)
+
+
+        # transform from gei to geo and then nec coordinate
+        pos_fsp_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z]))
+        fgs_fsp_res_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z]))
+        [GEO_2_NEC, NEC_2_GEO] = geo_nec_matrix(pos_fsp_geo[:,0], pos_fsp_geo[:,1], pos_fsp_geo[:,2])
+        fgs_fsp_res_nec = geo2nec(fgs_fsp_res_geo[:,0], fgs_fsp_res_geo[:,1], fgs_fsp_res_geo[:,2], GEO_2_NEC)
+
         if parameter.makeplot == True:
             if loop_idx is not None:
                 Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title=f"res_obw_fsp{loop_idx}", 
                     ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
             else:
                 Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z, title=f"res_obw_fsp", 
+                    ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
+                Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_nec[:, 0], fgs_fsp_res_nec[:, 1], fgs_fsp_res_nec[:, 2], title=f"res_nec_fsp", 
                     ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
 
     

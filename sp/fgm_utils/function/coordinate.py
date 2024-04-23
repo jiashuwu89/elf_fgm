@@ -245,5 +245,36 @@ def gei2obw(fgs_gei_x, fgs_gei_y, fgs_gei_z, GEI_2_OBW):
 
 
 def obw2gei(fgs_obw_x, fgs_obw_y, fgs_obw_z, OBW_2_GEI):
-    
+    ##TODO: need to finish obw2gei transform
     pass
+
+
+def geo_nec_matrix(
+    pos_geo_x, pos_geo_y, pos_geo_z
+    ):
+    """use pos to get the rotation matrix between geo and nec. Code from Sasha (anton) 
+            
+    """
+    #e_n, e_e, e_c - NEC basis
+    e_c=-np.stack([pos_geo_x, pos_geo_y, pos_geo_z]).T
+    e_c=e_c/np.sqrt(np.sum(e_c**2,axis=1)).reshape(-1,1)  #normalization
+
+    e_e=np.cross(e_c,np.array([0,0,1]))
+    e_e[np.all(e_e==0,axis=1)]=[0,1,0]  #make e_e zero vector into [0, 1, 0], zero vector can appar when e_c is parallel to [0, 0, 1]
+    e_e=e_e/np.sqrt(np.sum(e_e**2,axis=1)).reshape(-1,1) #normaliation
+
+    e_n=np.cross(e_e,e_c)
+
+    NEC_2_GEO=np.zeros([e_c.shape[0],3,3]) #NEC -> ITRF transformation matrix 
+
+    NEC_2_GEO[:,:,0]=e_n
+    NEC_2_GEO[:,:,1]=e_e
+    NEC_2_GEO[:,:,2]=e_c
+
+    GEO_2_NEC = np.transpose(NEC_2_GEO, axes=(0, 2, 1))
+
+    return [GEO_2_NEC, NEC_2_GEO]
+
+def geo2nec(B_x, B_y, B_z, GEO_2_NEC):
+    B_nec=np.squeeze(np.matmul(GEO_2_NEC,np.column_stack((B_x, B_y, B_z))[:,:,np.newaxis]))
+    return B_nec

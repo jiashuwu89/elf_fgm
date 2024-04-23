@@ -29,7 +29,7 @@ bidirectional_integrate = False
 
 init_secs = 0 # inital seconds to exclude
 funkyfgm = False
-f = (90-55) * np.pi / 180
+f = (-90-55) * np.pi / 180
 
 """zero crossing parameter
 """
@@ -201,12 +201,12 @@ state03_plotatt = False
 
 """nonlinear least square fitting
 """
-nonlinear = True
+nonlinear = False
 
 """nonlinear least square fitting with ph2=ph1+90, 
 work only when nonlinear is true
 """
-nonlinear_phi90 = True
+nonlinear_phi90 = False
 
 """use x0 in calibration without actually run the fit, need to modify x0 in calibration
 This is to show the comparison of data with "corret parameters"
@@ -216,11 +216,11 @@ skipfit = False     # default should be false
 """detrend according to igrf before calibration
 this is to address misalignment of igrf and fgm
 """
-beforecali_detrend = True
+beforecali_detrend = False
 
 
 """loop of shift
 """
-shift_loop = True
+shift_loop = False
 shift_loop_x = np.arange(-0.5, 0.5, 0.05)
 shift_loop_y = np.arange(-0.5, 0.5, 0.05)
