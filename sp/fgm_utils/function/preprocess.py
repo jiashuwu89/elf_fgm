@@ -86,7 +86,7 @@ def get_relevant_state_data(sta_cdfpath: str, mission: Literal["ela", "elb"],
         get_cdf(sta_cdfpath, vars=[f"{mission}_pos_gei"])
     )  # not read state time b/c too slow
     pos_cdfdata[f"{mission}_pos_time"] = pd.date_range(
-        start=starttime.date(), periods=len(pos_cdfdata[f"{mission}_pos_gei"]), freq="S"
+        start=starttime.date(), periods=len(pos_cdfdata[f"{mission}_pos_gei"]), freq="s"
     )
     pos_cdfdata.set_index(f"{mission}_pos_time", inplace=True)
     pos_cdfdata = clip_cdfdata(

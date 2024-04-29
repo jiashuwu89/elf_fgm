@@ -5,6 +5,7 @@ from .. import parameter
 from . import calibration
 from . import Bplot
 
+
 def detrend_linear(
     ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
     ):
@@ -95,10 +96,11 @@ def detrend_quad_log(
 
 
 def detrend_quad(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
+    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float],
+    outliner_idx = None,
     ):
     """detrend with quadratic fit 
-
+        if outlinear is not None, then remove outliner of z component
     """
     B_x_trend = calibration.quad_fit(
                 ctime,
@@ -109,11 +111,18 @@ def detrend_quad(
                 ctime,
                 *curve_fit(calibration.quad_fit, ctime, B_y)[0],
     )
+    if outliner_idx is None:
+        # default not remove outliner
+        B_z_trend = calibration.quad_fit(
+                    ctime,
+                    *curve_fit(calibration.quad_fit, ctime, B_z)[0],
+        )
+    else:
+        B_z_trend = calibration.quad_fit(
+                    ctime,
+                    *curve_fit(calibration.quad_fit, ctime[outliner_idx], B_z[outliner_idx])[0],
+        )
     
-    B_z_trend = calibration.quad_fit(
-                ctime,
-                *curve_fit(calibration.quad_fit, ctime, B_z)[0],
-    )
 
     #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
     return [B_x_trend, B_y_trend, B_z_trend]
@@ -182,3 +191,16 @@ def del_rogue(ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[
 
 def delete_data(del_idx, *argv):
     return tuple(np.delete(arg, del_idx, axis = 0) for arg in argv)
+
+def remove_outliers(data, sigma = 1):
+    """This function removes outliers before detrend
+    """
+    mean = np.median(np.abs(data))
+    std_dev = np.std(np.abs(data))
+
+    lower_bound = mean - (sigma * std_dev)
+    upper_bound = mean + (sigma * std_dev)
+
+    filter_idx = (data >= lower_bound ) & (data <= upper_bound)
+
+    return filter_idx

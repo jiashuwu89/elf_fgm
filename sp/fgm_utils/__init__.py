@@ -8,9 +8,11 @@ import sys
 import requests
 from .pyspedas.cotrans import cotrans_lib
 from . import parameter
+from . import config
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend, wfit
 from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix, geo_nec_matrix, geo2nec
 from .function.attitude import att_rot
+from .function import detrend
 
 datestr = ""
 
@@ -176,8 +178,7 @@ def fgm_fsp_calib_prepos_wrapper(
             att_cdfdata2, pos_cdfdata2 = preprocess.get_relevant_state_data(sta_cdfpath2, mission, start_time[i], end_time[i])
             Bplot.att_compare(att_cdfdata, column=f'{mission}_att_gei', att_cdfdata2=att_cdfdata2, datestr=datestr)
 
-
-        f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f] * len(fgs_ful_fgm_0th_x_0) 
+        f_all_arry_0 = [f_all[i]] * len(fgs_ful_fgm_0th_x_0) if f_all is not None else [parameter.f[mission]] * len(fgs_ful_fgm_0th_x_0) 
         
         if i == 0: # first collection 
             [
@@ -238,8 +239,10 @@ def fgm_fsp_calib(
     logger: Logger,
     mission: str,
     loop_idx = None,
-):
-    
+):  
+    # compare parameters and output
+    config.compare_parameters(logger) 
+
     if parameter.funkyfgm == True:
         try:
             preprocess.funkyfgm_check(fgs_ful_fgm_0th_x, ctime, datestr)
@@ -369,6 +372,54 @@ def fgm_fsp_calib(
     """
         # 2 : step 2 fgs fsp resolution
     """
+    fsp_detrend_function_list = {
+            'detrend_linear': detrend.detrend_linear,
+            'detrend_linear_2point': detrend.detrend_linear_2point,
+            'detrend_quad_log': detrend.detrend_quad_log,
+            'detrend_quad': detrend.detrend_quad,
+            'detrend_cube': detrend.detrend_cube,
+        }
+    if parameter.prefsp_detrend == True:
+        fgs_res_dmxl_x = fgs_ful_dmxl_x-fgs_igrf_dmxl_x
+        fgs_res_dmxl_y = fgs_ful_dmxl_y-fgs_igrf_dmxl_y
+        fgs_res_dmxl_z = fgs_ful_dmxl_z-fgs_igrf_dmxl_z
+
+        filter_idx = detrend.remove_outliers(fgs_res_dmxl_z)
+
+        [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend] = detrend.detrend_quad(
+            ctime,
+            fgs_igrf_dmxl_x, 
+            fgs_igrf_dmxl_y, 
+            fgs_igrf_dmxl_z)
+        
+        [fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend] = detrend.detrend_quad(
+            ctime,
+            fgs_ful_dmxl_x, 
+            fgs_ful_dmxl_y, 
+            fgs_ful_dmxl_z,
+            outliner_idx = filter_idx,)
+        
+
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(
+                ctime, [fgs_ful_dmxl_x, fgs_ful_dmxl_x_detrend], 
+                [fgs_ful_dmxl_y, fgs_ful_dmxl_y_detrend], 
+                [fgs_ful_dmxl_z, fgs_ful_dmxl_z_detrend], 
+                title="res_dmxl_prefsp_fultrend", 
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag
+            )
+            
+        fgs_ful_dmxl_x = fgs_ful_dmxl_x - fgs_ful_dmxl_x_detrend + fgs_igrf_dmxl_x_detrend
+        fgs_ful_dmxl_y = fgs_ful_dmxl_y - fgs_ful_dmxl_y_detrend + fgs_igrf_dmxl_y_detrend
+        fgs_ful_dmxl_z = fgs_ful_dmxl_z - fgs_ful_dmxl_z_detrend + fgs_igrf_dmxl_z_detrend
+
+        if parameter.makeplot == True:
+            Bplot.B_ctime_plot(
+                ctime, fgs_ful_dmxl_x-fgs_igrf_dmxl_x, 
+                fgs_ful_dmxl_y-fgs_igrf_dmxl_y, fgs_ful_dmxl_z-fgs_igrf_dmxl_z, title="res_dmxl_afterdetrend", 
+                datestr = datestr
+            )
+
     logger.info(f"Step 2 fsp data starts ... ")
     try:
         [
@@ -416,7 +467,7 @@ def fgm_fsp_calib(
 
     if parameter.fsp_detrend == True:
         [
-            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z] = detrend.detrend_quad(
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z] = fsp_detrend_function_list[parameter.fsp_detrend_func](
                 cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)
 
         if parameter.makeplot == True:

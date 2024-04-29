@@ -28,8 +28,11 @@ relative_integrate = True
 bidirectional_integrate = False
 
 init_secs = 0 # inital seconds to exclude
-funkyfgm = False
-f = (-90-55) * np.pi / 180
+funkyfgm = True
+f = {
+    'elb': (-90-55) * np.pi / 180,
+    'ela': 85 * np.pi / 180,
+    }
 
 """zero crossing parameter
 """
@@ -90,16 +93,22 @@ cali_4th = False  # add a third calibration
 #del_rogue = False   # del rogue points in the first and last three points         
 del_rogue_fsp = True # del rogue points in fsp resolution, which has a better result than del_rogue
 eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
-fsp_detrend = True # detrend in dmxl if true
-fsp_detrend_cutoff = 6 # detrend in dmxl if true
 
+"""detrend parameter
+"""
+prefsp_detrend = True # detrend in dmxl if true
+prefsp_detrend_func = 'detrend_cube'
+
+fsp_detrend = False # detrend in dmxl if true
+fsp_detrend_cutoff = 6 # detrend in dmxl if true
+fsp_detrend_func = 'detrend_quad'
 #del_spike_fsp = False  # delete spike in fsp resolution
 
 """output paramter
 """
-makeplot = True
-savepng = True
-output = True # if true output to txt file
+makeplot = False
+savepng = False
+output = False # if true output to txt file
 download_data = True
 
 """specify time interval for some events
@@ -123,7 +132,7 @@ fit_bound = False
 """loop f, if set ignore the f value above 
 """
 f_loop = False
-f_loop_value = list(map(lambda x: x * (np.pi / 180), range(0, 360, 100)))
+f_loop_value = list(map(lambda x: x * (np.pi / 180), range(50, 95, 5)))
 
 """att rotation by a angle around one axis
 """
@@ -176,6 +185,7 @@ att_split_detrend = False  # will detrend attitude before fitting
 """run batch sci zones from fgm_availablity.csv
 """
 batch_run = False
+batch_run_eventlist = True
 
 """spin rate fit
 """
@@ -199,9 +209,9 @@ cal_dmxl = False
 state03 = False
 state03_plotatt = False
 
-"""nonlinear least square fitting
+"""nonlinear least square fitting, fit Gthphi instead of G11-G33
 """
-nonlinear = False
+nonlinear = True
 
 """nonlinear least square fitting with ph2=ph1+90, 
 work only when nonlinear is true
@@ -216,11 +226,14 @@ skipfit = False     # default should be false
 """detrend according to igrf before calibration
 this is to address misalignment of igrf and fgm
 """
-beforecali_detrend = False
-
+beforecali_detrend = True
 
 """loop of shift
 """
 shift_loop = False
 shift_loop_x = np.arange(-0.5, 0.5, 0.05)
 shift_loop_y = np.arange(-0.5, 0.5, 0.05)
+
+"""beta angle
+"""
+read_beta = False

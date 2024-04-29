@@ -234,20 +234,49 @@ if __name__ == "__main__":
     settings 
     ====================
     """
-    mission = "elb"
-    fgmcsvpath = f"fgm_utils/{mission}_fgm_data_availability.csv"
-    betacsvpath = f"fgm_utils/orbits_fgm_cal_{mission}.csv"
-    beta_df = get_betaCSV(betacsvpath)
-    beta_out = []
+    
+
     if parameter.batch_run == True:
-        # batch run
-        starttime_str = '2022-01-13/00:00:00'
-        endtime_str = '2022-01-13/02:00:00'
-        start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
+        # batch run parameters
+        if parameter.batch_run_eventlist == False:
+            # run batch run events from data availablity csv file, can only choose one satellite
+            mission = "elb"
+            starttime_str = '2022-01-13/00:00:00'
+            endtime_str = '2022-01-13/02:00:00'
+
+            fgmcsvpath = f"fgm_utils/{mission}_fgm_data_availability.csv"
+
+            if parameter.read_beta == True:
+                betacsvpath = f"fgm_utils/orbits_fgm_cal_{mission}.csv"
+                beta_df = get_betaCSV(betacsvpath)
+                beta_out = []
+            
+            logger.info(f"===========BATCH RUN===========")
+            logger.info(f"==={mission}: {starttime_str} - {endtime_str}===")
+
+            start_times, end_times = get_fgmCSV(fgmcsvpath, starttime_str, endtime_str)
+            mission_list = [mission] * len(start_times)
+            f_list = [[parameter.f[mission]]] * len(start_times)
+        else:
+            # run batch run events from batch run eventlist
+            batchrun_list = [90, 89, 88, 87, 86, 85, 83, 84, 82, 81, 80, 79, 78, 77, 74, 75, 76]
+            mission_list = []
+            start_times = []
+            end_times = []
+            f_list = []
+            for event in batchrun_list:
+                from . import eventlist
+                if event in eventlist.eventlist:
+                    mission_list.append(eventlist.eventlist[event]['mission'])
+                    start_times.append(dt.datetime.strptime(eventlist.eventlist[event]['starttime_str'][0], "%Y-%m-%d/%H:%M:%S"))
+                    end_times.append(dt.datetime.strptime(eventlist.eventlist[event]['endtime_str'][0], "%Y-%m-%d/%H:%M:%S"))
+                    f_list.append(eventlist.eventlist[event].get("f_all", None))
+            starttime_str = eventlist.eventlist[batchrun_list[0]]['starttime_str'][0]
+            endtime_str = eventlist.eventlist[batchrun_list[-1]]['endtime_str'][0]
 
         Bpara_out, Gthphi_out, f_out, att_rot_out, res_rot_out, beta_out, start_times_str, end_times_str = [], [], [], [], [], [], [], []
 
-        for start_time, end_time in zip(start_times, end_times):
+        for start_time, end_time, mission, f_all_arry in zip(start_times, end_times, mission_list, f_list):
             start_time = [start_time]
             end_time = [end_time]
             """
@@ -260,7 +289,7 @@ if __name__ == "__main__":
                     fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
                     att_gei_x, att_gei_y, att_gei_z, 
                     pos_gei_x, pos_gei_y, pos_gei_z,
-                    f_all_arry, clip_start_idx, clip_end_idx] = fgm_fsp_calib_prepos_wrapper(mission, start_time, end_time, None, logger)
+                    f_all_arry, clip_start_idx, clip_end_idx] = fgm_fsp_calib_prepos_wrapper(mission, start_time, end_time, f_all_arry, logger)
                 """
                 ====================
                 start processing
@@ -282,21 +311,24 @@ if __name__ == "__main__":
                 logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
                 print('\n'.join(traceback.format_exception(*sys.exc_info())))
                 Bpara_single, Gthphi_single, f_single, att_rot_single, res_rot_single = [], [], [], [], []
-            
-            Bpara_out.append(Bpara_single)
-            Gthphi_out.append(Gthphi_single)
-            f_out.append(f_single)
-            att_rot_out.append(att_rot_single)
-            res_rot_out.append(res_rot_single)
+
+            Bpara_out.extend(Bpara_single)
+            Gthphi_out.extend(Gthphi_single)
+            f_out.extend(f_single)
+            att_rot_out.extend(att_rot_single)
+            res_rot_out.extend(res_rot_single)
 
             """
             ====================
             get beta
             ====================
             """
-            mid_time = start_time[0] + 0.5*(end_time[0] - start_time[0])
-            beta_angle = get_beta(beta_df, mid_time)
-            beta_out.append(beta_angle)
+            if parameter.read_beta == True:
+                mid_time = start_time[0] + 0.5*(end_time[0] - start_time[0])
+                beta_angle = get_beta(beta_df, mid_time)
+                beta_out.append(beta_angle)
+            else:
+                beta_out.append(0)
 
             """
             ====================
@@ -313,10 +345,11 @@ if __name__ == "__main__":
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
         # not patch run, run one event or att loop or shift loop or f loop
-        eventnum = 73
-        starttime_str = eventlist[mission][eventnum]["starttime_str"]
-        endtime_str = eventlist[mission][eventnum]["endtime_str"]
-        f_all = eventlist[mission][eventnum].get("f_all", None)
+        eventnum = 90
+        mission = eventlist[eventnum]["mission"]
+        starttime_str = eventlist[eventnum]["starttime_str"]
+        endtime_str = eventlist[eventnum]["endtime_str"]
+        f_all = eventlist[eventnum].get("f_all", None)
 
         start_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), starttime_str))
         end_time = list(map(lambda ts: dt.datetime.strptime(ts, "%Y-%m-%d/%H:%M:%S"), endtime_str))
@@ -421,9 +454,12 @@ if __name__ == "__main__":
     get beta
     ====================
     """
-    mid_time = start_time[0] + 0.5*(end_time[-1] - start_time[0])
-    beta_angle = get_beta(beta_df, mid_time)
-    beta_out=[beta_angle]*len(Bpara_out)
+    if parameter.read_beta == True:
+        mid_time = start_time[0] + 0.5*(end_time[-1] - start_time[0])
+        beta_angle = get_beta(beta_df, mid_time)
+        beta_out=[beta_angle]*len(Bpara_out)
+    else:
+        beta_out=[0]*len(Bpara_out)
     
     """
     ====================
