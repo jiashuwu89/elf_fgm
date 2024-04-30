@@ -109,7 +109,8 @@ def fgm_fsp_calib_prepos_wrapper(
         start_time: List[datetime.datetime], 
         end_time: List[datetime.datetime],
         f_all: List[float],
-        logger: Logger) -> List[np.ndarray]:
+        logger: Logger,
+        state_cdf_path=False) -> List[np.ndarray]:
     """Wrapper for fgm_fsp_calib_prepos_wrapper.
     Read data from all science zones and prepare for processing
     
@@ -140,6 +141,7 @@ def fgm_fsp_calib_prepos_wrapper(
                     sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
                 res = requests.get(sta_url)
                 logger.info(f"Download file {sta_url} sucessful!")
+                breakpoint()
                 with open(sta_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
