@@ -34,6 +34,8 @@ class FgmCalibResponse(BaseModel):
     fgs_fsp_res_gei: List[List[float]]
     fgs_fsp_igrf_dmxl: List[List[float]]
     fgs_fsp_igrf_gei: List[List[float]]
+    B_parameter: List[float]
+    Gthphi_parameter: List[float]
 
 
 @router.get("/get_numbers")
@@ -59,6 +61,9 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
     mission = "ela" if fgm_calib_request.mission_id == 1 else "elb"
     start_time = fgm_calib_request.fgs_time[0]
     end_time = fgm_calib_request.fgs_time[-1]
+    starttime_str = start_time.strftime('%Y-%m-%d/%H:%M:%S')
+    endtime_str = end_time.strftime('%Y-%m-%d/%H:%M:%S')
+
     fgm_data = pd.DataFrame({
         f"{mission}_fgs_time": fgm_calib_request.fgs_time,
         f"{mission}_fgs": fgm_calib_request.fgs,
@@ -73,10 +78,19 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         year_str = str(cur_date.year)
         sta_datestr = cur_date.strftime("%Y%m%d")
         sta_cdfpath = os.path.join("/nfs/elfin-mirror/elfin", mission, "l1/state/defn", year_str, f"{mission}_l1_state_defn_{sta_datestr}_v01.cdf")
-
-        cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
-        all_att_cdfdata.append(cur_att_cdfdata)
-        all_pos_cdfdata.append(cur_pos_cdfdata)
+        
+        try:
+            cur_att_cdfdata, cur_pos_cdfdata = get_relevant_state_data(sta_cdfpath, mission, start_time, end_time)
+            all_att_cdfdata.append(cur_att_cdfdata)
+            all_pos_cdfdata.append(cur_pos_cdfdata)
+        except error.cdfError as e:
+            logger.error(f"CDF read error ({e})")
+            raise
+        except Exception as e:
+            traceback_msg = traceback.format_exc()
+            logger.error(f"CDF read error ({e}): {traceback_msg}")
+            raise
+        
 
         cur_date += dt.timedelta(days=1)
 
@@ -118,7 +132,14 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
             att_gei_x, att_gei_y, att_gei_z,
             pos_gei_x, pos_gei_y, pos_gei_z,
             logger, mission
-    )
+        )
+        if len(B_parameter) != 0:
+            from ..fgm_utils.function.postprocess import Bpara2Gthphi
+            Gthphi_parameter = Bpara2Gthphi(B_parameter)
+        else:
+            Gthphi_parameter= [0.] * 12
+            B_parameter = [0.] * 12
+  
     except Exception as e:
         traceback_msg = traceback.format_exc()
         logger.error(f"fsp calibration failed ({e}): {traceback_msg}")
@@ -133,4 +154,6 @@ def fgm_calib(fgm_calib_request: FgmCalibRequest) -> FgmCalibResponse:
         fgs_fsp_res_gei=list(map(list, zip(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z))),
         fgs_fsp_igrf_dmxl=list(map(list, zip(fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z))),
         fgs_fsp_igrf_gei=list(map(list, zip(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z))),
+        B_parameter=list(B_parameter),
+        Gthphi_parameter=list(Gthphi_parameter),
     )
