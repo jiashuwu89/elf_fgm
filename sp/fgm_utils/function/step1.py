@@ -40,7 +40,7 @@ def step1(
         ctime, cross_times_1st_1, cross_times_1st_1_mids, w_syn_1st_1, T_spins_1st_1,
         cross_times_1st_2, cross_times_1st_2_mids, w_syn_1st_2, T_spins_1st_2,
         cross_times_1st_3, w_syn_1st_3, T_spins_1st_3,
-    )    
+    )  
     logger.debug(f"[1.1] phase angle is done. ")
 
     """
@@ -206,8 +206,9 @@ def step1(
         phi_2nd, cross_times_2nd, w_syn_2nd, T_spins_2nd, cross_times_2nd_fit, w_syn_2nd_fit] = cross_time.phase_integration(
         ctime, cross_times_2nd_1, cross_times_2nd_1_mids, w_syn_2nd_1, T_spins_2nd_1,
         cross_times_2nd_2, cross_times_2nd_2_mids, w_syn_2nd_2, T_spins_2nd_2,
-        cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3,
+        cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3, CrossTime_Update=True
     )
+    cross_times_2nd = cross_times_2nd_fit
     logger.debug(f"[1.5] phi angle calib is done. ")
     
     if parameter.makeplot == True:
@@ -218,9 +219,11 @@ def step1(
             cross_times_2nd_fit, w_syn_2nd_fit,
             #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
             title="period_stage123", datestr = datestr,
-            ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
-            #ylimt = [2.10, 2.15]
+            #ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
+            ylimt = [2.20, 2.205]
         ) 
+        Bplot.B_ctime_plot_single(ctime, fgs_ful_fgm_2nd_z, cross_times=cross_times_2nd_fit)
+        breakpoint()
              
     """
         change to dmxl to see the results
@@ -252,14 +255,46 @@ def step1(
         )
         Bplot.B_ctime_plot(cross_times_1st, [fgs_fsp_ful_smxl_2nd_x, fgs_fsp_igrf_smxl_1st_x], [fgs_fsp_ful_smxl_2nd_y, fgs_fsp_igrf_smxl_1st_y], 
             [fgs_fsp_ful_smxl_2nd_z, fgs_fsp_igrf_smxl_1st_z], plot3 = True, title="fuligrf_smxl_fsp_after1stcali")
-
+        Bplot.B_ctime_plot(ctime, 
+                        fgs_ful_smxl_2nd_x - fgs_igrf_smxl_1st_x, 
+                        fgs_ful_smxl_2nd_y - fgs_igrf_smxl_1st_y,
+                        fgs_ful_smxl_2nd_z - fgs_igrf_smxl_1st_z, 
+                        plot3 = True, title="res_smxl_after1stcali")
     # att determine 
     if parameter.att_determine == True:
         att_gei_x, att_gei_y, att_gei_z = att_determine(
             fgs_ful_smxl_2nd_x, fgs_ful_smxl_2nd_y, fgs_ful_smxl_2nd_z, 
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
             att_gei_x, att_gei_y, att_gei_z, datestr)
-    
+
+
+    if parameter.cali_2nd_dmxl == True:
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_before2ndcali") 
+        [
+            fgs_ful_dmxl_3rd_x, fgs_ful_dmxl_3rd_y, fgs_ful_dmxl_3rd_z, B_parameter] = calibration.calib_leastsquare(
+            fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
+        )
+        cross_times = cross_times_2nd
+        w_syn = w_syn_2nd
+        T_spins = T_spins_2nd
+        fgs_ful_dmxl_x = fgs_ful_dmxl_3rd_x
+        fgs_ful_dmxl_y = fgs_ful_dmxl_3rd_y
+        fgs_ful_dmxl_z = fgs_ful_dmxl_3rd_z
+        DMXL_2_GEI_fsp = cross_time.fsp_matrix(ctime, cross_times, T_spins, DMXL_2_GEI)
+
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after2ndcali") 
+        return [
+            cross_times, w_syn, T_spins, DMXL_2_GEI_fsp,
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+            B_parameter,
+        ]
+        
+
     if parameter.cali_2nd == True:
         """
             1.6 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 2nd calibration
@@ -274,7 +309,44 @@ def step1(
             fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z] = coordinate.gei2dmxl(
                 fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, GEI_2_DMXL
         )
-
+        
+        if parameter.cali_2nd_zerocrossing == True:
+            [
+                cross_times_2nd_1, cross_times_2nd_1_mids, 
+                T_spins_2nd_1, w_syn_2nd_1] = cross_time.cross_time_stage_1(
+                ctime, fgs_igrf_fgm_1st_z,
+            )
+            [
+                cross_times_2nd_2, cross_times_2nd_2_mids, 
+                T_spins_2nd_2, w_syn_2nd_2] = cross_time.cross_time_stage_2(
+                ctime, fgs_igrf_fgm_1st_z, cross_times_2nd_1, T_spins_2nd_1,
+            )
+            [
+                cross_times_2nd_3, T_spins_2nd_3, w_syn_2nd_3] = cross_time.cross_time_stage_3(
+                    ctime, fgs_igrf_fgm_1st_z, cross_times_2nd_2, T_spins_2nd_2
+            )
+            """
+                # 1.1 corr - phase angle integration
+            """
+            [
+                phi_2nd, cross_times_2nd, w_syn_2nd, T_spins_2nd, cross_times_2nd_fit, w_syn_2nd_fit] = cross_time.phase_integration(
+                ctime, cross_times_2nd_1, cross_times_2nd_1_mids, w_syn_2nd_1, T_spins_2nd_1,
+                cross_times_2nd_2, cross_times_2nd_2_mids, w_syn_2nd_2, T_spins_2nd_2,
+                cross_times_2nd_3, w_syn_2nd_3, T_spins_2nd_3, CrossTime_Update=True
+            )
+            cross_times_2nd = cross_times_2nd_fit
+            if parameter.makeplot == True:
+                Bplot.omega_stage123(
+                    cross_times_2nd_1_mids, w_syn_2nd_1, 
+                    cross_times_2nd_2_mids, w_syn_2nd_2, 
+                    cross_times_2nd,  w_syn_2nd, 
+                    cross_times_2nd_fit, w_syn_2nd_fit,
+                    #title="period_stage123", datestr = datestr, ylimt = [2.215, 2.217]
+                    title="period_stage123", datestr = datestr,
+                    #ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
+                    ylimt = [2.20, 2.205]
+                ) 
+                breakpoint()
         # B igrf rotate from dmxl to smxl
         [
             fgs_igrf_smxl_2nd_x, fgs_igrf_smxl_2nd_y, fgs_igrf_smxl_2nd_z] = coordinate.dmxl2smxl(
@@ -372,10 +444,10 @@ def step1(
             phi_3rd, cross_times_3rd, w_syn_3rd, T_spins_3rd, cross_times_3rd_fit, w_syn_3rd_fit] = cross_time.phase_integration(
             ctime, cross_times_3rd_1, cross_times_3rd_1_mids, w_syn_3rd_1, T_spins_3rd_1,
             cross_times_3rd_2, cross_times_3rd_2_mids, w_syn_3rd_2, T_spins_3rd_2,
-            cross_times_3rd_3, w_syn_3rd_3, T_spins_3rd_3,
+            cross_times_3rd_3, w_syn_3rd_3, T_spins_3rd_3, CrossTime_Update=True
         )
         logger.debug(f"[1.9] phi angle calib is done. ")
-
+        cross_times_3rd = cross_times_3rd_fit
         """
             change to dmxl to see the results
         """
@@ -720,10 +792,10 @@ def step1(
     #         )
 
     # B full rotate from dmxl to gei
-    [
-        fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
-            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
-    )
+    # [
+    #     fgs_ful_gei_x, fgs_ful_gei_y, fgs_ful_gei_z] = coordinate.dmxl2gei(
+    #         fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, DMXL_2_GEI
+    # )
 
 
     #if parameter.makeplot == True: 

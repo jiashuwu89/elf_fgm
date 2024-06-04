@@ -23,7 +23,7 @@ def get_state_cdf_path(mission: Literal["ela", "elb"], date: dt.date) -> str:
 elfin_url = "https://data.elfin.ucla.edu/"
 
 proper_pad = False  # fails when data have gaps
-fit_running_spline = False
+fit_running_spline = False # if true, running spline for w_syd, if false, use curve fit
 relative_integrate = True
 bidirectional_integrate = False
 
@@ -36,9 +36,9 @@ f = {
 
 """zero crossing parameter
 """
-eps_1 = 1
-eps_2 = 2
-eps_3 = 2
+eps_1 = 5
+eps_2 = 5
+eps_3 = 4
 N_spins_fit = 4
 peak_detect = False # For detecting peaks by fitting B_S3 itself instead of 
     #fitting its derivative and computing zero-crossings
@@ -87,7 +87,9 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = False  # add a second calibration 
+cali_2nd = True  # add a second calibration 
+cali_2nd_dmxl = False # second calibration, run in dmxl instead of fgm coordinate, never use this
+cali_2nd_zerocrossing = False # if true, update zero crossing with res_dmxl, only works when cali_2nd is true
 cali_3rd = False # add a third calibration 
 cali_4th = False  # add a third calibration 
 #del_rogue = False   # del rogue points in the first and last three points         
@@ -97,19 +99,19 @@ eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 """detrend parameter
 """
 prefsp_detrend = True # detrend in dmxl if true
-prefsp_detrend_func = 'detrend_cube'
+prefsp_detrend_func = 'detrend_cube' # used in iter_detrend
 
-fsp_detrend = False # detrend in dmxl if true
+fsp_detrend = True # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
-fsp_detrend_func = 'detrend_quad'
+fsp_detrend_func = 'detrend_linear'
 #del_spike_fsp = False  # delete spike in fsp resolution
 
 """output paramter
 """
-makeplot = False
-savepng = False
+makeplot = True
+savepng = True
 output = False # if true output to txt file
-download_data = True
+download_data = False
 
 """specify time interval for some events
 """
@@ -123,7 +125,7 @@ gei2obw = True
 
 """change zero crossing location according to omege, in phase interation  
 """
-CrossTime_Update = False
+CrossTime_Update = True # update zero crossing when fitting w
 
 """add boundary to least square fitting, in calibration
 """
@@ -211,7 +213,7 @@ state03_plotatt = False
 
 """nonlinear least square fitting, fit Gthphi instead of G11-G33
 """
-nonlinear = True
+nonlinear = False
 
 """nonlinear least square fitting with ph2=ph1+90, 
 work only when nonlinear is true

@@ -141,7 +141,7 @@ def fgm_fsp_calib_prepos_wrapper(
                     sta_url = f"{parameter.elfin_url}{mission}/l1/state/defn/{start_time[i].year}/{mission}_l1_state_defn_{sta_datestr}_v02.cdf"
                 res = requests.get(sta_url)
                 logger.info(f"Download file {sta_url} sucessful!")
-                breakpoint()
+         
                 with open(sta_cdfpath, 'wb') as f:
                     f.write(res.content)
             except:
@@ -345,13 +345,24 @@ def fgm_fsp_calib(
                     att_gei_x, att_gei_y, att_gei_z,
                     datestr, logger, ctime_idx, ctime_idx_time, ctime_idx_flag, ctime_idx_timediff, f_all,
                 )
+            if parameter.makeplot == True:
+                w_update = 2*np.pi/(cross_times_calib[1:] - cross_times_calib[:-1])
+                from .function.Bplot import omega_stage123
+                omega_stage123(
+                    cross_times_calib[:-1], w_update, 
+                    cross_times_calib, w_syn_d_calib, 
+                    title="period_stage123", 
+                    #ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
+                    ylimt = [2.20, 2.205]
+                )
+                breakpoint()
 
     except:
         logger.error(f"❌ step 1 other error. Stop processing.")
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
         return [ [] for _ in range(17) ]
-        
+         
     if parameter.output == True:
         # full res
         fgs_res_dmxl_x = fgs_ful_dmxl_x - fgs_igrf_dmxl_x
@@ -380,47 +391,52 @@ def fgm_fsp_calib(
             'detrend_quad_log': detrend.detrend_quad_log,
             'detrend_quad': detrend.detrend_quad,
             'detrend_cube': detrend.detrend_cube,
+            'detrend_quadcube': detrend.detrend_quadcube,
         }
     if parameter.prefsp_detrend == True:
-        fgs_res_dmxl_x = fgs_ful_dmxl_x-fgs_igrf_dmxl_x
-        fgs_res_dmxl_y = fgs_ful_dmxl_y-fgs_igrf_dmxl_y
-        fgs_res_dmxl_z = fgs_ful_dmxl_z-fgs_igrf_dmxl_z
-
-        filter_idx = detrend.remove_outliers(fgs_res_dmxl_z)
-
-        [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend] = detrend.detrend_quad(
-            ctime,
-            fgs_igrf_dmxl_x, 
-            fgs_igrf_dmxl_y, 
-            fgs_igrf_dmxl_z)
-        
-        [fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend] = detrend.detrend_quad(
-            ctime,
-            fgs_ful_dmxl_x, 
-            fgs_ful_dmxl_y, 
-            fgs_ful_dmxl_z,
-            outliner_idx = filter_idx,)
-        
+        [
+            fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend, 
+            fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend] = detrend.iter_detrend(
+            ctime, 
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, detrend_func = fsp_detrend_function_list[parameter.prefsp_detrend_func])
 
         if parameter.makeplot == True:
+            Bplot.B_ctime_plot(
+                ctime, 
+                [fgs_ful_dmxl_x, fgs_igrf_dmxl_x], 
+                [fgs_ful_dmxl_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_z, fgs_igrf_dmxl_z], 
+                title="fuligrf_dmxl_prefsp", 
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag, xlimt=[100, 200]
+            )
+            # Bplot.B_ctime_plot(
+            #     ctime[filter_idx], fgs_res_dmxl_x[filter_idx], 
+            #     fgs_res_dmxl_y[filter_idx], 
+            #     fgs_res_dmxl_z[filter_idx], 
+            #     title="res_dmxl_prefsp_filter_idx", 
+            #     datestr = datestr, ctime_idx_flag = ctime_idx_flag,
+            # )
+            
             Bplot.B_ctime_plot(
                 ctime, [fgs_ful_dmxl_x, fgs_ful_dmxl_x_detrend], 
                 [fgs_ful_dmxl_y, fgs_ful_dmxl_y_detrend], 
                 [fgs_ful_dmxl_z, fgs_ful_dmxl_z_detrend], 
-                title="res_dmxl_prefsp_fultrend", 
-                datestr = datestr, ctime_idx_flag = ctime_idx_flag
+                title="fultrend_dmxl_prefsp", 
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag, xlimt=[100, 200]
             )
             
-        fgs_ful_dmxl_x = fgs_ful_dmxl_x - fgs_ful_dmxl_x_detrend + fgs_igrf_dmxl_x_detrend
-        fgs_ful_dmxl_y = fgs_ful_dmxl_y - fgs_ful_dmxl_y_detrend + fgs_igrf_dmxl_y_detrend
-        fgs_ful_dmxl_z = fgs_ful_dmxl_z - fgs_ful_dmxl_z_detrend + fgs_igrf_dmxl_z_detrend
+        fgs_ful_dmxl_x = fgs_ful_dmxl_x - fgs_ful_dmxl_x_detrend + fgs_igrf_dmxl_x
+        fgs_ful_dmxl_y = fgs_ful_dmxl_y - fgs_ful_dmxl_y_detrend + fgs_igrf_dmxl_y
+        fgs_ful_dmxl_z = fgs_ful_dmxl_z - fgs_ful_dmxl_z_detrend + fgs_igrf_dmxl_z
 
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(
                 ctime, fgs_ful_dmxl_x-fgs_igrf_dmxl_x, 
                 fgs_ful_dmxl_y-fgs_igrf_dmxl_y, fgs_ful_dmxl_z-fgs_igrf_dmxl_z, title="res_dmxl_afterdetrend", 
-                datestr = datestr
+                datestr = datestr, ylimt=[[-500, 600], [-500, 500], [-500, 200]]
             )
+            breakpoint()
 
     logger.info(f"Step 2 fsp data starts ... ")
     try:
@@ -428,9 +444,13 @@ def fgm_fsp_calib(
             fgs_fsp_igrf_dmxl_x, fgs_fsp_igrf_dmxl_y, fgs_fsp_igrf_dmxl_z] = cross_time.fsp_igrf(
                 ctime, cross_times_calib, T_spins_d_calib, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z
         )
+        # [
+        #     fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
+        #         ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+        # )
         [
-            fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_ful(
-                ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
+            fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
+            ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
         )
     except error.postproc_fgs_igrf as e:
         logger.error(e.__str__())
@@ -438,11 +458,7 @@ def fgm_fsp_calib(
     except Exception as e:
         logger.error('\n'.join(traceback.format_exception(*sys.exc_info())))
         print('\n'.join(traceback.format_exception(*sys.exc_info())))
-        
-    #[
-    #    fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z] = cross_time.fsp_igrf(
-    #        ctime, cross_times_calib, T_spins_d_calib, fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z
-    #)
+    
 
     del_idx = np.where((fgs_fsp_ful_dmxl_x == 0) & (fgs_fsp_ful_dmxl_y == 0) & (fgs_fsp_ful_dmxl_z == 0))
     [
@@ -476,7 +492,7 @@ def fgm_fsp_calib(
             Bplot.B_ctime_plot(
                 cross_times_calib, [fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_trend_x], 
                 [fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_trend_y], [fgs_fsp_res_dmxl_z, fgs_fsp_res_dmxl_trend_z], title="res_dmxl_fsp_trend", scatter = True, 
-                datestr = datestr, ctime_idx_flag = ctime_idx_flag
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag, ylimt=[[-200, 200],[-100, 100],[-500, 100]]
             )
         # detrend res dmxl
         fgs_fsp_res_dmxl_x = fgs_fsp_res_dmxl_x - fgs_fsp_res_dmxl_trend_x
@@ -496,7 +512,7 @@ def fgm_fsp_calib(
     # transform ful dmxl to ful gei
     [fgs_fsp_ful_gei_x, fgs_fsp_ful_gei_y, fgs_fsp_ful_gei_z] = dmxl2gei(
         fgs_fsp_ful_dmxl_x, fgs_fsp_ful_dmxl_y, fgs_fsp_ful_dmxl_z, DMXL_2_GEI_fsp)
-    
+
     # get igrf gei
     [
         fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z] = cross_time.fsp_igrf(
@@ -574,10 +590,10 @@ def fgm_fsp_calib(
     
     if parameter.gei2obw == True:
         # transform to obw
+
         [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)
         [GEI_2_OBW, OBW_2_GEI] = gei_obw_matrix(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z)
         [fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z] = gei2obw(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, GEI_2_OBW)
-
 
         # transform from gei to geo and then nec coordinate
         pos_fsp_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z]))

@@ -345,7 +345,7 @@ if __name__ == "__main__":
         Bpara_filename = f"fgm_utils/fitting_csv/{starttime_str[0:10]}_{starttime_str[11:13]}{starttime_str[14:16]}_{mission}_Bpara.csv"
     else:
         # not patch run, run one event or att loop or shift loop or f loop
-        eventnum = 90
+        eventnum = 104
         mission = eventlist[eventnum]["mission"]
         starttime_str = eventlist[eventnum]["starttime_str"]
         endtime_str = eventlist[eventnum]["endtime_str"]

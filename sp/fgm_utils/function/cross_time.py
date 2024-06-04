@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from .. import parameter
 from scipy.integrate import simpson
 from . import calibration
-from .Bplot import B_ctime_plot, B_ctime_plot_single, omega_fit
+from .Bplot import B_ctime_plot, B_ctime_plot_single, omega_fit, omega_stage123
 from .error import CrossTime1Error, postproc_fgs_igrf
 func = calibration.quad_fit
 
@@ -443,14 +443,17 @@ def phase_integration(
     w_syn_d_1_select, T_spins_d_pad_1_select,
     cross_times_2_select, cross_times_2_mids_select,
     w_syn_d_2_select, T_spins_d_pad_2_select,
-    cross_times_3_select, w_syn_d_3_select, T_spins_d_3_select,
+    cross_times_3_select, w_syn_d_3_select, T_spins_d_3_select, CrossTime_Update=False,
 ):
     """cross time determination stage 3
     curvefit to find B peak
     w_syn_d is the measured spin period
-    w_syn is the spin period at ctime
-    w_t0s is the fitted spin period at cross time
+    w_syn: use cross_times, w_syn_d to fit ctime
+    w_t0s: use cross_times, w_syn_d to fit cross_times
     """
+    if CrossTime_Update == True:
+        CrossTime_Update = parameter.CrossTime_Update
+
     if parameter.zero_crossing_method == 1:
         cross_times = cross_times_1_select
         cross_times_mids = cross_times_1_mids_select
@@ -494,7 +497,7 @@ def phase_integration(
         else:
             #breakpoint()
             w_syn = func(
-                ctime, *curve_fit(func, cross_times, w_syn_d)[0]
+                ctime, *curve_fit(func, cross_times, w_syn_d)[0] #****
             )
     if parameter.relative_integrate == True:
         # Use multiple reference points for integration
@@ -522,17 +525,40 @@ def phase_integration(
             else:
                 w_t0s = func(
                     cross_times,
-                    *curve_fit(func, cross_times, w_syn_d)[0],
+                    *curve_fit(func, cross_times, w_syn_d)[0], #****
                 )
         w_fit = w_t0s
         if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:
             cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times_mids
-            if parameter.CrossTime_Update == True:
+            if CrossTime_Update == True:
                 cross_times_mids = cross_times_fit
         else:
             cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
-            if parameter.CrossTime_Update == True:
-                cross_times = cross_times_fit
+            if CrossTime_Update == True:
+                cumulative_sums = []
+                for i in range(1, len(w_t0s) + 1):
+                   cumulative_sums.append(sum(2*np.pi/w_t0s[0:i]))
+                    
+                cross_times_fit = cumulative_sums + cross_times[0]
+
+                cumulative_sums = []
+                for i in range(72, len(w_t0s) + 1):
+                   cumulative_sums.append(sum(2*np.pi/w_t0s[71:i]))
+
+                cross_times_fit[71:] = cumulative_sums + cross_times[71]
+                w_update = 2*np.pi/(cross_times_fit[1:] - cross_times_fit[:-1])
+                
+                if parameter.makeplot == True:
+                    omega_stage123(
+                        cross_times[:-1], w_update, 
+                        cross_times_fit, w_t0s, 
+                        cross_times_fit, w_syn_d,
+                        title="period_stage123", 
+                        #ylimt = [np.median(w_syn_2nd_fit)-0.03, np.median(w_syn_2nd_fit)+0.03]
+                        ylimt = [2.20, 2.205]
+                    )
+                    breakpoint()
+
     else:
         # Use just one reference point for integration
         t0 = cross_times[0]
@@ -576,11 +602,11 @@ def phase_integration(
         w_fit = w_t0s
         if parameter.zero_crossing_method == 1 or parameter.zero_crossing_method == 2:
             cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times_mids
-            if parameter.CrossTime_Update == True:
+            if CrossTime_Update == True:
                 cross_times_mids = cross_times_fit
         else:
             cross_times_fit = 2*np.pi/w_t0s-2*np.pi/w_syn_d + cross_times
-            if parameter.CrossTime_Update == True:
+            if CrossTime_Update == True:
                 cross_times = cross_times_fit
 
     phi = np.zeros(len(ctime))
@@ -652,8 +678,8 @@ def fsp_igrf(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z):
 
 
 def fsp_ful(ctime, cross_times, T_spins_d, fgs_x, fgs_y, fgs_z): 
-    """generate igrf in fsp resolution
-        use average directly
+    """generate full field in fsp
+        use curve fit
     """
     fgs_fsp_x = np.zeros(len(cross_times))
     fgs_fsp_y = np.zeros(len(cross_times))
