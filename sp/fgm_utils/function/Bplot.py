@@ -50,7 +50,10 @@ def B_ctime_plot(
     title = "B_ctime_plot", xlimt = None, cross_times = None, 
     datestr = None, ylimt = None, ctime_idx_flag = None
 ):
-    
+    """plot function
+    Parameter
+        plot3: if true, plot 3 subplots
+    """
     filename = datestr + "_" + title if datestr is not None else title
     if np.array(B_x).ndim == np.array(B_y).ndim == np.array(B_z).ndim:
         if np.array(B_x).ndim == np.array(ctime).ndim == 1:

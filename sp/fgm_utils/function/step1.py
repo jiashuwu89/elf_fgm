@@ -260,6 +260,34 @@ def step1(
             fgs_igrf_gei_x, fgs_igrf_gei_y, fgs_igrf_gei_z, 
             att_gei_x, att_gei_y, att_gei_z, datestr)
     
+
+    if parameter.cali_2nd_dmxl == True:
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_2nd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_2nd_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_before2ndcali") 
+        [
+            fgs_ful_dmxl_3rd_x, fgs_ful_dmxl_3rd_y, fgs_ful_dmxl_3rd_z, B_parameter] = calibration.calib_leastsquare(
+            fgs_ful_dmxl_2nd_x, fgs_ful_dmxl_2nd_y, fgs_ful_dmxl_2nd_z, fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z, init = B_parameter 
+        )
+        cross_times = cross_times_2nd
+        w_syn = w_syn_2nd
+        T_spins = T_spins_2nd
+        fgs_ful_dmxl_x = fgs_ful_dmxl_3rd_x
+        fgs_ful_dmxl_y = fgs_ful_dmxl_3rd_y
+        fgs_ful_dmxl_z = fgs_ful_dmxl_3rd_z
+        DMXL_2_GEI_fsp = cross_time.fsp_matrix(ctime, cross_times, T_spins, DMXL_2_GEI)
+
+        if parameter.makeplot == True: 
+            Bplot.B_ctime_plot(ctime, [fgs_ful_dmxl_3rd_x, fgs_igrf_dmxl_x], [fgs_ful_dmxl_3rd_y, fgs_igrf_dmxl_y], 
+                [fgs_ful_dmxl_3rd_z, fgs_igrf_dmxl_z], title="ful_igrf_dmxl_after2ndcali") 
+        return [
+            cross_times, w_syn, T_spins, DMXL_2_GEI_fsp,
+            fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+            fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+            B_parameter,
+        ]
+        
+
     if parameter.cali_2nd == True:
         """
             1.6 IGRF coorindate transformation : gei -> dmxl -> smxl -> fgm : 2nd calibration

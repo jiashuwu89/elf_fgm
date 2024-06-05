@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import numpy as np
 from scipy.optimize import curve_fit
 from .. import parameter 
@@ -96,59 +96,106 @@ def detrend_quad_log(
 
 
 def detrend_quad(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float],
-    outliner_idx = None,
+    ctime: List[float], 
+    B_x: Optional[List[float]] = None, 
+    B_y: Optional[List[float]] = None, 
+    B_z: Optional[List[float]] = None,
+    inlier_idx_x: Optional[List[int]] = None, 
+    inlier_idx_y: Optional[List[int]] = None, 
+    inlier_idx_z: Optional[List[int]] = None
     ):
     """detrend with quadratic fit 
         if outlinear is not None, then remove outliner of z component
     """
-    B_x_trend = calibration.quad_fit(
+    def detrend_component(component, inlier_idx):
+        if component is None:
+            return None
+        if inlier_idx is None:
+            trend = calibration.quad_fit(
                 ctime,
-                *curve_fit(calibration.quad_fit, ctime, B_x)[0],
-    )
-
-    B_y_trend = calibration.quad_fit(
+                *curve_fit(calibration.quad_fit, ctime, component)[0],
+            )
+        else:
+            trend = calibration.quad_fit(
                 ctime,
-                *curve_fit(calibration.quad_fit, ctime, B_y)[0],
-    )
-    if outliner_idx is None:
-        # default not remove outliner
-        B_z_trend = calibration.quad_fit(
-                    ctime,
-                    *curve_fit(calibration.quad_fit, ctime, B_z)[0],
-        )
-    else:
-        B_z_trend = calibration.quad_fit(
-                    ctime,
-                    *curve_fit(calibration.quad_fit, ctime[outliner_idx], B_z[outliner_idx])[0],
-        )
+                *curve_fit(calibration.quad_fit, ctime[inlier_idx], component[inlier_idx])[0],
+            )
+        return trend
     
-
+    B_x_trend = detrend_component(B_x, inlier_idx_x)
+    B_y_trend = detrend_component(B_y, inlier_idx_y)
+    B_z_trend = detrend_component(B_z, inlier_idx_z)
+    
     #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
     return [B_x_trend, B_y_trend, B_z_trend]
 
 
+def detrend_quadcube(
+    ctime: List[float], 
+    B_x: Optional[List[float]] = None, 
+    B_y: Optional[List[float]] = None, 
+    B_z: Optional[List[float]] = None,
+    inlier_idx_x: Optional[List[int]] = None, 
+    inlier_idx_y: Optional[List[int]] = None, 
+    inlier_idx_z: Optional[List[int]] = None
+    ):
+    """detrend with quadratic fit for x and y
+       z use cube fit
+        if outlinear is not None, then remove outliner of z component
+    """
+    def detrend_component(component, inlier_idx, fit_func):
+        if component is None:
+            return None
+        if inlier_idx is None:
+            trend = fit_func(
+                ctime,
+                *curve_fit(fit_func, ctime, component)[0],
+            )
+        else:
+            trend = fit_func(
+                ctime,
+                *curve_fit(fit_func, ctime[inlier_idx], component[inlier_idx])[0],
+            )
+        return trend
+    
+    B_x_trend = detrend_component(B_x, inlier_idx_x, calibration.quad_fit)
+    B_y_trend = detrend_component(B_y, inlier_idx_y, calibration.quad_fit)
+    B_z_trend = detrend_component(B_z, inlier_idx_z, calibration.cube_fit)
+    
+    return [B_x_trend, B_y_trend, B_z_trend]
+
+
 def detrend_cube(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
+    ctime: List[float], 
+    B_x: Optional[List[float]] = None, 
+    B_y: Optional[List[float]] = None, 
+    B_z: Optional[List[float]] = None,
+    inlier_idx_x: Optional[List[int]] = None, 
+    inlier_idx_y: Optional[List[int]] = None, 
+    inlier_idx_z: Optional[List[int]] = None
     ):
     """detrend with cubic fit 
 
     """
-
-    B_x_trend = calibration.cube_fit(
+    def detrend_component(component, inlier_idx):
+        if component is None:
+            return None
+        if inlier_idx is None:
+            trend = calibration.cube_fit(
                 ctime,
-                *curve_fit(calibration.cube_fit, ctime, B_x)[0],
-    )
-
-    B_y_trend = calibration.cube_fit(
+                *curve_fit(calibration.cube_fit, ctime, component)[0],
+            )
+        else:
+            trend = calibration.cube_fit(
                 ctime,
-                *curve_fit(calibration.cube_fit, ctime, B_y)[0],
-    )
+                *curve_fit(calibration.cube_fit, ctime[inlier_idx], component[inlier_idx])[0],
+            )
+        return trend
     
-    B_z_trend = calibration.cube_fit(
-                ctime,
-                *curve_fit(calibration.cube_fit, ctime, B_z)[0],
-    )
+    B_x_trend = detrend_component(B_x, inlier_idx_x)
+    B_y_trend = detrend_component(B_y, inlier_idx_y)
+    B_z_trend = detrend_component(B_z, inlier_idx_z)
+
     return [B_x_trend, B_y_trend, B_z_trend]
     #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
 
@@ -204,3 +251,46 @@ def remove_outliers(data, sigma = 1):
     filter_idx = (data >= lower_bound ) & (data <= upper_bound)
 
     return filter_idx
+
+
+def iter_detrend(ctime, 
+                 fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
+                 fgs_igrf_dmxl_x, fgs_igrf_dmxl_y, fgs_igrf_dmxl_z,
+                 detrend_func,):
+    """iteratively determine outliers and fit the baseline
+    """
+    [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend] = detrend_func(
+        ctime,
+        B_x = fgs_igrf_dmxl_x, 
+        B_y = fgs_igrf_dmxl_y, 
+        B_z = fgs_igrf_dmxl_z)
+    
+    # the first iteration will use difference between ful and igrf to determine outliers
+    fgs_res_dmxl_x = fgs_ful_dmxl_x-fgs_igrf_dmxl_x
+    fgs_res_dmxl_y = fgs_ful_dmxl_y-fgs_igrf_dmxl_y
+    fgs_res_dmxl_z = fgs_ful_dmxl_z-fgs_igrf_dmxl_z
+    
+    inlier_idx_x = remove_outliers(fgs_res_dmxl_x, sigma=5)
+    inlier_idx_y = remove_outliers(fgs_res_dmxl_y, sigma=5)
+    inlier_idx_z = remove_outliers(fgs_res_dmxl_z, sigma=2)
+    # x and y only exclude outliers once. if iter too many times a lot of points will be excluded, the results will have a large trend
+    [fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend] = detrend_func(
+        ctime,
+        B_x = fgs_ful_dmxl_x, 
+        B_y = fgs_ful_dmxl_y, 
+        B_z = fgs_ful_dmxl_z,
+        inlier_idx_x = inlier_idx_x,
+        inlier_idx_y = inlier_idx_y,
+        inlier_idx_z = inlier_idx_z)
+    
+    # iter for z
+    for i in range(3):
+        fgs_res_dmxl_z = fgs_ful_dmxl_z - fgs_ful_dmxl_z_detrend
+        inlier_idx_z = remove_outliers(fgs_res_dmxl_z, sigma=2)
+
+        _, _, fgs_ful_dmxl_z_detrend = detrend_func(
+            ctime,
+            B_z = fgs_ful_dmxl_z,
+            inlier_idx_z = inlier_idx_z)
+
+    return [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend, fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend]
