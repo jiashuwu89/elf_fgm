@@ -35,6 +35,9 @@ def dmxl_gei_matrix(
 
         GEI_2_DMXL[i, :, :] = np.linalg.inv(DMXL_2_GEI[i, :, :])
 
+        # if i == 0 or i == len(fgs_igrf_gei_x) -1:
+        #     breakpoint()
+
     return [DMXL_2_GEI, GEI_2_DMXL]
 
 
@@ -212,6 +215,9 @@ def gei_obw_matrix(
         GEI_2_OBW[i, 1, :] = b_hat
         GEI_2_OBW[i, 2, :] = BperpWest_norm
 
+        # if i == 0 or i == len(fgs_igrf_gei_x) -1:
+        #     breakpoint()
+
         OBW_2_GEI[i, :, :] = np.linalg.inv(GEI_2_OBW[i, :, :])
 
     return [GEI_2_OBW, OBW_2_GEI]
@@ -245,8 +251,29 @@ def gei2obw(fgs_gei_x, fgs_gei_y, fgs_gei_z, GEI_2_OBW):
 
 
 def obw2gei(fgs_obw_x, fgs_obw_y, fgs_obw_z, OBW_2_GEI):
-    ##TODO: need to finish obw2gei transform
-    pass
+
+    fgs_gei_x = np.zeros(len(fgs_obw_x))
+    fgs_gei_y = np.zeros(len(fgs_obw_x))
+    fgs_gei_z = np.zeros(len(fgs_obw_x))
+
+    for i in range(len(fgs_obw_x)):
+        fgs_gei_x[i] = (
+            OBW_2_GEI[i][0, 0] * fgs_obw_x[i]
+            + OBW_2_GEI[i][0, 1] * fgs_obw_y[i]
+            + OBW_2_GEI[i][0, 2] * fgs_obw_z[i]
+        )
+        fgs_gei_y[i] = (
+            OBW_2_GEI[i][1, 0] * fgs_obw_x[i]
+            + OBW_2_GEI[i][1, 1] * fgs_obw_y[i]
+            + OBW_2_GEI[i][1, 2] * fgs_obw_z[i]
+        )
+        fgs_gei_z[i] = (
+            OBW_2_GEI[i][2, 0] * fgs_obw_x[i]
+            + OBW_2_GEI[i][2, 1] * fgs_obw_y[i]
+            + OBW_2_GEI[i][2, 2] * fgs_obw_z[i]
+        )
+
+    return [fgs_gei_x, fgs_gei_y, fgs_gei_z] 
 
 
 def geo_nec_matrix(

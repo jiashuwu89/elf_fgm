@@ -10,7 +10,7 @@ from .pyspedas.cotrans import cotrans_lib
 from . import parameter
 from . import config
 from .function import cross_time, Bplot, igrf, preprocess, error, postprocess, output, step0, step1, detrend, wfit
-from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix, geo_nec_matrix, geo2nec
+from .function.coordinate import dmxl2gei, gei2obw, gei_obw_matrix, geo_nec_matrix, geo2nec, obw2gei
 from .function.attitude import att_rot
 from .function import detrend
 
@@ -398,7 +398,7 @@ def fgm_fsp_calib(
                 [fgs_ful_dmxl_y, fgs_igrf_dmxl_y], 
                 [fgs_ful_dmxl_z, fgs_igrf_dmxl_z], 
                 title="fuligrf_dmxl_prefsp", 
-                datestr = datestr, ctime_idx_flag = ctime_idx_flag, xlimt=[100, 200]
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag
             )
             # Bplot.B_ctime_plot(
             #     ctime[filter_idx], fgs_res_dmxl_x[filter_idx], 
@@ -413,7 +413,7 @@ def fgm_fsp_calib(
                 [fgs_ful_dmxl_y, fgs_ful_dmxl_y_detrend], 
                 [fgs_ful_dmxl_z, fgs_ful_dmxl_z_detrend], 
                 title="fultrend_dmxl_prefsp", 
-                datestr = datestr, ctime_idx_flag = ctime_idx_flag, xlimt=[100, 200]
+                datestr = datestr, ctime_idx_flag = ctime_idx_flag
             )
             
         fgs_ful_dmxl_x = fgs_ful_dmxl_x - fgs_ful_dmxl_x_detrend + fgs_igrf_dmxl_x
@@ -593,12 +593,44 @@ def fgm_fsp_calib(
         [GEI_2_OBW, OBW_2_GEI] = gei_obw_matrix(fgs_fsp_igrf_gei_x, fgs_fsp_igrf_gei_y, fgs_fsp_igrf_gei_z, pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z)
         [fgs_fsp_res_obw_x, fgs_fsp_res_obw_y, fgs_fsp_res_obw_z] = gei2obw(fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z, GEI_2_OBW)
 
-
         # transform from gei to geo and then nec coordinate
         pos_fsp_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z]))
         fgs_fsp_res_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([fgs_fsp_res_gei_x, fgs_fsp_res_gei_y, fgs_fsp_res_gei_z]))
         [GEO_2_NEC, NEC_2_GEO] = geo_nec_matrix(pos_fsp_geo[:,0], pos_fsp_geo[:,1], pos_fsp_geo[:,2])
         fgs_fsp_res_nec = geo2nec(fgs_fsp_res_geo[:,0], fgs_fsp_res_geo[:,1], fgs_fsp_res_geo[:,2], GEO_2_NEC)
+
+        # get w according to the angle between u and w
+        spin_axis = DMXL_2_GEI_fsp[:, :, 2] # spin axis in gei
+        obw_w = GEI_2_OBW[:, 2, :] # obw in gei
+        obw_o = GEI_2_OBW[:, 0, :] # obw in gei
+        dot_product = np.einsum('ij,ij->i', spin_axis, obw_w)
+        cos_theta = np.degrees(np.arccos(dot_product))
+        print(f"First angle between spin axis and w: {cos_theta[0]}")
+        print(f"Last angle between spin axis and w: {cos_theta[-1]}")
+        dot_product = np.einsum('ij,ij->i', spin_axis, obw_o)
+        cos_theta = np.degrees(np.arccos(dot_product))
+        print(f"First angle between spin axis and o: {cos_theta[0]}")
+        print(f"Last angle between spin axis and o: {cos_theta[-1]}")
+
+        # generate a fake obw
+        # fgs_fsp_res_obw2_z = fgs_fsp_res_dmxl_z / dot_product
+        # fgs_fsp_res_obw2_x = np.zeros_like(fgs_fsp_res_obw2_z, dtype=float)
+        # fgs_fsp_res_obw2_y = np.zeros_like(fgs_fsp_res_obw2_z, dtype=float)
+        # fgs_fsp_res_gei2_x, fgs_fsp_res_gei2_y, fgs_fsp_res_gei2_z = obw2gei(fgs_fsp_res_obw2_x, fgs_fsp_res_obw2_y, fgs_fsp_res_obw2_z, OBW_2_GEI)
+        # fgs_fsp_res_geo2 = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, np.column_stack([fgs_fsp_res_gei2_x, fgs_fsp_res_gei2_y, fgs_fsp_res_gei2_z]))
+        # fgs_fsp_res_nec2 = geo2nec(fgs_fsp_res_geo2[:,0], fgs_fsp_res_geo2[:,1], fgs_fsp_res_geo2[:,2], GEO_2_NEC)
+        
+        # get angle between u and east
+        spin_axis_geo = cotrans_lib.subgei2geo(cross_times_calib+ctimestamp, spin_axis)
+        spin_axis_nec = geo2nec(spin_axis_geo[:,0], spin_axis_geo[:,1], spin_axis_geo[:,2], GEO_2_NEC)
+        dot_product = np.dot(spin_axis_nec, [0, 1, 0])
+        cos_theta = np.degrees(np.arccos(dot_product))
+        print(f"First angle between spin axis and e: {cos_theta[0]}")
+        print(f"Last angle between spin axis and e: {cos_theta[-1]}")
+        dot_product = np.dot(spin_axis_nec, [1, 0, 0])
+        cos_theta = np.degrees(np.arccos(dot_product))
+        print(f"First angle between spin axis and n: {cos_theta[0]}")
+        print(f"Last angle between spin axis and n: {cos_theta[-1]}")
 
         if parameter.makeplot == True:
             if loop_idx is not None:
@@ -609,6 +641,9 @@ def fgm_fsp_calib(
                     ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
                 Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_nec[:, 0], fgs_fsp_res_nec[:, 1], fgs_fsp_res_nec[:, 2], title=f"res_nec_fsp", 
                     ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag)
+                #Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_obw2_x, fgs_fsp_res_obw2_y, fgs_fsp_res_obw2_z, title=f"res_obw2_fsp", datestr = datestr)
+                #Bplot.B_ctime_plot(cross_times_calib, fgs_fsp_res_nec2[:, 0], fgs_fsp_res_nec2[:, 1], fgs_fsp_res_nec2[:, 2], title=f"res_nec2_fsp", datestr = datestr, )
+
 
     
     return [

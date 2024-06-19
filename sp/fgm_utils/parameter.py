@@ -121,7 +121,7 @@ del_time_idxend = [306]
 
 """gei to obw
 """
-gei2obw = True
+gei2obw = False
 
 """change zero crossing location according to omege, in phase interation  
 """
