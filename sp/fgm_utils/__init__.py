@@ -483,8 +483,11 @@ def fgm_fsp_calib(
         fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_dmxl_x)
 
     if parameter.fsp_detrend == True:
+        # for dmxl fsp z, use iterative detrend according to dBz, and then a fit quadratic
+        fgs_fsp_res_dmxl_trend_z = detrend.iter_detrend_singleB(cross_times_calib, fgs_fsp_res_dmxl_z)
+        # for dmxl fsp x and y, use linear fit
         [
-            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z] = fsp_detrend_function_list[parameter.fsp_detrend_func](
+            fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, _] = fsp_detrend_function_list[parameter.fsp_detrend_func](
                 cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z)
 
         if parameter.makeplot == True:

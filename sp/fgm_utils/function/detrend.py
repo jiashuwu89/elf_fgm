@@ -252,6 +252,13 @@ def remove_outliers(data, sigma = 1):
 
     return filter_idx
 
+def select_percentile(data, percent = 50):
+    """This function select the lower percentile of the data
+    """
+    threshold = np.percentile(data, percent)
+    low_idx = data <= threshold
+
+    return low_idx
 
 def iter_detrend(ctime, 
                  fgs_ful_dmxl_x, fgs_ful_dmxl_y, fgs_ful_dmxl_z, 
@@ -294,3 +301,26 @@ def iter_detrend(ctime,
             inlier_idx_z = inlier_idx_z)
 
     return [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend, fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend]
+
+
+def iter_detrend_singleB(cross_times, fsp_B,):
+    """iteratively determine outliers and fit the baseline
+    """
+    low_idxs = np.ones(len(fsp_B), dtype=bool)
+    for i in range(4):
+        dy = np.diff(fsp_B, i)
+        gradients = np.abs(dy) 
+        gradients = np.pad(gradients, (0, i), mode='edge')
+
+        low_idx = select_percentile(gradients, percent=85)
+        low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
+        
+
+    _, _, fsp_B_trend = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
+    
+        
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot(cross_times, [fsp_B, fsp_B_trend], [gradients, gradients], [fsp_B, fsp_B_trend], cross_times=cross_times[~low_idxs], scatter=True)
+    #breakpoint()
+
+    return fsp_B_trend
