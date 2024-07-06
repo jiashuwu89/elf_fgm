@@ -585,11 +585,12 @@ def fgm_fsp_calib(
                 ctime_idx_time = ctime_idx_time, datestr = datestr, ctime_idx_flag = ctime_idx_flag
             )
     
-    #FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + 
-    #                           datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
-    #breakpoint()
-    FGM_timestamp = ctimestamp + cross_times_calib     
+    # FGM_datetime = list(map(lambda ts: (df["time"][0].to_pydatetime() + datetime.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S'), cross_times_calib))
+    FGM_timestamp = ctimestamp + cross_times_calib 
     
+    # import datetime as dt    
+    # FGM_datetime = list(map(lambda ts: (dt.datetime.fromtimestamp(ctimestamp, tz=dt.timezone.utc) + dt.timedelta(seconds=ts)).strftime('%Y-%m-%d/%H:%M:%S.%f'), cross_times_calib))
+
     if parameter.gei2obw == True:
         # transform to obw
         [pos_fsp_gei_x, pos_fsp_gei_y, pos_fsp_gei_z] = cross_time.fsp_igrf(ctime, cross_times_calib, T_spins_d_calib, pos_gei_x, pos_gei_y, pos_gei_z)

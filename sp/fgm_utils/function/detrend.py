@@ -304,23 +304,41 @@ def iter_detrend(ctime,
 
 
 def iter_detrend_singleB(cross_times, fsp_B,):
-    """iteratively determine outliers and fit the baseline
+    """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
     """
     low_idxs = np.ones(len(fsp_B), dtype=bool)
-    for i in range(4):
-        dy = np.diff(fsp_B, i)
-        gradients = np.abs(dy) 
-        gradients = np.pad(gradients, (0, i), mode='edge')
+    # for i in range(3):
+    #     dy = np.diff(fsp_B, i)
+    #     gradients = np.abs(dy) 
+    #     gradients = np.pad(gradients, (0, i), mode='edge')
 
-        low_idx = select_percentile(gradients, percent=85)
-        low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
+    #     low_idx = select_percentile(gradients, percent=90)
+    #     low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
         
+    # fit the one with smaller resdidual
+    _, _, fsp_B_trend_quad = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
+    for i in range(3):
+        fsp_B_trend_quad_res = np.abs(fsp_B - fsp_B_trend_quad)
+        low_idx_quad = select_percentile(fsp_B_trend_quad_res, percent=85)
+        low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
+        _, _, fsp_B_trend_quad = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs_quad)
 
-    _, _, fsp_B_trend = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
-    
+    _, _, fsp_B_trend_cube = detrend_cube(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
+    for i in range(3):
+        fsp_B_trend_cube_res = np.abs(fsp_B - fsp_B_trend_cube)
+        low_idx_cube = select_percentile(fsp_B_trend_cube_res, percent=85)
+        low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
+        _, _, fsp_B_trend_cube = detrend_cube(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs_cube)
+
+    if np.mean(np.abs(fsp_B - fsp_B_trend_quad)) < np.mean(np.abs(fsp_B - fsp_B_trend_cube)):
+        fsp_B_trend = fsp_B_trend_quad 
+        low_idxs = low_idxs_quad
+    else:
+        fsp_B_trend = fsp_B_trend_cube
+        low_idxs = low_idxs_cube
         
     if parameter.makeplot == True:
-        Bplot.B_ctime_plot(cross_times, [fsp_B, fsp_B_trend], [gradients, gradients], [fsp_B, fsp_B_trend], cross_times=cross_times[~low_idxs], scatter=True)
+        Bplot.B_ctime_plot(cross_times, [fsp_B, fsp_B_trend], [fsp_B, fsp_B_trend], [fsp_B, fsp_B_trend], cross_times=cross_times[~low_idxs], scatter=True)
     #breakpoint()
 
     return fsp_B_trend
