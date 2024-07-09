@@ -7,27 +7,36 @@ from . import Bplot
 
 
 def detrend_linear(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
+    ctime: List[float], 
+    B_x: Optional[List[float]] = None, 
+    B_y: Optional[List[float]] = None, 
+    B_z: Optional[List[float]] = None,
+    inlier_idx_x: Optional[List[int]] = None, 
+    inlier_idx_y: Optional[List[int]] = None, 
+    inlier_idx_z: Optional[List[int]] = None
     ):
     """detrend with linear fit 
 
     """
-    B_x_trend = calibration.linear_fit(
+    def linear_fit_component(component, inlier_idx):
+        if component is None:
+            return None
+        if inlier_idx is None:
+            trend = calibration.linear_fit(
                 ctime,
-                *curve_fit(calibration.linear_fit, ctime, B_x)[0],
-    )
+                *curve_fit(calibration.linear_fit, ctime, component)[0],
+            )
+        else:
+            trend = calibration.linear_fit(
+                ctime,
+                *curve_fit(calibration.linear_fit, ctime[inlier_idx], component[inlier_idx])[0],
+            )
+        return trend
 
-    B_y_trend = calibration.linear_fit(
-                ctime,
-                *curve_fit(calibration.linear_fit, ctime, B_y)[0],
-    )
+    B_x_trend = linear_fit_component(B_x, inlier_idx_x)
+    B_y_trend = linear_fit_component(B_y, inlier_idx_y)
+    B_z_trend = linear_fit_component(B_z, inlier_idx_z)
     
-    B_z_trend = calibration.linear_fit(
-                ctime,
-                *curve_fit(calibration.linear_fit, ctime, B_z)[0],
-    )
-
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
     return [B_x_trend, B_y_trend, B_z_trend]
 
 
