@@ -303,10 +303,26 @@ def iter_detrend(ctime,
     return [fgs_igrf_dmxl_x_detrend, fgs_igrf_dmxl_y_detrend, fgs_igrf_dmxl_z_detrend, fgs_ful_dmxl_x_detrend, fgs_ful_dmxl_y_detrend, fgs_ful_dmxl_z_detrend]
 
 
-def iter_detrend_singleB(cross_times, fsp_B,):
+def iter_detrend_compare(cross_times, fgs_res_dmxl_x, 
+                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func):
     """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
     """
-    low_idxs = np.ones(len(fsp_B), dtype=bool)
+    ## detrend x, y
+    # the first iteration will use difference between ful and igrf to determine outliers
+    inlier_idx_x = remove_outliers(fgs_res_dmxl_x, sigma=3)
+    inlier_idx_y = remove_outliers(fgs_res_dmxl_y, sigma=3)
+ 
+    # x and y only exclude outliers once. if iter too many times a lot of points will be excluded, the results will have a large trend
+    [fsp_trend_x, fsp_trend_y, _] = detrend_func(
+        cross_times,
+        B_x = fgs_res_dmxl_x, 
+        B_y = fgs_res_dmxl_y,
+        inlier_idx_x = inlier_idx_x,
+        inlier_idx_y = inlier_idx_y,
+   )
+    
+    ## detrend z
+    low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
     # for i in range(3):
     #     dy = np.diff(fsp_B, i)
     #     gradients = np.abs(dy) 
@@ -316,29 +332,29 @@ def iter_detrend_singleB(cross_times, fsp_B,):
     #     low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
         
     # fit the one with smaller resdidual
-    _, _, fsp_B_trend_quad = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
+    _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
     for i in range(3):
-        fsp_B_trend_quad_res = np.abs(fsp_B - fsp_B_trend_quad)
-        low_idx_quad = select_percentile(fsp_B_trend_quad_res, percent=85)
+        fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
+        low_idx_quad = select_percentile(fsp_trend_z_quad_res, percent=85)
         low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
-        _, _, fsp_B_trend_quad = detrend_quad(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs_quad)
+        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_quad)
 
-    _, _, fsp_B_trend_cube = detrend_cube(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs)
+    _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
     for i in range(3):
-        fsp_B_trend_cube_res = np.abs(fsp_B - fsp_B_trend_cube)
-        low_idx_cube = select_percentile(fsp_B_trend_cube_res, percent=85)
+        fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
+        low_idx_cube = select_percentile(fsp_trend_z_cube_res, percent=85)
         low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
-        _, _, fsp_B_trend_cube = detrend_cube(cross_times, B_z = fsp_B, inlier_idx_z = low_idxs_cube)
+        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_cube)
 
-    if np.mean(np.abs(fsp_B - fsp_B_trend_quad)) < np.mean(np.abs(fsp_B - fsp_B_trend_cube)):
-        fsp_B_trend = fsp_B_trend_quad 
+    if np.mean(np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)) < np.mean(np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)):
+        fsp_trend_z = fsp_trend_z_quad 
         low_idxs = low_idxs_quad
     else:
-        fsp_B_trend = fsp_B_trend_cube
+        fsp_trend_z = fsp_trend_z_cube
         low_idxs = low_idxs_cube
         
-    if parameter.makeplot == True:
-        Bplot.B_ctime_plot(cross_times, [fsp_B, fsp_B_trend], [fsp_B, fsp_B_trend], [fsp_B, fsp_B_trend], cross_times=cross_times[~low_idxs], scatter=True)
+    #if parameter.makeplot == True:
+    #    Bplot.B_ctime_plot(cross_times, [fgs_fsp_ful_dmxl_z, fsp_trend_z], [fgs_fsp_ful_dmxl_z, fsp_trend_z], [fgs_fsp_ful_dmxl_z, fsp_trend_z], cross_times=cross_times[~low_idxs], scatter=True)
     #breakpoint()
 
-    return fsp_B_trend
+    return fsp_trend_x, fsp_trend_y, fsp_trend_z

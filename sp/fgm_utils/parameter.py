@@ -103,7 +103,7 @@ prefsp_detrend_func = 'detrend_cube' # used in iter_detrend
 
 fsp_detrend = True # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
-fsp_detrend_func = 'detrend_linear'
+fsp_detrend_func = 'detrend_cube'
 #del_spike_fsp = False  # delete spike in fsp resolution
 
 """output paramter
