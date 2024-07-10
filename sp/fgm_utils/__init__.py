@@ -484,7 +484,7 @@ def fgm_fsp_calib(
 
     if parameter.fsp_detrend == True:
         # for dmxl fsp z, use iterative detrend according to dBz, and then a fit quadratic
-        fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z = detrend.iter_detrend_compare(
+        fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z = detrend.iter_detrend_xyz(
             cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
             detrend_func=fsp_detrend_function_list[parameter.fsp_detrend_func])
 
