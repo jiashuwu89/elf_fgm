@@ -4,6 +4,7 @@ from scipy.optimize import curve_fit
 from .. import parameter 
 from . import calibration
 from . import Bplot
+import datetime
 
 
 def detrend_linear(
@@ -313,78 +314,146 @@ def iter_detrend(ctime,
 
 
 def iter_detrend_xyz(cross_times, fgs_res_dmxl_x, 
-                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, ):
+                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=2):
     """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
     """
+
     ## detrend x, y
     # the first iteration will use difference between ful and igrf to determine outliers
     inlier_idx_x = remove_outliers(fgs_res_dmxl_x, sigma=3)
     inlier_idx_y = remove_outliers(fgs_res_dmxl_y, sigma=3)
+    inlier_idx_z = remove_outliers(fgs_res_dmxl_z, sigma=5)
  
     # x and y only exclude outliers once. if iter too many times a lot of points will be excluded, the results will have a large trend
-    [fsp_trend_x, fsp_trend_y, _] = detrend_func(
+    [fsp_trend_x_linear, fsp_trend_y_linear, fsp_trend_z_linear] = detrend_func(
         cross_times,
         B_x = fgs_res_dmxl_x, 
         B_y = fgs_res_dmxl_y,
+        B_z = fgs_res_dmxl_z,
         inlier_idx_x = inlier_idx_x,
         inlier_idx_y = inlier_idx_y,
-   )
+        inlier_idx_z = inlier_idx_z,
+    )
     
+    fgs_res_dmxl_z = fgs_res_dmxl_z - fsp_trend_z_linear
+
     ## detrend z
-    low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
-    for i in range(3):
-        dy = np.diff(fgs_res_dmxl_z, i)
-        gradients = np.abs(dy) 
-        gradients = np.pad(gradients, (0, i), mode='edge')
-        low_idx = select_percentile(gradients, percent=87)
-        low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
+    if detrend_method == 1:
+        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        for i in range(3):
+            dy = np.diff(fgs_res_dmxl_z, i)
+            gradients = np.abs(dy) 
+            gradients = np.pad(gradients, (0, i), mode='edge')
+            low_idx = select_percentile(gradients, percent=85)
+            low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
 
-    # fit the one with smaller resdidual
-    _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
-    _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+        # fit the one with smaller resdidual
+        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
 
-    fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
-    fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
-
-    if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
-        fsp_res_z_1 = np.mean(fsp_trend_z_quad_res)  
-        fsp_trend_z_1 = fsp_trend_z_quad
-        low_idxs_1 = low_idxs
-    else:
-        fsp_res_z_1 = np.mean(fsp_trend_z_cube_res)
-        fsp_trend_z_1 = fsp_trend_z_cube
-        low_idxs_1 = low_idxs
-
-    
-    for i in range(3):
-        low_idx_quad = select_percentile(fsp_trend_z_quad_res, percent=85)
-        low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
-        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_quad)
         fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
-
-    for i in range(3):
-        low_idx_cube = select_percentile(fsp_trend_z_cube_res, percent=85)
-        low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
-        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_cube)
         fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
 
-    if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
-        fsp_res_z_2 = np.mean(fsp_trend_z_quad_res) 
-        fsp_trend_z_2 = fsp_trend_z_quad 
-        low_idxs_2 = low_idxs_quad
-    else:
-        fsp_res_z_2 = np.mean(fsp_trend_z_cube_res) 
-        fsp_trend_z_2 = fsp_trend_z_cube
-        low_idxs_2 = low_idxs_cube
-        
-    if fsp_res_z_1 < fsp_res_z_2:
-        fsp_trend_z =  fsp_trend_z_1
-        low_idxs = low_idxs_1
-    else:
-        fsp_trend_z =  fsp_trend_z_2
-        low_idxs = low_idxs_2
+        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
+            fsp_trend_z = fsp_trend_z_quad
+            low_idxs_final = low_idxs
+        else:
+            fsp_trend_z = fsp_trend_z_cube
+            low_idxs_final = low_idxs
 
+    elif detrend_method == 2:
+        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        # fit the one with smaller resdidual
+        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+
+        fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
+        fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
+
+        for i in range(3):
+            low_idx_quad = select_percentile(fsp_trend_z_quad_res, percent=85)
+            low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
+            _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_quad)
+            fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
+
+        for i in range(3):
+            low_idx_cube = select_percentile(fsp_trend_z_cube_res, percent=85)
+            low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
+            _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_cube)
+            fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
+
+        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
+            fsp_trend_z = fsp_trend_z_quad 
+            low_idxs_final = low_idxs_quad
+        else:
+            fsp_trend_z = fsp_trend_z_cube
+            low_idxs_final = low_idxs_cube
+
+    elif detrend_method == 3:    
+        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        for i in range(3):
+            dy = np.diff(fgs_res_dmxl_z, i)
+            gradients = np.abs(dy) 
+            gradients = np.pad(gradients, (0, i), mode='edge')
+            low_idx = select_percentile(gradients, percent=85)
+            low_idxs = np.logical_and(low_idxs, low_idx) # select the lower 85% in each iteration. and combine
+
+        # fit the one with smaller resdidual
+        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+
+        fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
+        fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
+  
+        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
+            fsp_res_z_1 = np.mean(fsp_trend_z_quad_res)  
+            fsp_trend_z_1 = fsp_trend_z_quad
+            low_idxs_1 = low_idxs.copy()
+        else:
+            fsp_res_z_1 = np.mean(fsp_trend_z_cube_res)
+            fsp_trend_z_1 = fsp_trend_z_cube
+            low_idxs_1 = low_idxs.copy()
+
+        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        for i in range(3):
+            low_idx_quad = select_percentile(fsp_trend_z_quad_res, percent=85)
+            low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
+            _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_quad)
+            fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
+
+        for i in range(3):
+            low_idx_cube = select_percentile(fsp_trend_z_cube_res, percent=85)
+            low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
+            _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_cube)
+            fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
+
+        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
+            fsp_res_z_2 = np.mean(fsp_trend_z_quad_res) 
+            fsp_trend_z_2 = fsp_trend_z_quad 
+            low_idxs_2 = low_idxs_quad
+        else:
+            fsp_res_z_2 = np.mean(fsp_trend_z_cube_res) 
+            fsp_trend_z_2 = fsp_trend_z_cube
+            low_idxs_2 = low_idxs_cube
+            
+        if fsp_res_z_1 < fsp_res_z_2:
+            fsp_trend_z =  fsp_trend_z_1
+            low_idxs_final = low_idxs_1
+        else:
+            fsp_trend_z =  fsp_trend_z_2
+            low_idxs_final = low_idxs_2
+   
     if parameter.makeplot == True:
-        Bplot.B_ctime_plot(cross_times, [fgs_res_dmxl_z, fsp_trend_z], [fgs_res_dmxl_z, fsp_trend_z], [fgs_res_dmxl_z, fsp_trend_z], cross_times=cross_times[~low_idxs], scatter=True)
+        Bplot.B_ctime_plot(
+            cross_times, [fgs_res_dmxl_z, fsp_trend_z], [fgs_res_dmxl_z, fsp_trend_z], 
+            [fgs_res_dmxl_z, fsp_trend_z], cross_times=cross_times[~low_idxs_final], scatter=True)
 
-    return fsp_trend_x, fsp_trend_y, fsp_trend_z
+    return fsp_trend_x_linear, fsp_trend_y_linear, fsp_trend_z + fsp_trend_z_linear
+
+
+detrend_list  = {
+    "2022-04-02/18:20:00": {
+        'method': 1,
+        'mission': 'elb',
+    },
+}

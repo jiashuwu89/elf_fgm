@@ -483,10 +483,20 @@ def fgm_fsp_calib(
         fgs_fsp_res_dmxl_trend_z = [0] * len(fgs_fsp_res_dmxl_x)
 
     if parameter.fsp_detrend == True:
+        ctimestamp_dt = datetime.datetime.fromtimestamp(ctimestamp, tz=datetime.timezone.utc)
+        detrend_method = 2
+        for dt, attribute, in detrend.detrend_list.items():
+            dt1 =  datetime.datetime.strptime(dt, "%Y-%m-%d/%H:%M:%S")
+            dt1 = dt1.replace(tzinfo=datetime.timezone.utc)
+            diff = abs(dt1 - ctimestamp_dt)
+            if diff < datetime.timedelta(minutes=10):
+                if attribute['mission'] == mission:
+                    detrend_method = attribute['method']
+        
         # for dmxl fsp z, use iterative detrend according to dBz, and then a fit quadratic
         fgs_fsp_res_dmxl_trend_x, fgs_fsp_res_dmxl_trend_y, fgs_fsp_res_dmxl_trend_z = detrend.iter_detrend_xyz(
             cross_times_calib, fgs_fsp_res_dmxl_x, fgs_fsp_res_dmxl_y, fgs_fsp_res_dmxl_z, 
-            detrend_func=fsp_detrend_function_list[parameter.fsp_detrend_func])
+            detrend_func=fsp_detrend_function_list[parameter.fsp_detrend_func], detrend_method=detrend_method)
 
         if parameter.makeplot == True:
             Bplot.B_ctime_plot(
