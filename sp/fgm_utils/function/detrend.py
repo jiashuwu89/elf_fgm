@@ -314,7 +314,7 @@ def iter_detrend(ctime,
 
 
 def iter_detrend_xyz(cross_times, fgs_res_dmxl_x, 
-                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=2):
+                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=3):
     """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
     """
 
@@ -389,7 +389,8 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
             fsp_trend_z = fsp_trend_z_cube
             low_idxs_final = low_idxs_cube
 
-    elif detrend_method == 3:    
+    elif detrend_method == 3: 
+        # method 1  
         low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
         for i in range(3):
             dy = np.diff(fgs_res_dmxl_z, i)
@@ -402,41 +403,51 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
         _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
         _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
 
-        fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
-        fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
-  
-        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
-            fsp_res_z_1 = np.mean(fsp_trend_z_quad_res)  
+        fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
+        fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
+
+        thr = 50 ## this is the threshold to check how many data points in residual are below this threshold. 
+        # choose the method with most data points below this threshold 
+
+        if np.sum(fsp_trend_z_quad_res < thr) > np.sum(fsp_trend_z_cube_res < thr):
+            fsp_res_z_1 = np.sum(fsp_trend_z_quad_res < thr) 
             fsp_trend_z_1 = fsp_trend_z_quad
             low_idxs_1 = low_idxs.copy()
         else:
-            fsp_res_z_1 = np.mean(fsp_trend_z_cube_res)
+            fsp_res_z_1 = np.sum(fsp_trend_z_cube_res < thr)
             fsp_trend_z_1 = fsp_trend_z_cube
             low_idxs_1 = low_idxs.copy()
 
+        # method 2
         low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+        _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
+
+        fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
+        fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
+
         for i in range(3):
             low_idx_quad = select_percentile(fsp_trend_z_quad_res, percent=85)
             low_idxs_quad = np.logical_and(low_idx_quad, low_idxs)
             _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_quad)
-            fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
+            fsp_trend_z_quad_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_quad)
 
         for i in range(3):
             low_idx_cube = select_percentile(fsp_trend_z_cube_res, percent=85)
             low_idxs_cube = np.logical_and(low_idx_cube, low_idxs)
             _, _, fsp_trend_z_cube = detrend_cube(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs_cube)
-            fsp_trend_z_cube_res = (fgs_res_dmxl_z - fsp_trend_z_cube)**2
-
-        if np.mean(fsp_trend_z_quad_res) < np.mean(fsp_trend_z_cube_res):
-            fsp_res_z_2 = np.mean(fsp_trend_z_quad_res) 
+            fsp_trend_z_cube_res = np.abs(fgs_res_dmxl_z - fsp_trend_z_cube)
+ 
+        if np.sum(fsp_trend_z_quad_res < thr) > np.sum(fsp_trend_z_cube_res < thr):
+            fsp_res_z_2 = np.sum(fsp_trend_z_quad_res < thr) 
             fsp_trend_z_2 = fsp_trend_z_quad 
             low_idxs_2 = low_idxs_quad
         else:
-            fsp_res_z_2 = np.mean(fsp_trend_z_cube_res) 
+            fsp_res_z_2 = np.sum(fsp_trend_z_cube_res < thr) 
             fsp_trend_z_2 = fsp_trend_z_cube
             low_idxs_2 = low_idxs_cube
-            
-        if fsp_res_z_1 < fsp_res_z_2:
+
+        if fsp_res_z_1 > fsp_res_z_2:
             fsp_trend_z =  fsp_trend_z_1
             low_idxs_final = low_idxs_1
         else:
