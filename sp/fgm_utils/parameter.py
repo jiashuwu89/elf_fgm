@@ -87,7 +87,7 @@ ctime_repeat_check = True
 
 """post calibration parameter
 """
-cali_2nd = True  # add a second calibration 
+cali_2nd = False  # add a second calibration 
 cali_2nd_dmxl = False # second calibration, run in dmxl instead of fgm coordinate, never use this
 cali_2nd_zerocrossing = False # if true, update zero crossing with res_dmxl, only works when cali_2nd is true
 cali_3rd = False # add a third calibration 

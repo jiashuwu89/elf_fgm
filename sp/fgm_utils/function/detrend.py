@@ -258,7 +258,7 @@ def remove_outliers(data, sigma = 1):
     lower_bound = mean - (sigma * std_dev)
     upper_bound = mean + (sigma * std_dev)
 
-    filter_idx = (data >= lower_bound ) & (data <= upper_bound)
+    filter_idx = (np.abs(data) >= lower_bound ) & (np.abs(data) <= upper_bound)
 
     return filter_idx
 
@@ -466,5 +466,9 @@ detrend_list  = {
     "2022-04-02/18:20:00": {
         'method': 1,
         'mission': 'elb',
+    },
+    "2022-04-06/12:15:00": {
+        'method': 1,
+        'mission': 'ela',
     },
 }
