@@ -99,7 +99,7 @@ eps_rogue = 3 # delete points outside med-std*eps_rogue and med+std*eps_rogue
 """detrend parameter
 """
 prefsp_detrend = True # detrend in dmxl if true
-prefsp_detrend_func = 'detrend_cube' # used in iter_detrend
+prefsp_detrend_func = 'detrend_quad' # used in iter_detrend
 
 fsp_detrend = True # detrend in dmxl if true
 fsp_detrend_cutoff = 6 # detrend in dmxl if true
