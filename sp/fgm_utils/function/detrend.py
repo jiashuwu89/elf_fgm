@@ -316,6 +316,9 @@ def iter_detrend(ctime,
 def iter_detrend_xyz(cross_times, fgs_res_dmxl_x, 
                  fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=3, detrend_percent=85):
     """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
+    Parameter
+        - detrend_func: the function for xy detrend and initial z detrend
+        - detrend_method: detrend method for z detrend
     """
 
     ## detrend x, y
