@@ -42,30 +42,37 @@ def detrend_linear(
 
 
 def detrend_linear_2point(
-    ctime: List[float], B_x: List[float], B_y: List[float], B_z: List[float]
+    ctime: List[float], 
+    B_x: Optional[List[float]] = None, 
+    B_y: Optional[List[float]] = None,
+    B_z: Optional[List[float]] = None,
     ):
     """detrend with a linear trend with only first and last two points
     one problem is sometimes start and end has large spikes need to be removed
     check derivative of first and last three points
     """
-    trend = np.zeros((3, len(ctime)))
-    B_all = [B_x, B_y, B_z]
-    for B_i in range(3):
-        B = B_all[B_i]
+    def detrend_linear_2point_component(B):
+        if B is None:
+            return None
         d_B = np.gradient(B) / np.gradient(ctime)
         index1 = [i for i in d_B[0:3] if np.abs(i) > parameter.fsp_detrend_cutoff*np.average(np.abs(d_B))]
         index2 = [i for i in d_B[-4:-1] if np.abs(i) > parameter.fsp_detrend_cutoff*np.average(np.abs(d_B))]
         if (not index1 and not index2):
-            trend[B_i, :] = B[0] + (ctime-ctime[0])*(B[-1] - B[0])/(ctime[-1]-ctime[0])
+            trend = B[0] + (ctime-ctime[0])*(B[-1] - B[0])/(ctime[-1]-ctime[0])
         elif (not index1 and index2):
-            trend[B_i, :] = B[0] + (ctime-ctime[0])*(B[-4] - B[0])/(ctime[-4]-ctime[0])
+            trend = B[0] + (ctime-ctime[0])*(B[-4] - B[0])/(ctime[-4]-ctime[0])
         elif (index1 and not index2):   
-            trend[B_i, :] = B[3] + (ctime-ctime[3])*(B[-1] - B[3])/(ctime[-1]-ctime[3])
+            trend = B[3] + (ctime-ctime[3])*(B[-1] - B[3])/(ctime[-1]-ctime[3])
         else:
-            trend[B_i, :] = B[3] + (ctime-ctime[3])*(B[-4] - B[3])/(ctime[-4]-ctime[3])
+            trend = B[3] + (ctime-ctime[3])*(B[-4] - B[3])/(ctime[-4]-ctime[3])
 
-    #Bplot.B2_ctime_plot(ctime, B_x, B_y, B_z, B_x_trend, B_y_trend, B_z_trend, "res_dmxl and trend_dmxl")    
-    return [trend[0,:], trend[1,:], trend[2,:]]
+        return trend
+   
+    B_x_trend = detrend_linear_2point_component(B_x)
+    B_y_trend = detrend_linear_2point_component(B_y)
+    B_z_trend = detrend_linear_2point_component(B_z)
+    
+    return [B_x_trend, B_y_trend, B_z_trend]
 
 
 def detrend_quad_log(
@@ -497,7 +504,7 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
         low_idxs_final = low_idxs_quad
 
     elif detrend_method == 6: 
-        # exclude points according to magnitude of res, fit quad only quad
+        # exclude points according to magnitude of res, fit linear only
         low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
         _, _, fsp_trend_z_quad = detrend_linear(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
 
@@ -511,6 +518,11 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
 
         fsp_trend_z = fsp_trend_z_quad 
         low_idxs_final = low_idxs_quad
+
+    elif detrend_method == 7: 
+        # use the two  end points only to detrend
+        _, _, fsp_trend_z = detrend_linear_2point(cross_times, B_z = fgs_res_dmxl_z)
+        low_idxs_final = np.ones(len(fgs_res_dmxl_z), dtype=bool)
 
    
     if parameter.makeplot == True:
@@ -611,5 +623,55 @@ detrend_list  = {
         'method': 6,
         'mission': 'ela',
         'percent': 50,
+    },
+    "2022-01-08/18:40:00": { #152
+        'method': 5,
+        'mission': 'elb',
+        'percent': 50,
+    },
+    "2022-02-06/18:04:00": { #153
+        'method': 5,
+        'mission': 'elb',
+        'percent': 80,
+    },
+    "2022-03-06/05:10:00": { #154
+        'method': 6,
+        'mission': 'elb',
+        'percent': 80,
+    },
+    "2022-03-19/19:16:00": { #155
+        'method': 4,
+        'mission': 'elb',
+        'percent': 96,
+    },
+    "2022-04-03/17:34:00": { #156
+        'method': 6,
+        'mission': 'elb',
+        'percent': 99,
+    },
+    "2022-04-07/18:58:00": { #157
+        'method': 5,
+        'mission': 'elb',
+        'percent': 70,
+    },
+    "2022-01-17/00:55:00": { #158
+        'method': 7,
+        'mission': 'elb',
+        'percent': 70,
+    },
+    "2022-01-16/15:40:00": { #159
+        'method': 5,
+        'mission': 'elb',
+        'percent': 99,
+    },
+    "2022-01-16/22:50:00": { #160
+        'method': 7,
+        'mission': 'elb',
+        'percent': 99,
+    },
+    "2022-01-15/18:58:00": { #161
+        'method': 7,
+        'mission': 'elb',
+        'percent': 99,
     },
 }
