@@ -123,6 +123,7 @@ def detrend_quad(
     ):
     """detrend with quadratic fit 
         if outlinear is not None, then remove outliner of z component
+        inlier_idx: index used to fit 
     """
     def detrend_component(component, inlier_idx):
         if component is None:
@@ -321,7 +322,7 @@ def iter_detrend(ctime,
 
 
 def iter_detrend_xyz(cross_times, fgs_res_dmxl_x, 
-                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=3, detrend_percent=85):
+                 fgs_res_dmxl_y, fgs_res_dmxl_z, detrend_func, detrend_method=3, detrend_percent=85, detrend_portion=None):
     """iteratively determine outliers and fit the baseline, try both quad and cube fit, pick the one with smaller residual
     Parameter
         - detrend_func: the function for xy detrend and initial z detrend
@@ -332,7 +333,15 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
     # the first iteration will use difference between ful and igrf to determine outliers
     inlier_idx_x = remove_outliers(fgs_res_dmxl_x, sigma=3)
     inlier_idx_y = remove_outliers(fgs_res_dmxl_y, sigma=3)
-    inlier_idx_z = remove_outliers(fgs_res_dmxl_z, sigma=5)
+    if detrend_portion is None:
+        inlier_idx_z = remove_outliers(fgs_res_dmxl_z, sigma=5)
+    else:
+        n = len(fgs_res_dmxl_z)
+        inlier_idx_z = np.zeros(n, dtype=bool)
+        for start, end in detrend_portion:
+            start_idx = int(np.floor(start * n))
+            end_idx = int(np.ceil(end * n))
+            inlier_idx_z[start_idx:end_idx] = True
  
     # x and y only exclude outliers once. if iter too many times a lot of points will be excluded, the results will have a large trend
     [fsp_trend_x_linear, fsp_trend_y_linear, fsp_trend_z_linear] = detrend_func(
@@ -344,7 +353,14 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
         inlier_idx_y = inlier_idx_y,
         inlier_idx_z = inlier_idx_z,
     )
-    
+
+    if parameter.makeplot == True:
+        Bplot.B_ctime_plot(
+            cross_times, [fgs_res_dmxl_z, fsp_trend_x_linear], [fgs_res_dmxl_z, fsp_trend_y_linear], 
+            [fgs_res_dmxl_z, fsp_trend_z_linear], cross_times=cross_times[~inlier_idx_z], scatter=True)
+        
+    breakpoint()
+
     fgs_res_dmxl_z = fgs_res_dmxl_z - fsp_trend_z_linear
 
     iter = 1 if detrend_percent == 100 else 3
@@ -470,7 +486,15 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
 
     elif detrend_method == 4: 
         # exclude points according to gradient, fit quad only quad
-        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        if detrend_portion is None:
+            low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        else:
+            n = len(fgs_res_dmxl_z)
+            low_idxs = np.zeros(n, dtype=bool)
+            for start, end in detrend_portion:
+                start_idx = int(np.floor(start * n))
+                end_idx = int(np.ceil(end * n))
+                low_idxs[start_idx:end_idx] = True
 
         for i in range(iter):
             dy = np.diff(fgs_res_dmxl_z, i)
@@ -489,9 +513,18 @@ def iter_detrend_xyz(cross_times, fgs_res_dmxl_x,
 
     elif detrend_method == 5: 
         # exclude points according to magnitude of res, fit quad only quad
-        low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        if detrend_portion is None:
+            low_idxs = np.ones(len(fgs_res_dmxl_z), dtype=bool)
+        else:
+            n = len(fgs_res_dmxl_z)
+            low_idxs = np.zeros(n, dtype=bool)
+            for start, end in detrend_portion:
+                start_idx = int(np.floor(start * n))
+                end_idx = int(np.ceil(end * n))
+                low_idxs[start_idx:end_idx] = True
+    
+        # x and y only exclude outliers once. if iter too many times a lot of points will be excluded, the results will have a large trend
         _, _, fsp_trend_z_quad = detrend_quad(cross_times, B_z = fgs_res_dmxl_z, inlier_idx_z = low_idxs)
-
         fsp_trend_z_quad_res = (fgs_res_dmxl_z - fsp_trend_z_quad)**2
         
         for i in range(iter):
@@ -624,11 +657,6 @@ detrend_list  = {
         'mission': 'ela',
         'percent': 50,
     },
-    "2022-01-08/18:40:00": { #152
-        'method': 5,
-        'mission': 'elb',
-        'percent': 50,
-    },
     "2022-02-06/18:04:00": { #153
         'method': 5,
         'mission': 'elb',
@@ -645,7 +673,7 @@ detrend_list  = {
         'percent': 96,
     },
     "2022-04-03/17:34:00": { #156
-        'method': 6,
+        'method': 7,
         'mission': 'elb',
         'percent': 99,
     },
@@ -673,5 +701,11 @@ detrend_list  = {
         'method': 7,
         'mission': 'elb',
         'percent': 99,
+    },
+    "2022-08-07/18:50:00": { #164
+        'method': 4,
+        'mission': 'elb',
+        'percent': 60,
+        'portion': [(0, 0.35),(0.98,1)],
     },
 }
