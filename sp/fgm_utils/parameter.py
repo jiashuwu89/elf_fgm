@@ -106,7 +106,7 @@ fsp_detrend_cutoff = 6 # detrend in dmxl if true
 fsp_detrend_func = 'detrend_linear'
 #del_spike_fsp = False  # delete spike in fsp resolution
 
-detrend_iter_method = 7 # default detrend method for iterative detrend
+detrend_iter_method = 3 # default detrend method for iterative detrend
 
 """output paramter
 """

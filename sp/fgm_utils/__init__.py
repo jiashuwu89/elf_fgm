@@ -486,6 +486,7 @@ def fgm_fsp_calib(
         ctimestamp_dt = datetime.datetime.fromtimestamp(ctimestamp, tz=datetime.timezone.utc)
         detrend_method = parameter.detrend_iter_method
         detrend_percent = 85
+        detrend_portion = None
         for dt, attribute, in detrend.detrend_list.items():
             dt1 =  datetime.datetime.strptime(dt, "%Y-%m-%d/%H:%M:%S")
             dt1 = dt1.replace(tzinfo=datetime.timezone.utc)
